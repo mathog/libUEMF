@@ -1,0 +1,187 @@
+Overview:
+
+libUEMF is a portable C99 implementation for reading/writing Enhanced Metafile (EMF)
+files.  libUEMF avoids collisions with with Microsoft defined functions and values, so
+portable programs which use it, and have a Windows version, do not require any conditional
+logic to separate the native GDI support from the EMF support proviced by libUEMF.  To accomplish
+this libUEMF does not implement GDI calls. Instead, for each EMR record type, and
+each object type incorporated into such a record, it provides corresponding *_set, *_print,
+and *_swap functions.  For example, for the U_EMRBITBLT record there are corresponding functions:
+U_EMRBITBLT_set, U_EMRBITBLT_print,  and U_EMRBITBLT_swap. A few additional functions are provided for
+assembling the EMF in memory, debugging, and converting the EMF file to/from Little Endian representation.
+(EMF files' internal data representation is always Little Endian.)
+
+This code has been tested on a 32 bit Ubuntu (LE) and 64 bit Solaris (BE).
+
+libUEMF is released under the GPL 2 license, read the file 'COPYING' for more information
+
+Version 0.0.2, released July 12, 2012.
+
+To report bugs or provide feedback send email to David Mathog, mathog@caltech.edu.
+
+--------------------------------------------------------------------------------------------
+Sources:
+
+EMF file Record structure information has been derived from Mingw, Wine, and libEMF
+header files, and from Microsoft's EMF Information pdf, release date March 28,2012, 
+link from here:
+  
+     http://msdn2.microsoft.com/en-us/library/cc230514.aspx
+  
+If the direct link fails the document may be found
+by searching for: "[MS-EMF]: Enhanced Metafile Format".
+
+
+Files:
+
+README            This file.
+
+COPYING           GPL V2 license file.
+
+DOXYFILE          Doxygen configuration file, for generating documentation from the source files.
+
+uemf.c            Contains the *_set functions needed to construct an EMF file.
+                  Also contains auxilliary functions for debugging and constructing
+                  EMF files in memory.
+
+uemf.h            Definitions and structures for EMF records and objects. 
+                  Prototypes for *_set and construction functions.
+                  
+uemf_print.c      Contains the *_print functions needed to print the contents of EMF records and objects.
+
+uemf_print.h      Prototypes for *_print functions.
+
+uemf_endian.c     Contains the *_swap functions needed to rearrange bytes between Big and Little Endian.
+                  U_emf_endian() is the only function here that user could should call.
+                  
+uemf_endian.h     Prototype for U_emf_endian() and definitions for Endian type of the local machine.
+
+testbed.c         Program used for testing libUEMF.  Run it like: testbed flags. 
+                  Run with no argument to see what the bit flag values are.
+                  It creates a test file "test_libuemf.emf" which should be identical to
+                  test_libuemf_ref.emf.  (This file cannot be imported from EMF into PowerPoint
+                  because it contains dotted lines.  Use "testbed 1" to generate a file without
+                  any dotted lines. )
+
+reademf.c         Utility that that reads an EMF file and emits its contents in text form.
+                  Run it like:  reademf target_file.emf
+
+test_libuemf_ref.emf
+                  Example output from: testbed 0
+                  
+emf-inout.cpp,example
+emf-inout.h.example
+emf-print.cpp.example
+emf-print.h.example
+                  Example code from Inkscape demonstrate how to integrate libUEMF with another program.
+                  
+--------------------------------------------------------------------------------------------
+How to Build:
+
+In Linux/Unix like environments (omit -g  flag for production versions): 
+ 
+  Build and install a shared library (example, details may vary) and then build and link
+  the example programs to the shared library:
+    gcc -std=c99 -Wall -fPIC -g -c uemf.c
+    gcc -std=c99 -Wall -fPIC -g -c uemf_print.c
+    gcc -std=c99 -Wall -fPIC -g -c uemf_endian.c
+    gcc -shared -Wl,-soname,libuemf.so.0 \
+      -o libuemf.so.0.0.2 uemf.o uemf_print.o uemf_endian.o -lc
+    ln -s libuemf.so.0.0.2 libuemf.so.0
+    ln -s libuemf.so.0 libuemf.so
+    /bin/cp -f libuemf.so* /usr/local/lib
+    ldconfig
+    gcc -std=c99 -Wall -g -o testbed testbed.c -luemf -lm 
+    gcc -std=c99 -Wall -g -o reademf reademf.c -luemf -lm
+
+  For simple development work just build the example programs statically linked:
+    gcc -std=c99 -Wall -g -o testbed testbed.c uemf.c uemf_endian.c uemf_print.c -lm 
+    gcc -std=c99 -Wall -g -o reademf reademf.c uemf.c uemf_print.c -lm
+
+Extra debugging on linux may be enabled in testbed for use under Valgrind.  To build that way do instead:
+
+  gcc -std=c99 -Wall -g -DU_VALGRIND -o testbed -I. testbed.c uemf.c uemf_endian.c uemf_print.c -lm 
+  
+Sparc Solaris 8 and 9 are Big Endian, and to work around some minor incompatibilities with more recent systems,
+assuming gcc is installed in /opt/csw and PATH is set correctly to use it:
+
+  gcc -DSOL8 -DWORDS_BIGENDIAN -std=c99 -Wall -g -o testbed testbed.c uemf.c uemf_endian.c uemf_print.c -lm -L/opt/csw/lib -liconv
+  gcc -DSOL8 -DWORDS_BIGENDIAN -std=c99 -Wall -g -o reademf reademf.c uemf.c uemf_endian.c uemf_print.c -lm -L/opt/csw/lib -liconv
+
+(Note: WORDS_BIGENDIAN would also be produced by autconf's configure, if that was used.)
+
+Define WIN32 when compiling for Windows.  This uses _wfopen() instead of fopen(), with
+filename translation from UTF-8 to UTF-16LE.  This will allow file opens to utilize unicode
+names.  If WIN32 is omitted on Windows file names must be all ASCII.  To build on mingw use:
+
+    gcc -DWIN32 -std=c99 -Wall -g -o testbed testbed.c uemf.c uemf_endian.c uemf_print.c -lm -liconv
+    gcc -DWIN32 -std=c99 -Wall -g -o reademf reademf.c uemf.c uemf_print.c -lm -liconv
+
+
+
+
+Dependencies:
+   libiconv (if not built into your compiler)
+   libpng (in the Inkscape examples)
+
+--------------------------------------------------------------------------------------------
+Using libUEMF:
+
+To write an EMF file the code first runs two initialization functions: emf_start() and htable_create(). 
+Then a U_EMRHEADER record is created.  This and all subsequent records are appended to the EMF file in
+memory with emf_append().  Whichever other EMR records are desired are also added.  The last EMR record
+added must be the  single instance of U_EMREOF.  Then the code calls emf_finish(), emf_free(), and
+htable_free().  Conversion of byte order on Big Endian machines to Little Endian is carried out
+automatically in emf_finish(), if it is required.
+
+To input an EMF file it is is opened and the data read into a buffer in memory with emf_readdata().  On a
+Big Endian machine this will also swap machine dependent byte orders as needed.  At that point end user code
+generally has to do something with the data in each record.  The simplest case is to just print it, as shown
+in reademf.c.   More typically it must map the operations into its own graphics model, as shown in the
+emf32*.*.example files from Inkscape.  Basically the processing program needs to enter a loop, processing
+one record at a time, pulling the record size and type from the first two uint32_t values present in each
+record.  It then enters a switch statement with one case for each EMR record type.  Each case: statement
+will generally define a pointer to that type of data object.  Accessing the data from that pointer is
+illustrated in the code for the corresponding *_print function. 
+
+While libUEMF implements  _print and _swap functions for all supported EMR records, end user code would
+never call any of these directly.  Instead it should either pass a single EMR record
+to U_emf_onerec_print() (see reademf.c) or the entire completed EMF file in memory buffer to U_emf_endian()
+(see testbed.c).  
+
+Things to be aware of...
+
+The usual idea when employing a graphics file type like EMF is to copy a description of the objects in a
+drawing from one program to another.  Many of the record types in an EMF file can be thought of as objects,
+they are lines or shapes or bitmaps or text.  However, Microsoft's GDI implements binary and ternary raster
+operations (see the descriptions in uemf.h) and most of these operations are not object like, instead they
+combine things on the drawing surface.  (There is in each case a copy operation which is object like.)  
+Consequently, EMF files which use these other raster operations  are not particularly easy to import as
+graphic objects. For instance, when PowerPoint rotates an image and saves it in an EMF the result is not
+a single rotated image object. Instead there is an image containing the rotated image, which is followed by
+masking operations to make the regions outside of the image transparent.  There appears to be no standard
+for when and where these subsequent operations will be applied.  That is, there is no equivalent of 
+"begin path" and "end path" to delineate the start and end of such a compound operation.  So a program
+reading such a file has no easy way of figuring out which previous object is being modified by a subsequent
+raster operation.  The testbed program provided in this package generates a region which applies all
+binary raster operations in vertical slices to two images.  The expected result appears in Windows "Preview",
+but if that region is imported into PowerPoint and converted to objects within that program the result looks
+nothing like what Preview shows.
+
+Support for U_EMREXTTEXTOUTW is much more common than for U_EMRSMALLTEXT.  The latter is easier to use,
+since it does not require a Dx array for each text string, but the objects will not import into PowerPoint,
+for instance.
+
+There are two types of dotted/dashed lines.  The first uses a set of predefined flags to set the pattern
+and the latter is end user user defined.  Both are restricted to lines of width 1. These built in types are
+problematic as key applications cannot handle them properly.  PowerPoint cannot convert either type to its
+internal object format.  The first form loses the pattern and comes through as solid lines.  The second type
+is toxic - even a single dotted line of the second type will prevent the entire EMF from being converted.  
+The safest choice is to avoid these patterned line styles entirely. Convert all dots and dashes to separate
+line draws before writing those into the EMF file.  libUEMF has no problem reading these records, so code
+should accept them for input.
+
+As with most graphics file formats there is no single object representation of a complex text string (varying
+font size, super/sub script, bold, italic,.etc.).  Such text must be decomposed into multiple text strings,
+each with its own formatting.  It is unlikely that a subsequent program reading these records from the EMF
+will be able to reassemble them back into a single complex text string.  
