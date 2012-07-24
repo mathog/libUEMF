@@ -23,8 +23,8 @@
 
 /*
 File:      testbed.c
-Version:   0.0.2
-Date:      12-JUL-2012
+Version:   0.0.3
+Date:      24-JUL-2012
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2012 David Mathog and California Institute of Technology (Caltech)
@@ -250,7 +250,7 @@ int main(int argc, char *argv[]){
     char     *step4 = U_Utf16leToUtf8(     step3, 0, NULL); 
     uint32_t *step5 = U_Utf8ToUtf32le(     step4, 0, NULL); 
     char     *step6 = U_Utf32leToUtf8(     step5, 0, &len); 
-    printf("telegraph size: %d, string:<%s>\n",len,step6);
+    printf("telegraph size: %d, string:<%s>\n", (int) len,step6);
     free(step0);  
     free(step1);  
     free(step2);  
@@ -266,7 +266,7 @@ int main(int argc, char *argv[]){
     step4 = U_Utf16leToUtf8(     step3, len, &len); 
     step5 = U_Utf8ToUtf32le(     step4,   4, &len); 
     step6 = U_Utf32leToUtf8(     step5, len, &len); 
-    printf("telegraph size: %d, string (should be just \"Ever\"):<%s>\n",len,step6);
+    printf("telegraph size: %d, string (should be just \"Ever\"):<%s>\n",(int) len,step6);
     free(step0);  
     free(step1);  
     free(step2);  

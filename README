@@ -15,7 +15,7 @@ This code has been tested on a 32 bit Ubuntu (LE) and 64 bit Solaris (BE).
 
 libUEMF is released under the GPL 2 license, read the file 'COPYING' for more information
 
-Version 0.0.2, released July 12, 2012.
+Version 0.0.3, released July 24, 2012.
 
 To report bugs or provide feedback send email to David Mathog, mathog@caltech.edu.
 
@@ -86,8 +86,8 @@ In Linux/Unix like environments (omit -g  flag for production versions):
     gcc -std=c99 -Wall -fPIC -g -c uemf_print.c
     gcc -std=c99 -Wall -fPIC -g -c uemf_endian.c
     gcc -shared -Wl,-soname,libuemf.so.0 \
-      -o libuemf.so.0.0.2 uemf.o uemf_print.o uemf_endian.o -lc
-    ln -s libuemf.so.0.0.2 libuemf.so.0
+      -o libuemf.so.0.0.3 uemf.o uemf_print.o uemf_endian.o -lc
+    ln -s libuemf.so.0.0.3 libuemf.so.0
     ln -s libuemf.so.0 libuemf.so
     /bin/cp -f libuemf.so* /usr/local/lib
     ldconfig
@@ -185,3 +185,14 @@ As with most graphics file formats there is no single object representation of a
 font size, super/sub script, bold, italic,.etc.).  Such text must be decomposed into multiple text strings,
 each with its own formatting.  It is unlikely that a subsequent program reading these records from the EMF
 will be able to reassemble them back into a single complex text string.  
+
+--------------------------------------------------------------------------------------------
+History
+0.0.2 2012-07-12 first release
+0.0.3 2012-07-24 Warnings related to printing size_t on 64 bit Linux. Correct
+  fix is to use "zd", but gcc -std=c99 does not support that on Solaris 9,
+  the only available big endian system.  So use cast or the size_t to (int)
+  and stick with %d format specifier.  This should be OK as the sizes involved
+  should not be all that large.
+  
+  Bug in core9 affecting U_EMRARC_swap(), and related, on Big Endian.

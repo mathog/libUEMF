@@ -14,8 +14,8 @@
 
 /*
 File:      uemf_endian.h
-Version:   0.0.2
-Date:      12-JUL-2012
+Version:   0.0.3
+Date:      24-JUL-2012
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2012 David Mathog and California Institute of Technology (Caltech)
@@ -525,7 +525,7 @@ void core9_swap(char *record, int torev){
    PU_EMRARC pEmr = (PU_EMRARC) (record);
    core5_swap(record, torev);
    rectl_swap(&(pEmr->rclBox),1);           // rclBox
-   U_swap4(&(pEmr->ptlStart),2);            // ptlStart ptlEnd
+   U_swap4(&(pEmr->ptlStart),4);            // ptlStart ptlEnd
 }
 
 // Functions with the same form starting with U_EMRPOLYPOLYLINE16_swap

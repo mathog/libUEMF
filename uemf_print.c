@@ -4,8 +4,8 @@
 
 /*
 File:      uemf_print.c
-Version:   0.0.2
-Date:      12-JUL-2012
+Version:   0.0.3
+Date:      24-JUL-2012
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2012 David Mathog and California Institute of Technology (Caltech)
@@ -607,7 +607,7 @@ by end user code and to further that end prototypes are NOT provided and they ar
 // numbered as core5 to be consistent with uemf.c, but must appear before the others as there is no prototype
 void core5_print(char *name, char *contents, int recnum, size_t off){
    PU_ENHMETARECORD lpEMFR = (PU_ENHMETARECORD)(contents + off);
-   printf("%-30srecord:%5d type:%3d offset:%8d size:%8d\n",name,recnum,lpEMFR->iType,off,lpEMFR->nSize);
+   printf("%-30srecord:%5d type:%3d offset:%8d size:%8d\n",name,recnum,lpEMFR->iType,(int) off,lpEMFR->nSize);
 }
 
 // Functions with the same form starting with U_EMRPOLYBEZIER_print
@@ -820,7 +820,7 @@ They are listed in order by the corresponding U_EMR_* index number.
 */
 void U_EMRNOTIMPLEMENTED_print(char *name, char *contents, int recnum, size_t off){
    PU_ENHMETARECORD lpEMFR = (PU_ENHMETARECORD)(contents + off);
-   printf("%-30srecord:%5d type:%3d offset:%8d size:%8d\n",name,recnum,lpEMFR->iType,off,lpEMFR->nSize);
+   printf("%-30srecord:%5d type:%3d offset:%8d size:%8d\n",name,recnum,lpEMFR->iType,(int) off,lpEMFR->nSize);
    printf("   Not Implemented!\n");
 }
 

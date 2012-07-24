@@ -14,8 +14,8 @@
 
 /*
 File:      uemf.c
-Version:   0.0.2
-Date:      12-JUL-2012
+Version:   0.0.3
+Date:      24-JUL-2012
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2012 David Mathog and California Institute of Technology (Caltech)
@@ -142,7 +142,7 @@ void wchar8show(
    ){
    printf("char show\n");
    size_t srclen = 0;
-   while(*src){ printf("%d %d %x\n",srclen,*src,*src); srclen++; src++; }
+   while(*src){ printf("%d %d %x\n",(int) srclen,*src,*src); srclen++; src++; }
 }
 
 /**
@@ -154,7 +154,7 @@ void wchar16show(
    ){
    printf("uint16_t show\n");
    size_t srclen = 0;
-   while(*src){ printf("%d %d %x\n",srclen,*src,*src); srclen++; src++; }
+   while(*src){ printf("%d %d %x\n",(int) srclen,*src,*src); srclen++; src++; }
 }
 
 /** 
@@ -165,7 +165,7 @@ void wchar32show(
    ){
    printf("uint32_t show\n");
    size_t srclen = 0;
-   while(*src){ printf("%d %d %x\n",srclen,*src,*src); srclen++; src++; }
+   while(*src){ printf("%d %d %x\n",(int) srclen,*src,*src); srclen++; src++; }
 }
 
 /**
@@ -180,7 +180,7 @@ void wchartshow(
    size_t srclen = 0;
    while(*src){
       val = *src;  // because *src is wchar_t is not strictly an integer type, can cause warnings on next line
-      printf("%d %d %x\n",srclen,val,val); 
+      printf("%d %d %x\n",(int) srclen,val,val); 
       srclen++; 
       src++;
    }
@@ -332,7 +332,7 @@ uint32_t *U_Utf16leToUtf32le(
    dst2 = dst = calloc(dstlen,1);
    if(!dst)return(NULL);
    iconv_t conv = iconv_open("UTF-32LE",   "UTF-16LE");
-   if ((int) conv == -1)return(NULL);
+   if ( conv == (iconv_t)-1)return(NULL);
    status = iconv(conv, ICONV_CAST &src2, &srclen, &dst, &dstlen);
    iconv_close(conv);
    if(status == (size_t) -1)return(NULL);
@@ -361,7 +361,7 @@ uint32_t *U_Utf8ToUtf32le(
    dst2 = dst = calloc(dstlen,1);
    if(!dst)return(NULL);
    iconv_t conv = iconv_open("UTF-32LE",   "UTF-8");
-   if ((int) conv == -1)return(NULL);
+   if ( conv == (iconv_t) -1)return(NULL);
    status = iconv(conv, ICONV_CAST &src2, &srclen, &dst, &dstlen);
    iconv_close(conv);
    if(status == (size_t) -1)return(NULL);
@@ -390,7 +390,7 @@ char *U_Utf32leToUtf8(
    dst2 = dst = calloc(dstlen,1);
    if(!dst)return(NULL);
    iconv_t conv = iconv_open("UTF-8",   "UTF-32LE");
-   if ((int) conv == -1)return(NULL);
+   if ( conv == (iconv_t)-1)return(NULL);
    status = iconv(conv, ICONV_CAST &src2, &srclen, &dst, &dstlen);
    iconv_close(conv);
    if(status == (size_t) -1)return(NULL);
@@ -420,7 +420,7 @@ uint16_t *U_Utf8ToUtf16le(
    dst2 = dst =calloc(dstlen,1);            // so there will always be a terminator
    if(!dst)return(NULL);
    conv = iconv_open("UTF-16LE", "UTF-8");
-   if ((int) conv == -1)return(NULL);
+   if (conv == (iconv_t) -1)return(NULL);
    status = iconv(conv, ICONV_CAST &src, &srclen, &dst, &dstlen);
    iconv_close(conv);
    if(status == (size_t) -1)return(NULL);

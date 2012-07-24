@@ -13,8 +13,8 @@
 
 /*
 File:      uemf.h
-Version:   0.0.2
-Date:      12-JUL-2012
+Version:   0.0.3
+Date:      24-JUL-2012
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2012 David Mathog and California Institute of Technology (Caltech)
