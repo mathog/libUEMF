@@ -14,8 +14,8 @@
 
 /*
 File:      uemf.c
-Version:   0.0.3
-Date:      24-JUL-2012
+Version:   0.0.4
+Date:      25-JUL-2012
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2012 David Mathog and California Institute of Technology (Caltech)
@@ -1680,7 +1680,7 @@ U_RECT findbounds(
       PU_POINT pts,
       uint32_t width
    ){
-   U_RECT rect={INT_MAX, INT_MAX, INT_MIN, INT_MIN };
+   U_RECT rect={INT32_MAX, INT32_MAX, INT32_MIN, INT32_MIN };
    unsigned int i;
 
    for(i=0; i<count;i++,pts++){
@@ -1710,7 +1710,7 @@ U_RECT findbounds16(
       PU_POINT16 pts,
       uint32_t width
    ){
-   U_RECT rect={INT_MAX, INT_MAX, INT_MIN, INT_MIN };
+   U_RECT rect={INT16_MAX, INT16_MAX, INT16_MIN, INT16_MIN };
    unsigned int i;
 
    for(i=0; i<count;i++,pts++){
@@ -2273,7 +2273,7 @@ U_COLORADJUSTMENT coloradjustment_set(
    ca.caRedGamma        = U_MNMX(RedGamma,       U_RGB_GAMMA_MIN,       U_RGB_GAMMA_MAX);
    ca.caGreenGamma      = U_MNMX(GreenGamma,     U_RGB_GAMMA_MIN,       U_RGB_GAMMA_MAX);
    ca.caBlueGamma       = U_MNMX(BlueGamma,      U_RGB_GAMMA_MIN,       U_RGB_GAMMA_MAX);
-   ca.caReferenceBlack  = U_MAX( ReferenceBlack,                        U_REFERENCE_BLACK_MAX); // U_REFERENCE_BLACK_MIN is 0 and referenceblack is unsigned
+   ca.caReferenceBlack  = U_MNMX(ReferenceBlack, U_REFERENCE_BLACK_MIN, U_REFERENCE_BLACK_MAX);
    ca.caReferenceWhite  = U_MNMX(ReferenceWhite, U_REFERENCE_WHITE_MIN, U_REFERENCE_WHITE_MAX); 
    ca.caContrast        = U_MNMX(Contrast,       U_COLOR_ADJ_MIN,       U_COLOR_ADJ_MAX); 
    ca.caBrightness      = U_MNMX(Brightness,     U_COLOR_ADJ_MIN,       U_COLOR_ADJ_MAX); 
@@ -2754,6 +2754,42 @@ PU_TRIVERTEX trivertex_transform(PU_TRIVERTEX tv, int count, U_XFORM xform){
    return(newtvs);
 }
 
+/**
+    \brief Allocate and construct an array of U_POINT objects from a set of U_POINT16 objects
+    \returns pointer to an array of U_POINT structures.
+    \param points  pointer to the source U_POINT16 structures
+    \param count   number of members in points
+    
+*/
+PU_POINT point16_to_point(PU_POINT16 points, int count){
+   PU_POINT newpts;
+   int i;
+   newpts = (PU_POINT) malloc(count * sizeof(U_POINT));
+   for(i=0; i<count; i++){
+      newpts[i].x = points[i].x;
+      newpts[i].y = points[i].y;
+   }
+   return(newpts);
+}
+
+/**
+    \brief Allocate and construct an array of U_POINT16 objects from a set of U_POINT objects
+    \returns pointer to an array of U_POINT16 structures.
+    \param points  pointer to the source U_POINT structures
+    \param count   number of members in points
+    
+    If a coordinate is out of range it saturates at boundary.
+*/
+PU_POINT16 point_to_point16(PU_POINT points, int count){
+   PU_POINT16 newpts;
+   int i;
+   newpts = (PU_POINT16) malloc(count * sizeof(U_POINT16));
+   for(i=0; i<count; i++){
+      newpts[i].x = U_MNMX(points[i].x, INT16_MIN, INT16_MAX);
+      newpts[i].y = U_MNMX(points[i].y, INT16_MIN, INT16_MAX);
+   }
+   return(newpts);
+}
 
 // hide these from Doxygen
 //! @cond
@@ -2805,12 +2841,12 @@ char *U_EMR_CORE1(uint32_t iType, U_RECTL rclBounds, const uint32_t cptl, const 
 // Functions with the same form starting with U_EMR_POLYPOLYLINE
 char *U_EMR_CORE2(uint32_t iType, U_RECTL rclBounds, const uint32_t nPolys, const uint32_t *aPolyCounts,const uint32_t cptl, const U_POINTL *points){
    char *record;
-   int   cbPolys,cbPoints;
+   int   cbPolys,cbPoints,off;
    int   irecsize;
 
    cbPoints    = sizeof(U_POINTL)*cptl;
    cbPolys    = sizeof(uint32_t)*nPolys;
-   irecsize = sizeof(U_EMRPOLYPOLYLINE) + cbPoints + cbPolys - sizeof(U_POINTL) - sizeof(uint32_t); // First instance of each is in struct
+   irecsize = sizeof(U_EMRPOLYPOLYLINE) + cbPoints + cbPolys - sizeof(uint32_t); // First instance of each is in struct
    record   = malloc(irecsize);
    if(record){
       ((PU_EMR)             record)->iType     = iType;
@@ -2818,8 +2854,9 @@ char *U_EMR_CORE2(uint32_t iType, U_RECTL rclBounds, const uint32_t nPolys, cons
       ((PU_EMRPOLYPOLYLINE) record)->rclBounds = rclBounds;
       ((PU_EMRPOLYPOLYLINE) record)->nPolys    = nPolys;
       ((PU_EMRPOLYPOLYLINE) record)->cptl      = cptl;
-      memcpy(((PU_EMRPOLYPOLYLINE) record)->aPolyCounts,aPolyCounts,cbPolys);   
-      memcpy(((PU_EMRPOLYPOLYLINE) record)->aPolyCounts + cbPolys,points,cbPoints);   
+      memcpy(((PU_EMRPOLYPOLYLINE) record)->aPolyCounts,aPolyCounts,cbPolys); 
+      off = sizeof(U_EMRPOLYPOLYLINE) - 4 + cbPolys;
+      memcpy(record + off,points,cbPoints);   
    }
    return(record);
 } 
@@ -2982,7 +3019,7 @@ char *U_EMR_CORE10(uint32_t iType, U_RECTL rclBounds, const uint32_t nPolys, con
 
    cbPolys  = sizeof(uint32_t)*nPolys;
    cbPoints = sizeof(U_POINT16)*cpts;
-   irecsize = sizeof(U_EMRPOLYPOLYLINE16) + cbPoints + cbPolys - sizeof(U_POINT16) - sizeof(uint32_t); // First instance of each is in struct
+   irecsize = sizeof(U_EMRPOLYPOLYLINE16) + cbPoints + cbPolys - sizeof(uint32_t); // First instance of each is in struct
    record   = malloc(irecsize);
    if(record){
       ((PU_EMR)               record)->iType     = iType;
@@ -2990,10 +3027,9 @@ char *U_EMR_CORE10(uint32_t iType, U_RECTL rclBounds, const uint32_t nPolys, con
       ((PU_EMRPOLYPOLYLINE16) record)->rclBounds = rclBounds;
       ((PU_EMRPOLYPOLYLINE16) record)->nPolys    = nPolys;
       ((PU_EMRPOLYPOLYLINE16) record)->cpts      = cpts;
-      off = sizeof(U_EMR) + sizeof(U_RECTL) + 2*sizeof(uint32_t);
-      memcpy(record + off, aPolyCounts, cbPolys);
-      off += cbPolys;    
-      memcpy(record + off,points,cbPoints);    
+      memcpy(((PU_EMRPOLYPOLYLINE16) record)->aPolyCounts,aPolyCounts,cbPolys); 
+      off = sizeof(U_EMRPOLYPOLYLINE16) - 4 + cbPolys;
+      memcpy(record + off,points,cbPoints);   
    }
    return(record);
 } 

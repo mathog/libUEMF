@@ -14,8 +14,8 @@
 
 /*
 File:      uemf_endian.h
-Version:   0.0.3
-Date:      24-JUL-2012
+Version:   0.0.4
+Date:      25-JUL-2012
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2012 David Mathog and California Institute of Technology (Caltech)
@@ -455,20 +455,20 @@ void core1_swap(char *record, int torev){
 // Functions with the same form starting with U_EMRPOLYPOLYLINE_swap
 void core2_swap(char *record, int torev){
    int count, nPolys;
-   PU_EMRPOLYPOLYGON pEmr = (PU_EMRPOLYPOLYGON) (record);
+   PU_EMRPOLYPOLYLINE pEmr = (PU_EMRPOLYPOLYLINE) (record);
    if(torev){
       count  = pEmr->cptl;
       nPolys = pEmr->nPolys;
    }
    core5_swap(record, torev);
    rectl_swap(&(pEmr->rclBounds),1);        // rclBounds
-   U_swap4(&(pEmr->nPolys),2 + nPolys);     // nPolysc cptl aPolyCounts[]
+   U_swap4(&(pEmr->nPolys),2);              // nPolys cptl
    if(!torev){
       count  = pEmr->cptl;
       nPolys = pEmr->nPolys;
    }
    U_swap4(pEmr->aPolyCounts,nPolys);       // aPolyCounts[]
-   pointl_swap((PU_POINTL)((char *)pEmr->aPolyCounts + sizeof(U_POINTL)* nPolys),count); // paptl[]
+   pointl_swap((PU_POINT)(record + sizeof(U_EMRPOLYPOLYLINE) - 4 + sizeof(uint32_t)* nPolys), count); // paptl[]
 }
 
 
@@ -544,7 +544,7 @@ void core10_swap(char *record, int torev){
       nPolys = pEmr->nPolys;
    }
    U_swap4(pEmr->aPolyCounts,nPolys);       // aPolyCounts[]
-   point16_swap((PU_POINT16)((char *)pEmr->aPolyCounts + sizeof(U_POINTL)* pEmr->nPolys), count); // apts[]
+   point16_swap((PU_POINT16)(record + sizeof(U_EMRPOLYPOLYLINE16) - 4 + sizeof(uint32_t)* nPolys), count); // apts[]
 } 
 
 // Functions with the same form starting with  U_EMRINVERTRGN_swap and U_EMRPAINTRGN_swap,

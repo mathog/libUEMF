@@ -23,8 +23,8 @@
 
 /*
 File:      testbed.c
-Version:   0.0.3
-Date:      24-JUL-2012
+Version:   0.0.4
+Date:      25-JUL-2012
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2012 David Mathog and California Institute of Technology (Caltech)
@@ -69,6 +69,7 @@ void taf(char *rec,EMFTRACK *et, char *text){  // Test, append, free
     (void) emf_append((PU_ENHMETARECORD)rec, et, 1);
 #ifndef U_VALGRIND
     printf("\n");
+    fflush(stdout);  // helps keep lines ordered within Valgrind
 #endif
 }
 
@@ -185,11 +186,61 @@ void spintext(uint32_t x, uint32_t y, uint32_t textalign, uint32_t *font, EMFTRA
     free(string);
 }
     
+void textlabel(uint32_t size, const char *string, uint32_t x, uint32_t y, uint32_t *font, EMFTRACK *et, EMFHANDLES *eht){
+    char               *rec;
+    char               *rec2;
+    uint16_t            *FontName;
+    uint16_t            *FontStyle;
+    uint16_t            *text16;
+    U_LOGFONT            lf;
+    U_LOGFONT_PANOSE     elfw;
+    int                  slen;
+    uint32_t            *dx;
+    
+    
+    rec = U_EMRSETTEXTALIGN_set(U_TA_DEFAULT);
+    taf(rec,et,"U_EMRSETTEXTALIGN_set");
+    FontName = U_Utf8ToUtf16le("Courier New", 0, NULL);  // Helvetica originally, but that does not work
+    FontStyle = U_Utf8ToUtf16le("Normal", 0, NULL);
+    rec = selectobject_set(U_DEVICE_DEFAULT_FONT, eht); // Release current font
+    taf(rec,et,"selectobject_set");
+
+    if(*font){
+       rec  = deleteobject_set(font, eht);  // then delete it
+       taf(rec,et,"deleteobject_set");
+    }
+
+    // set escapement and orientation in tenths of a degree counter clockwise rotation
+    lf   = logfont_set( -size, 0, 0, 0, 
+                      U_FW_NORMAL, U_FW_NOITALIC, U_FW_NOUNDERLINE, U_FW_NOSTRIKEOUT,
+                      U_ANSI_CHARSET, U_OUT_DEFAULT_PRECIS, U_CLIP_DEFAULT_PRECIS, 
+                      U_DEFAULT_QUALITY, U_DEFAULT_PITCH, FontName);
+    elfw = logfont_panose_set(lf, FontName, FontStyle, 0, U_PAN_ALL1);  // U_PAN_ALL1 is all U_PAN_NO_FIT, this is what createfont() would have made
+    rec  = extcreatefontindirectw_set(font, eht,  NULL, (char *) &elfw);
+    taf(rec,et,"extcreatefontindirectw_set");
+    rec = selectobject_set(*font, eht); // make this font active
+    taf(rec,et,"selectobject_set");
+
+    text16 = U_Utf8ToUtf16le(string, 0, NULL);
+    slen   = wchar16len(text16);
+    dx = dx_set(-size,  U_FW_NORMAL, slen);
+    rec2 = emrtext_set( pointl_set(x,y), slen, 2, text16, U_ETO_NONE, U_RCL_DEF, dx);
+    free(text16);
+    free(dx);
+    rec = U_EMREXTTEXTOUTW_set(U_RCL_DEF,U_GM_COMPATIBLE,1.0,1.0,(PU_EMRTEXT)rec2); 
+    taf(rec,et,"U_EMREXTTEXTOUTW_set");
+    free(rec2);
+    free(FontName);
+    free(FontStyle);
+}
+
+
 int main(int argc, char *argv[]){
     EMFTRACK            *et;
     EMFHANDLES          *eht;
     U_POINT              pl1;
     U_POINT              pl12[12];
+    uint32_t             plc[12];
     U_POINT              plarray[7]   = { { 200, 0 }, { 400, 200 }, { 400, 400 }, { 200, 600 } , { 0, 400 }, { 0, 200 }, { 200, 0 }};
     U_POINT16            plarray16[7] = { { 200, 0 }, { 400, 200 }, { 400, 400 }, { 200, 600 } , { 0, 400 }, { 0, 200 }, { 200, 0 }};
     U_POINT              star5[5]     = { { 100, 0 }, { 200, 300 }, { 0, 100 }, { 200, 100 } , { 0, 300 }};
@@ -211,7 +262,9 @@ int main(int argc, char *argv[]){
     uint32_t            *dx;
     size_t               slen;
     size_t               len;
-    uint32_t             pen,brush,font;
+    uint32_t             pen=0;   //none of these have been defined yet
+    uint32_t             brush=0;
+    uint32_t             font=0;;
     U_XFORM              xform;
     U_LOGBRUSH           lb;
     U_EXTLOGPEN         *elp;
@@ -336,6 +389,12 @@ int main(int argc, char *argv[]){
 
     rec = selectobject_set(pen, eht); // make pen just created active
     taf(rec,et,"selectobject_set");
+
+    /* label the drawing */
+    
+    textlabel(400, "libUEMF v0.0.4", 10000, 200, &font, et, eht);
+    textlabel(400, "July 25, 2012",  10000, 500, &font, et, eht);
+
 
     /* ********************************************************************** */
     // basic drawing operations
@@ -667,6 +726,65 @@ int main(int argc, char *argv[]){
        rec = U_EMRSTROKEANDFILLPATH_set(rclFrame);                     taf(rec,et,"U_EMRSTROKEANDFILLPATH_set");
        free(points);
     }
+    
+    // test polypolyline and polypolygon using this same array.
+
+    plc[0]=3;
+    plc[1]=4;
+    plc[2]=5;
+
+    points  = points_transform(pl12, 12, xform_alt_set(1.0, 1.0, 0.0, 0.0, 4000, 2800));
+    rec = U_EMRPOLYPOLYLINE_set(findbounds(12, points, 0), 3, plc, 12, points);
+    taf(rec,et,"U_EMRPOLYPOLYLINE_set");
+    free(points);
+
+    points  = points_transform(pl12, 12, xform_alt_set(1.0, 1.0, 0.0, 0.0, 4000, 3300));
+    point16 = point_to_point16(points, 12);
+    rec = U_EMRPOLYPOLYLINE16_set(findbounds16(12, point16, 0), 3, plc, 12, point16);
+    taf(rec,et,"U_EMRPOLYPOLYLINE16_set");
+    free(point16);
+    free(points);
+
+    points = points_transform(pl12, 12, xform_alt_set(1.0, 1.0, 0.0, 0.0, 4300, 2800));
+    rec = U_EMRPOLYPOLYGON_set(findbounds(12, points, 0), 3, plc, 12, points);
+    taf(rec,et,"U_EMRPOLYPOLYGON_set");
+    free(points);
+
+    points  = points_transform(pl12, 12, xform_alt_set(1.0, 1.0, 0.0, 0.0, 4300, 3300));
+    point16 = point_to_point16(points, 12);
+    rec = U_EMRPOLYPOLYGON16_set(findbounds16(12, point16, 0), 3, plc, 12, point16);
+    taf(rec,et,"U_EMRPOLYPOLYGON16_set");
+    free(point16);
+    free(points);
+
+    plc[0]=3;
+    plc[1]=3;
+    plc[2]=3;
+    plc[3]=3;
+
+    points = points_transform(pl12, 12, xform_alt_set(1.0, 1.0, 0.0, 0.0, 4600, 2800));
+    rec = U_EMRPOLYPOLYLINE_set(findbounds(12, points, 0), 4, plc, 12, points);
+    taf(rec,et,"U_EMRPOLYPOLYLINE_set");
+    free(points);
+
+    points  = points_transform(pl12, 12, xform_alt_set(1.0, 1.0, 0.0, 0.0, 4600, 3300));
+    point16 = point_to_point16(points, 12);
+    rec = U_EMRPOLYPOLYLINE16_set(findbounds16(12, point16, 0), 4, plc, 12, point16);
+    taf(rec,et,"U_EMRPOLYPOLYLINE16_set");
+    free(point16);
+    free(points);
+
+    points = points_transform(pl12, 12, xform_alt_set(1.0, 1.0, 0.0, 0.0, 4900, 2800));
+    rec = U_EMRPOLYPOLYGON_set(findbounds(12, points, 0), 4, plc, 12, points);
+    taf(rec,et,"U_EMRPOLYPOLYGON_set");
+    free(points);
+
+    points  = points_transform(pl12, 12, xform_alt_set(1.0, 1.0, 0.0, 0.0, 4900, 3300));
+    point16 = point_to_point16(points, 12);
+    rec = U_EMRPOLYPOLYGON16_set(findbounds16(12, point16, 0), 4, plc, 12, point16);
+    taf(rec,et,"U_EMRPOLYPOLYGON16_set");
+    free(point16);
+    free(points);
 
     if(mode & PREVIEW_BLOCKERS){
     /*  gradientfill
@@ -987,18 +1105,31 @@ int main(int argc, char *argv[]){
       NULL);
     taf(rec,et,"U_EMRBITBLT_set");
 
-    // make a series of rectangle draws with white rectangles under various binary raster operations
 
-    for(i=0;i<16;i++){
-       rec = U_EMRSETROP2_set(i+1);
-       taf(rec,et,"U_EMRSETROP2_set");
-       ul     = pointl_set(2900 + i*100,5000);
-       lr     = pointl_set(2900 + i*100+90,9019);
-       rclBox = rectl_set(ul,lr);
-       rec = U_EMRRECTANGLE_set(rclBox);
-       taf(rec,et,"U_EMRRECTANGLE_set");
+    // make a series of rectangle draws with grey rectangles under various binary raster operations
+    for(i=1;i<=16;i++){
+       rec = U_EMRSETROP2_set(i);                                                taf(rec,et,"U_EMRSETROP2_set");
+       ul     = pointl_set(2800 + i*100,5000);
+       lr     = pointl_set(2800 + i*100+90,9019);
+       rec = U_EMRRECTANGLE_set(rectl_set(ul,lr));                               taf(rec,et,"U_EMRRECTANGLE_set");
     }
-    //restore the default
+    // make a series of white line draws under various binary raster operations
+    rec = selectobject_set(U_WHITE_PEN, eht);
+    taf(rec,et,"selectobject_set");
+    for(i=1;i<=16;i++){
+       rec = U_EMRSETROP2_set(i);                                                taf(rec,et,"U_EMRSETROP2_set");
+       rec = U_EMRMOVETOEX_set(pointl_set(4520 + i*10,4950));                    taf(rec,et,"U_EMRMOVETOEX_set");
+       rec = U_EMRLINETO_set(  pointl_set(4520 + i*10,9069));                    taf(rec,et,"U_EMRLINETO_set");
+    }
+    // make a series of black line draws under various binary raster operations, restore previous pen value
+    rec = selectobject_set(U_BLACK_PEN, eht);
+    taf(rec,et,"selectobject_set");
+    for(i=1;i<=16;i++){
+       rec = U_EMRSETROP2_set(i);                                                taf(rec,et,"U_EMRSETROP2_set");
+       rec = U_EMRMOVETOEX_set(pointl_set(4720 + i*10,4950));                    taf(rec,et,"U_EMRMOVETOEX_set");
+       rec = U_EMRLINETO_set(  pointl_set(4720 + i*10,9069));                    taf(rec,et,"U_EMRLINETO_set");
+    }
+    //restore the previous defaults
     rec = U_EMRSETROP2_set(U_R2_COPYPEN);
     taf(rec,et,"U_EMRSETROP2_set");
 

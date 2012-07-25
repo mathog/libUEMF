@@ -13,8 +13,8 @@
 
 /*
 File:      uemf.h
-Version:   0.0.3
-Date:      24-JUL-2012
+Version:   0.0.4
+Date:      25-JUL-2012
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2012 David Mathog and California Institute of Technology (Caltech)
@@ -1119,9 +1119,10 @@ extern "C" {
 // Other macros
 #define U_Gamma(A) (A < U_RGB_GAMMA_MIN ? U_RGB_GAMMA_MIN : (A > U_RGB_GAMMA_MAX ? U_RGB_GAMMA_MAX: A)) \
                                                                 //!<  Gamma set Macro (enforce range).
-#define U_PM(A,B) (A < -B ? -B : (A > B ? B: A))                //!<  Plus/Minus Range Macro (B must be postitive!).
-#define U_MNMX(A,B,C) (A < B ? B : (A > C ? C: A))              //!<  Min/Max Range Macro (B < C).
-#define U_MAX(A,B) (A > B ? B: A)                               //!<  Max Range Macro (B < C).
+#define U_PM(A,B)     ((A)<-(B)?-(B):((A)>(B)?(B):(A)))         //!<  Plus/Minus Range Macro (B must be postitive!).
+#define U_MNMX(A,B,C) ((A)<(B)?(B):((A)>(C)?(C):(A)))           //!<  Min/Max Range Macro (B <= A <= C).
+#define U_MIN(A,B)    ((A)>(B)?(B):(A))                         //!<  Minimum of A,B
+#define U_MAX(A,B)    ((A)>(B)?(A):(B))                         //!<  Maximum of A,B
 
 //  basic EMR macros.
 #define U_EMRTYPE(A) (((PU_EMR)A)->iType)                       //!<  Get iType from U_EMR* record
@@ -1216,7 +1217,7 @@ typedef struct {
 typedef struct {
     int16_t x;                              //!< X size (16 bit)
     int16_t y;                              //!< Y size (16 bit)
-} U_POINTS, U_POINT16, *PU_POINTS, *PU_POINT16;
+} U_POINT16, *PU_POINT16;
 
 /**
    \brief Coordinates of the upper left, lower right corner.
@@ -1873,7 +1874,8 @@ typedef struct {
     U_NUM_POLYCOUNTS    nPolys;             //!< Number of elements in aPolyCounts
     U_NUM_POINTL        cptl;               //!< Total number of points (over all poly)
     U_POLYCOUNTS        aPolyCounts[1];     //!< Number of points in each poly (sequential)
-    U_POINTL            aptl[1];            //!< array of points
+//  This will appear somewhere but is not really part of the core structure.
+//    U_POINTL            aptl[1];            //!< array of points
 } U_EMRPOLYPOLYLINE, *PU_EMRPOLYPOLYLINE,
   U_EMRPOLYPOLYGON,  *PU_EMRPOLYPOLYGON;
 
@@ -2362,7 +2364,8 @@ typedef struct {
     U_NUM_POLYCOUNTS    nPolys;             //!< Number of elements in aPolyCounts
     U_NUM_POINT16       cpts;               //!< Total number of points (over all poly)
     U_POLYCOUNTS        aPolyCounts[1];     //!< Number of points in each poly (sequential)
-    U_POINT16           apts[1];            //!< array of point16
+//  This will appear somewhere but is not really part of the core structure.
+//    U_POINT16           apts[1];            //!< array of point16
 } U_EMRPOLYPOLYLINE16,*PU_EMRPOLYPOLYLINE16,
   U_EMRPOLYPOLYGON16,*PU_EMRPOLYPOLYGON16;
 
@@ -2726,6 +2729,8 @@ U_PIXELFORMATDESCRIPTOR pixelformatdescriptor_set( uint32_t dwFlags, uint8_t iPi
 PU_POINT     points_transform(PU_POINT points, int count, U_XFORM xform);
 PU_POINT16   point16_transform(PU_POINT16 points, int count, U_XFORM xform);
 PU_TRIVERTEX trivertex_transform(PU_TRIVERTEX tv, int count, U_XFORM xform);
+PU_POINT     point16_to_point(PU_POINT16 points, int count);
+PU_POINT16   point_to_point16(PU_POINT   points, int count);
 
 U_RECT findbounds(uint32_t count, PU_POINT pts, uint32_t width);
 U_RECT findbounds16(uint32_t count, PU_POINT16 pts, uint32_t width);

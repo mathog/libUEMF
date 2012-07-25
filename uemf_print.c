@@ -4,8 +4,8 @@
 
 /*
 File:      uemf_print.c
-Version:   0.0.3
-Date:      24-JUL-2012
+Version:   0.0.4
+Date:      25-JUL-2012
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2012 David Mathog and California Institute of Technology (Caltech)
@@ -634,10 +634,10 @@ void core2_print(char *name, char *contents, int recnum, size_t off){
    printf("   cptl:           %d\n",pEmr->cptl          );
    printf("   Counts:         ");
    for(i=0;i<pEmr->nPolys; i++){
-      printf(" [%d]:%d \n",i,pEmr->aPolyCounts[i] );
+      printf(" [%d]:%d ",i,pEmr->aPolyCounts[i] );
    }
    printf("\n");
-   PU_POINTL paptl = (PU_POINTL)((char *)pEmr->aPolyCounts + sizeof(U_POINTL)* pEmr->nPolys);
+   PU_POINTL paptl = (PU_POINTL)((char *)pEmr->aPolyCounts + sizeof(uint32_t)* pEmr->nPolys);
    printf("   Points:         ");
    for(i=0;i<pEmr->cptl; i++){
       printf(" [%d]:",i); pointl_print(paptl[i]);
@@ -732,11 +732,11 @@ void core10_print(char *name, char *contents, int recnum, size_t off){
    printf("   cpts:           %d\n",pEmr->cpts          );
    printf("   Counts:         ");
    for(i=0;i<pEmr->nPolys; i++){
-      printf(" [%d]:%d \n",i,pEmr->aPolyCounts[i] );
+      printf(" [%d]:%d ",i,pEmr->aPolyCounts[i] );
    }
    printf("\n");
    printf("   Points:         ");
-   PU_POINT16 papts = (PU_POINT16)((char *)pEmr->aPolyCounts + sizeof(U_POINTL)* pEmr->nPolys);
+   PU_POINT16 papts = (PU_POINT16)((char *)pEmr->aPolyCounts + sizeof(uint32_t)* pEmr->nPolys);
    for(i=0; i<pEmr->cpts; i++){
       printf(" [%d]:",i);  point16_print(papts[i]);
    }
