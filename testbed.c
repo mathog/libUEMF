@@ -855,8 +855,9 @@ int main(int argc, char *argv[]){
        taf(rec,et,"deleteobject_set");
     }
 
+
     // if width isn't 1 in the following then it is drawn solid, at width==1 anyway.
-    elp = extlogpen_set(U_PS_USERSTYLE, 1, U_BS_SOLID, colorref_set(0, 0, 255), U_HS_HORIZONTAL,4,(uint32_t *)&(pl12[3]));
+    elp = extlogpen_set(U_PS_USERSTYLE | U_PS_COSMETIC, 1, U_BS_SOLID, colorref_set(0, 0, 255), U_HS_HORIZONTAL,4,(uint32_t *)&(pl12[3]));
     rec = extcreatepen_set(&pen, eht,  NULL, 0, NULL, elp );        taf(rec,et,"emrextcreatepen_set");
     free(elp);
 
@@ -867,6 +868,25 @@ int main(int argc, char *argv[]){
     rec = U_EMRPOLYLINE_set(findbounds(3, points, 0), 3, points); taf(rec,et,"U_EMRPOLYLINE_set");
     free(points);
 
+    rec = selectobject_set(U_BLACK_PEN, eht); // make pen a stock object
+    taf(rec,et,"selectobject_set");
+    if(pen){
+       rec = deleteobject_set(&pen, eht); // delete current pen
+       taf(rec,et,"deleteobject_set");
+    }
+    i++;
+
+    // if width isn't 1 in the following then it is drawn solid, at width==1 anyway.
+    elp = extlogpen_set(U_PS_USERSTYLE|U_PS_GEOMETRIC|U_PS_ENDCAP_SQUARE|U_PS_JOIN_MITER, 4, U_BS_SOLID, colorref_set(255, 0, 0), U_HS_HORIZONTAL,4,(uint32_t *)&(pl12[3]));
+    rec = extcreatepen_set(&pen, eht,  NULL, 0, NULL, elp );        taf(rec,et,"emrextcreatepen_set");
+    free(elp);
+
+    rec = selectobject_set(pen, eht); // make pen just created active
+    taf(rec,et,"selectobject_set");
+
+    points = points_transform(pl12, 3, xform_alt_set(1.0, 1.0, 0.0, 0.0, 200 + i*100, 3700));
+    rec = U_EMRPOLYLINE_set(findbounds(3, points, 0), 3, points); taf(rec,et,"U_EMRPOLYLINE_set");
+    free(points);
 
     rec = selectobject_set(U_BLACK_PEN, eht); // make pen a stock object
     taf(rec,et,"selectobject_set");
@@ -874,7 +894,6 @@ int main(int argc, char *argv[]){
        rec = deleteobject_set(&pen, eht); // delete current pen
        taf(rec,et,"deleteobject_set");
     }
-
 
     /* ********************************************************************** */
     // bitmaps

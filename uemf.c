@@ -14,8 +14,8 @@
 
 /*
 File:      uemf.c
-Version:   0.0.4
-Date:      25-JUL-2012
+Version:   0.0.5
+Date:      08-AUG-2012
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2012 David Mathog and California Institute of Technology (Caltech)
@@ -56,7 +56,7 @@ definitions are not needed in end user code, so they are here rather than in uem
    if(A){\
      if(!B)return(NULL);  /* size is derived from U_BIMAPINFO, but NOT from its size field, go figure*/ \
      C = F;\
-     D = UP4(cbImage);    /*  pixel array might not be a multiples of 4 bytes*/ \
+     D = UP4(C);          /*  pixel array might not be a multiples of 4 bytes*/ \
      E    = sizeof(U_BITMAPINFOHEADER) +  4 * B->bmiHeader.biClrUsed;  /*  bmiheader + colortable*/ \
    }\
    else { D = 0; E=0; }
@@ -1097,6 +1097,7 @@ int DIB_to_RGBA(
    }
 
    pxptr = px;
+   tmp8  = 0;  // silences a compiler warning, tmp8 always sets when j=0, so never used uninitialized
    for(i=istart; i!=iend; i+=iinc){
       rptr= *rgba_px + i*stride;
       for(j=0; j<w; j++){
@@ -2273,7 +2274,8 @@ U_COLORADJUSTMENT coloradjustment_set(
    ca.caRedGamma        = U_MNMX(RedGamma,       U_RGB_GAMMA_MIN,       U_RGB_GAMMA_MAX);
    ca.caGreenGamma      = U_MNMX(GreenGamma,     U_RGB_GAMMA_MIN,       U_RGB_GAMMA_MAX);
    ca.caBlueGamma       = U_MNMX(BlueGamma,      U_RGB_GAMMA_MIN,       U_RGB_GAMMA_MAX);
-   ca.caReferenceBlack  = U_MNMX(ReferenceBlack, U_REFERENCE_BLACK_MIN, U_REFERENCE_BLACK_MAX);
+   // Next one is different to eliminate compiler warning -  U_R_B_MIN is 0 and unsigned
+   ca.caReferenceBlack  = U_MAX( ReferenceBlack, U_REFERENCE_BLACK_MAX);
    ca.caReferenceWhite  = U_MNMX(ReferenceWhite, U_REFERENCE_WHITE_MIN, U_REFERENCE_WHITE_MAX); 
    ca.caContrast        = U_MNMX(Contrast,       U_COLOR_ADJ_MIN,       U_COLOR_ADJ_MAX); 
    ca.caBrightness      = U_MNMX(Brightness,     U_COLOR_ADJ_MIN,       U_COLOR_ADJ_MAX); 
@@ -3356,7 +3358,10 @@ char *U_EMRPOLYPOLYGON_set(
 char *U_EMRSETWINDOWEXTEX_set(
       const U_SIZEL szlExtent 
    ){
-   return(U_EMR_CORE7(U_EMR_SETWINDOWEXTEX, *((PU_PAIR) &szlExtent))); 
+   U_PAIR temp;
+   temp.x = szlExtent.cx;
+   temp.y = szlExtent.cy;
+   return(U_EMR_CORE7(U_EMR_SETWINDOWEXTEX, temp)); 
 }
 
 // U_EMRSETWINDOWORGEX_set            10
@@ -3368,7 +3373,7 @@ char *U_EMRSETWINDOWEXTEX_set(
 char *U_EMRSETWINDOWORGEX_set(
       const U_POINTL ptlOrigin
    ){
-   return(U_EMR_CORE7(U_EMR_SETWINDOWORGEX, *((PU_PAIR) & ptlOrigin))); 
+   return(U_EMR_CORE7(U_EMR_SETWINDOWORGEX, ptlOrigin)); // U_PAIR and U_POINTL are the same thing
 }
 
 // U_EMRSETVIEWPORTEXTEX_set          11
@@ -3380,7 +3385,10 @@ char *U_EMRSETWINDOWORGEX_set(
 char *U_EMRSETVIEWPORTEXTEX_set(
       const U_SIZEL szlExtent
    ){
-   return(U_EMR_CORE7(U_EMR_SETVIEWPORTEXTEX, *((PU_PAIR) &szlExtent))); 
+   U_PAIR temp;
+   temp.x = szlExtent.cx;
+   temp.y = szlExtent.cy;
+   return(U_EMR_CORE7(U_EMR_SETVIEWPORTEXTEX, temp)); 
 }
 
 // U_EMRSETVIEWPORTORGEX_set          12
@@ -3392,7 +3400,7 @@ char *U_EMRSETVIEWPORTEXTEX_set(
 char *U_EMRSETVIEWPORTORGEX_set(
       const U_POINTL ptlOrigin
    ){
-   return(U_EMR_CORE7(U_EMR_SETVIEWPORTORGEX, *((PU_PAIR) & ptlOrigin))); 
+   return(U_EMR_CORE7(U_EMR_SETVIEWPORTORGEX, ptlOrigin));  // U_PAIR and U_POINTL are the same thing
 }
 
 // U_EMRSETBRUSHORGEX_set             13

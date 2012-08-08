@@ -15,7 +15,7 @@ This code has been tested on a 32 bit Ubuntu (LE) and 64 bit Solaris (BE).
 
 libUEMF is released under the GPL 2 license, read the file 'COPYING' for more information
 
-Version 0.0.4, released July 25, 2012.
+Version 0.0.5, released August 8, 2012.
 
 To report bugs or provide feedback send email to David Mathog, mathog@caltech.edu.
 
@@ -192,7 +192,13 @@ History
   (Note, version numbers in files represent the libUEMF release where it was last modified, so not
   all files will show the same version numbers in each release.)
   
-0.0.2 2012-07-12 first release
+0.0.5 2012-08-08 Minor changes to uemf.c to suppress compiler warnings. Fixed
+  one bug in SET_CB_FROM_PXBMI macro (which was not triggered in testbed
+  because all images were the same size).
+
+0.0.4 2012-07-25 More tests in testbed.c. Found and fixed bugs in 
+  U_POLYPOLYLINE and U_POLYPOLYGON related code.
+
 0.0.3 2012-07-24 Warnings related to printing size_t on 64 bit Linux. Correct
   fix is to use "zd", but gcc -std=c99 does not support that on Solaris 9,
   the only available big endian system.  So use cast or the size_t to (int)
@@ -201,6 +207,5 @@ History
   
   Bug in core9 affecting U_EMRARC_swap(), and related, on Big Endian.
 
-0.0.4 2012-07-25 More tests in testbed.c. Found and fixed bugs in 
-  U_POLYPOLYLINE and U_POLYPOLYGON related code.
+0.0.2 2012-07-12 first release
   
