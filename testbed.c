@@ -23,8 +23,8 @@
 
 /*
 File:      testbed.c
-Version:   0.0.4
-Date:      25-JUL-2012
+Version:   0.0.6
+Date:      21-AUG-2012
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2012 David Mathog and California Institute of Technology (Caltech)
@@ -392,8 +392,8 @@ int main(int argc, char *argv[]){
 
     /* label the drawing */
     
-    textlabel(400, "libUEMF v0.0.4", 10000, 200, &font, et, eht);
-    textlabel(400, "July 25, 2012",  10000, 500, &font, et, eht);
+    textlabel(400, "libUEMF v0.0.6", 10000, 200, &font, et, eht);
+    textlabel(400, "August 21, 2012",  10000, 500, &font, et, eht);
 
 
     /* ********************************************************************** */
@@ -826,7 +826,7 @@ int main(int argc, char *argv[]){
           rec = selectobject_set(U_BLACK_PEN, eht); // make pen a stock object
           taf(rec,et,"deleteobject_set");
           if(pen){
-             rec = deleteobject_set(&pen, eht); // delete current pen
+             rec = deleteobject_set(&pen, eht); // delete current (custom) pen
              taf(rec,et,"deleteobject_set");
           }
 
@@ -848,10 +848,14 @@ int main(int argc, char *argv[]){
           free(points);
        }
     } //PPT_BLOCKERS
+    else {
+      i=U_PS_DASHDOTDOT+1;
+    }
+
     rec = selectobject_set(U_BLACK_PEN, eht); // make pen a stock object
     taf(rec,et,"selectobject_set");
     if(pen){
-       rec = deleteobject_set(&pen, eht); // delete current pen
+       rec = deleteobject_set(&pen, eht); // delete current (custom) pen
        taf(rec,et,"deleteobject_set");
     }
 
@@ -871,7 +875,7 @@ int main(int argc, char *argv[]){
     rec = selectobject_set(U_BLACK_PEN, eht); // make pen a stock object
     taf(rec,et,"selectobject_set");
     if(pen){
-       rec = deleteobject_set(&pen, eht); // delete current pen
+       rec = deleteobject_set(&pen, eht); // delete current (custom) pen
        taf(rec,et,"deleteobject_set");
     }
     i++;
@@ -891,7 +895,7 @@ int main(int argc, char *argv[]){
     rec = selectobject_set(U_BLACK_PEN, eht); // make pen a stock object
     taf(rec,et,"selectobject_set");
     if(pen){
-       rec = deleteobject_set(&pen, eht); // delete current pen
+       rec = deleteobject_set(&pen, eht); // delete current (custom) pen
        taf(rec,et,"deleteobject_set");
     }
 
@@ -901,8 +905,6 @@ int main(int argc, char *argv[]){
     // Make the first test image, it is 10 x 10 and has various colors, R,G,B in each of 3 corners
     rgba_px = (char *) malloc(10*10*4);
     FillImage(rgba_px,10,10,40);
-
-
 
     rec =  U_EMRSETSTRETCHBLTMODE_set(U_STRETCH_DELETESCANS);
     taf(rec,et,"U_EMRSETSTRETCHBLTMODE_set");
@@ -1253,7 +1255,7 @@ int main(int argc, char *argv[]){
     // use NULL_PEN (no edge on drawn rectangle)
     rec = selectobject_set(U_NULL_PEN, eht); // make stock object NULL_PEN active
     taf(rec,et,"selectobject_set");
-    // get rid of current pen, if defined
+    // get rid of current (custom) pen, if defined
     if(pen){
         rec  = deleteobject_set(&pen, eht);
         taf(rec,et,"deleteobject_set");
@@ -1313,16 +1315,116 @@ int main(int argc, char *argv[]){
     
     /* ***************    test rotated text  *************** */
     
-
     spintext(8000, 300,U_TA_BASELINE,&font,et,eht);
     spintext(8600, 300,U_TA_TOP,     &font,et,eht);
     spintext(9200, 300,U_TA_BOTTOM,  &font,et,eht);
     rec = U_EMRSETTEXTALIGN_set(U_TA_BASELINE); // go back to baseline
     taf(rec,et,"U_EMRSETTEXTALIGN_set");
+    
+    /* ***************    test hatched fill (standard patterns)  *************** */
+    
+    // use BLACK_PEN (edge on drawn rectangle)
+    rec = selectobject_set(U_BLACK_PEN, eht);    taf(rec,et,"selectobject_set");
+    // get rid of current (custom) pen, if defined
+    if(pen){ rec  = deleteobject_set(&pen, eht); taf(rec,et,"deleteobject_set"); }
+    cr = colorref_set(63, 127, 255);
+    ul = pointl_set(0,0);
+    lr = pointl_set(300,300);
+    rclBox = rectl_set(ul,lr);
+    for(i=0;i<=U_HS_DITHEREDBKCLR;i++){
+      if(brush){
+         rec = deleteobject_set(&brush, eht); // disable brush which is at handle 1, it should not be selected when this happens!!!
+         taf(rec,et,"deleteobject_set");
+      }
+      lb = logbrush_set(U_BS_HATCHED, cr, i);
+      rec = createbrushindirect_set(&brush, eht,lb); taf(rec,et,"createbrushindirect_set");
+      rec = selectobject_set(brush, eht);            taf(rec,et,"selectobject_set");
+      points = points_transform((PU_POINT) &rclBox, 2, xform_alt_set(1.0, 1.0, 0.0, 0.0, 2000+i*330, 3500));
+      rec = U_EMRRECTANGLE_set(*(U_RECTL*)points); taf(rec,et,"U_EMRRECTANGLE_set");
+      free(points);
+    }
 
+    //repeat with red background, green text
 
+    rec = U_EMRSETBKCOLOR_set(colorref_set(255, 0, 0));  taf(rec,et,"U_EMRSETBKCOLOR_set");
+    rec = U_EMRSETTEXTCOLOR_set(colorref_set(0,255,0));  taf(rec,et,"U_EMRSETTEXTCOLOR_set");
+    for(i=0;i<=U_HS_DITHEREDBKCLR;i++){
+      if(brush){ rec = deleteobject_set(&brush, eht);  taf(rec,et,"deleteobject_set"); }
+      lb = logbrush_set(U_BS_HATCHED, cr, i);
+      rec = createbrushindirect_set(&brush, eht,lb); taf(rec,et,"createbrushindirect_set");
+      rec = selectobject_set(brush, eht);            taf(rec,et,"selectobject_set");
+      points = points_transform((PU_POINT) &rclBox, 2, xform_alt_set(1.0, 1.0, 0.0, 0.0, 2000+i*330, 3830));
+      rec = U_EMRRECTANGLE_set(*(U_RECTL*)points); taf(rec,et,"U_EMRRECTANGLE_set");
+      free(points);
+    }
+
+    
+    /* ***************    test pattern fill  *************** */
+     
+    // this will draw a series of squares of increasing size, all with the same color fill pattern  
+    
+    // Make the first test image, it is 5 x 5 and has various colors, R,G,B in each of 3 corners
+    rgba_px = (char *) malloc(5*5*4);
+    FillImage(rgba_px,5,5,20);
+
+    colortype = U_BCBM_COLOR32;
+    status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  5, 5, 20, colortype, 0, 1);
+    Bmih = bitmapinfoheader_set(5, 5, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
+    Bmi = bitmapinfo_set(Bmih, ct);
+    if(brush){ rec = deleteobject_set(&brush, eht);  taf(rec,et,"deleteobject_set"); }
+    rec = createdibpatternbrushpt_set(&brush, eht, U_DIB_RGB_COLORS, Bmi, cbPx, px);
+    taf(rec,et,"createdibpatternbrushpt_set");
+    rec = selectobject_set(brush, eht);              taf(rec,et,"selectobject_set");
+
+    ul = pointl_set(0,0);
+    for(i=1;i<=10;i++){
+      lr = pointl_set(30*i,30*i);
+      rclBox = rectl_set(ul,lr);
+      points = points_transform((PU_POINT) &rclBox, 2, xform_alt_set(1.0, 1.0, 0.0, 0.0, 2000+i*330, 4160));
+      rec = U_EMRRECTANGLE_set(*(U_RECTL*)points); taf(rec,et,"U_EMRRECTANGLE_set");
+      free(points);
+    }
+    free(rgba_px);
+    free(px);
+    free(Bmi);
+
+    /* ***************    test mono fill  *************** */
+     
+    // this will draw a series of squares of increasing size, all with the same monobrush fill pattern  
+    
+    // Make the first test image, it is 4 x 4 and has various colors, R,G,B in each of 3 corners
+    rgba_px = (char *) malloc(4*4*4);
+    FillImage(rgba_px,4,4,16);
+
+    // make a two color image in the existing RGBA array
+    memset(rgba_px, 0x55, 4*4*4);
+    memset(rgba_px, 0xAA, 4*4*2);
+    colortype = U_BCBM_MONOCHROME;
+    status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  4, 4, 16, colortype, 1, 0);  // Must use color tables!
+    Bmih = bitmapinfoheader_set(4, 4, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
+    Bmi = bitmapinfo_set(Bmih, ct);
+    free(ct);
+    if(brush){ rec = deleteobject_set(&brush, eht);  taf(rec,et,"deleteobject_set"); }
+    rec = createmonobrush_set(&brush, eht, U_DIB_RGB_COLORS, Bmi, cbPx, px);
+    taf(rec,et,"createmonobrush_set");
+    rec = selectobject_set(brush, eht);              taf(rec,et,"selectobject_set");
+
+    ul = pointl_set(0,0);
+    for(i=1;i<=10;i++){
+      lr = pointl_set(30*i,30*i);
+      rclBox = rectl_set(ul,lr);
+      points = points_transform((PU_POINT) &rclBox, 2, xform_alt_set(1.0, 1.0, 0.0, 0.0, 2000+i*330, 4520));
+      rec = U_EMRRECTANGLE_set(*(U_RECTL*)points); taf(rec,et,"U_EMRRECTANGLE_set");
+      free(points);
+    }
+    free(rgba_px);
+    free(px);
+    free(Bmi);
 /* ************************************************* */
+
+//
 //  careful not to call anything after here twice!!! 
+//
 
     rec = U_EMREOF_set(0,NULL,et);
     taf(rec,et,"U_EMREOF_set");

@@ -14,8 +14,8 @@
 
 /*
 File:      uemf.c
-Version:   0.0.5
-Date:      08-AUG-2012
+Version:   0.0.6
+Date:      21-AUG-2012
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2012 David Mathog and California Institute of Technology (Caltech)
@@ -269,11 +269,8 @@ void   wchar16strncpypad(
       const uint16_t *src,
       size_t          nchars
    ){
-   for(;nchars;nchars--,dst++,src++){
-     *dst = *src;
-     if(!*src)break;
-   }
-   for(;nchars;nchars--,dst++){ *dst = 0; }  // Pad the remainder
+   for(;*src && nchars;nchars--,dst++,src++){ *dst = *src; }
+   for(;nchars;nchars--,dst++){               *dst = 0;    }  // Pad the remainder
 }
 
 /*  For the following converstion functions, remember that iconv() modifies ALL of its parameters,
@@ -2550,6 +2547,55 @@ char *createbrushindirect_set(
 }
 
 /**
+    \brief Allocate and construct a U_EMRCREATEDIBPATTERNBRUSHPT_set structure, create a handle and returns it
+    Use this function instead of calling U_EMRCREATEDIBPATTERNBRUSHPT_set() directly.
+    \return pointer to U_EMRCREATEDIBPATTERNBRUSHPT_set structure, or NULL on error.
+    \param ihBrush handle to be used by new object 
+    \param eht     EMF handle table 
+    \param iUsage  DIBColors enumeration
+    \param Bmi     Bitmap info
+    \param cbPx    Size in bytes of pixel array (row stride * height, there may be some padding at the end of each row)
+    \param Px      (Optional) bitmapbuffer (pixel array section )
+*/
+char *createdibpatternbrushpt_set(
+      uint32_t            *ihBrush,
+      EMFHANDLES          *eht,
+      const uint32_t       iUsage, 
+      PU_BITMAPINFO        Bmi,
+      const uint32_t       cbPx,
+      const char          *Px
+      
+   ){
+   if(htable_insert(ihBrush, eht))return(NULL);
+   return(U_EMRCREATEDIBPATTERNBRUSHPT_set(*ihBrush, iUsage, Bmi, cbPx, Px));
+}
+
+/**
+    \brief Allocate and construct a U_EMRCREATEMONOBRUSH_set structure, create a handle and returns it
+    Use this function instead of calling U_EMRCREATEMONOBRUSH_set() directly.
+    \return pointer to U_EMRCREATEMONOBRUSH_set structure, or NULL on error.
+    \param ihBrush handle to be used by new object 
+    \param eht     EMF handle table 
+    \param iUsage  DIBColors enumeration
+    \param Bmi     Bitmap info
+    \param cbPx    Size in bytes of pixel array (row stride * height, there may be some padding at the end of each row)
+    \param Px      (Optional) bitmapbuffer (pixel array section )
+*/
+char *createmonobrush_set(
+      uint32_t            *ihBrush,
+      EMFHANDLES          *eht,
+      const uint32_t       iUsage, 
+      PU_BITMAPINFO        Bmi,
+      const uint32_t       cbPx,
+      const char          *Px
+      
+   ){
+   if(htable_insert(ihBrush, eht))return(NULL);
+   return(U_EMRCREATEMONOBRUSH_set(*ihBrush, iUsage, Bmi, cbPx, Px));
+}
+
+
+/**
     \brief Allocate and construct a U_EMRCREATECOLORSPACE structure, create a handle and returns it
     Use this function instead of calling U_EMRCREATECOLORSPACE_set() directly.
     \return pointer to U_EMRCREATECOLORSPACE structure, or NULL on error.
@@ -3066,19 +3112,15 @@ char *U_EMR_CORE12_set(
        uint32_t            iType,
        uint32_t            ihBrush,            // Index to place object in EMF object table (this entry must not yet exist)
        uint32_t            iUsage,             // DIBcolors Enumeration
-       PU_BITMAPINFO       Bmi                 // (Optional) bitmapbuffer (U_BITMAPINFO + pixel array)
+       PU_BITMAPINFO       Bmi,                // (Optional) bitmapbuffer (U_BITMAPINFO + pixel array)
+       const uint32_t      cbPx,               // Size in bytes of pixel array (row stride * height, there may be some padding at the end of each row)
+       const char         *Px                  // (Optional) bitmapbuffer (pixel array section )
    ){
    char *record;
    int   irecsize;
    int   cbImage,cbImage4,cbBmi,off;
 
-   if(Bmi){ 
-     if(Bmi->bmiHeader.biSizeImage != 0){  cbImage = Bmi->bmiHeader.biSizeImage; } 
-     else {                                cbImage = 0;                          }
-     cbImage4 = UP4(cbImage);  // pixel array might not be a multiples of 4 bytes
-     cbBmi    = sizeof(U_BITMAPINFOHEADER) +  4 * Bmi->bmiHeader.biClrUsed;  // bmiheader + colortable
-   }
-   else { cbBmi = 0; cbImage4=0; }
+   SET_CB_FROM_PXBMI(Px,Bmi,cbImage,cbImage4,cbBmi,cbPx);
    
    irecsize = sizeof(U_EMRCREATEMONOBRUSH) + cbBmi + cbImage4;
    record   = malloc(irecsize);
@@ -3093,8 +3135,9 @@ char *U_EMR_CORE12_set(
          ((PU_EMRCREATEMONOBRUSH)    record)->offBmi  = off;                          
          ((PU_EMRCREATEMONOBRUSH)    record)->cbBmi   = cbBmi;   
          off += cbBmi;
+         memcpy(record + off, Px, cbPx);
          ((PU_EMRCREATEMONOBRUSH)    record)->offBits = off;                        
-         ((PU_EMRCREATEMONOBRUSH)    record)->cbBits  = cbImage;                     
+         ((PU_EMRCREATEMONOBRUSH)    record)->cbBits  = cbImage;
       }
       else {
          ((PU_EMRCREATEMONOBRUSH)    record)->offBmi  = 0;                            
@@ -5092,29 +5135,38 @@ char *U_EMRPOLYDRAW16_set(
     \param ihBrush Index to place object in EMF object table (this entry must not yet exist) 
     \param iUsage  DIBcolors Enumeration                                                     
     \param Bmi     (Optional) bitmapbuffer (U_BITMAPINFO + pixel array)                      
+    \param cbPx    Size in bytes of pixel array (row stride * height, there may be some padding at the end of each row)
+    \param Px      (Optional) bitmapbuffer (pixel array section )
 */
 char *U_EMRCREATEMONOBRUSH_set(
       const uint32_t            ihBrush,
       const uint32_t            iUsage,
-      const PU_BITMAPINFO       Bmi
+      const PU_BITMAPINFO       Bmi,
+      const uint32_t            cbPx,
+      const char               *Px
    ){
-   return(U_EMR_CORE12_set(U_EMR_CREATEMONOBRUSH,ihBrush,iUsage,Bmi));
+   return(U_EMR_CORE12_set(U_EMR_CREATEMONOBRUSH,ihBrush,iUsage,Bmi,cbPx,Px));
 }
 
 // U_EMRCREATEDIBPATTERNBRUSHPT_set   94
 /**
     \brief Allocate and construct a U_EMR_CREATEDIBPATTERNBRUSHPT record.
+    Use createdibpatternbrushpt_set() instead of calling this function directly.
     \return pointer to U_EMR_CREATEDIBPATTERNBRUSHPT record, or NULL on error.
     \param ihBrush Index to place object in EMF object table (this entry must not yet exist)
     \param iUsage  DIBcolors Enumeration
     \param Bmi     (Optional) bitmapbuffer (U_BITMAPINFO + pixel array)
+    \param cbPx    Size in bytes of pixel array (row stride * height, there may be some padding at the end of each row)
+    \param Px      (Optional) bitmapbuffer (pixel array section )
 */
 char *U_EMRCREATEDIBPATTERNBRUSHPT_set(
       const uint32_t            ihBrush,
       const uint32_t            iUsage,
-      const PU_BITMAPINFO       Bmi
+      const PU_BITMAPINFO       Bmi,
+      const uint32_t            cbPx,
+      const char               *Px
    ){
-    return(U_EMR_CORE12_set(U_EMR_CREATEDIBPATTERNBRUSHPT,ihBrush,iUsage,Bmi));
+    return(U_EMR_CORE12_set(U_EMR_CREATEDIBPATTERNBRUSHPT,ihBrush,iUsage,Bmi,cbPx,Px));
 }
 
 

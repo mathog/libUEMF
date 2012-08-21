@@ -13,8 +13,8 @@
 
 /*
 File:      uemf.h
-Version:   0.0.4
-Date:      25-JUL-2012
+Version:   0.0.6
+Date:      21-AUG-2012
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2012 David Mathog and California Institute of Technology (Caltech)
@@ -2742,8 +2742,13 @@ char *textcomment_set(char *string);
 char *deleteobject_set(uint32_t *ihObject, EMFHANDLES *eht); 
 char *selectobject_set(uint32_t ihObject, EMFHANDLES *eht);
 char *createpen_set(uint32_t *ihPen, EMFHANDLES *eht, U_LOGPEN lopn );
-char *extcreatepen_set(uint32_t *ihPen, EMFHANDLES *eht,  PU_BITMAPINFO Bmi, const uint32_t cbPx, char *Px, PU_EXTLOGPEN elp);
+char *extcreatepen_set(uint32_t *ihPen, EMFHANDLES *eht,
+                    PU_BITMAPINFO Bmi, const uint32_t cbPx, char *Px, PU_EXTLOGPEN elp);
 char *createbrushindirect_set(uint32_t *ihBrush, EMFHANDLES *eht, U_LOGBRUSH lb );
+char *createdibpatternbrushpt_set(uint32_t *ihBrush, EMFHANDLES *eht, uint32_t iUsage, 
+                    PU_BITMAPINFO Bmi, const uint32_t cbPx, const char *Px);
+char *createmonobrush_set(uint32_t *ihBrush, EMFHANDLES *eht, uint32_t iUsage, 
+                    PU_BITMAPINFO Bmi, const uint32_t cbPx, const char *Px);
 char *extcreatefontindirectw_set(uint32_t *ihFont, EMFHANDLES *eht, const char *elf, const char *elfw);
 char *createpalette_set(uint32_t *ihPal, EMFHANDLES *eht,  U_LOGPALETTE lgpl);
 char *setpaletteentries_set(uint32_t *ihPal, EMFHANDLES *eht, uint32_t iStart, U_NUM_LOGPLTNTRY cEntries, PU_LOGPLTNTRY aPalEntries);
@@ -2870,8 +2875,10 @@ char *U_EMRPOLYLINETO16_set(const U_RECTL rclBounds, const uint32_t cpts, const 
 char *U_EMRPOLYPOLYLINE16_set(const U_RECTL rclBounds, const uint32_t nPolys, const uint32_t *aPolyCounts,const uint32_t cpts, const U_POINT16 *points);
 char *U_EMRPOLYPOLYGON16_set(const U_RECTL rclBounds, const uint32_t nPolys, const uint32_t *aPolyCounts,const uint32_t cpts, const U_POINT16 *points);
 char *U_EMRPOLYDRAW16_set(const U_RECTL rclBounds,const U_NUM_POINT16 cpts, const U_POINT16 *aptl, const uint8_t *abTypes);
-char *U_EMRCREATEMONOBRUSH_set(const uint32_t ihBrush, const uint32_t iUsage, const PU_BITMAPINFO Bmi);
-char *U_EMRCREATEDIBPATTERNBRUSHPT_set(const uint32_t ihBrush, const uint32_t iUsage, const PU_BITMAPINFO Bmi);
+char *U_EMRCREATEMONOBRUSH_set(const uint32_t ihBrush, const uint32_t iUsage, 
+                    const PU_BITMAPINFO Bmi, const uint32_t cbPx, const char *Px);
+char *U_EMRCREATEDIBPATTERNBRUSHPT_set(const uint32_t ihBrush, const uint32_t iUsage,
+                    const PU_BITMAPINFO Bmi, const uint32_t cbPx, const char *Px);
 char *U_EMREXTCREATEPEN_set(const uint32_t ihPen, const PU_BITMAPINFO Bmi, const uint32_t cbPx, char *Px, const PU_EXTLOGPEN elp );
 // U_EMRPOLYTEXTOUTA_set 96 NOT IMPLEMENTED, denigrated after Windows NT
 // U_EMRPOLYTEXTOUTW_set 97 NOT IMPLEMENTED, denigrated after Windows NT
