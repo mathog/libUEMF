@@ -15,7 +15,7 @@ This code has been tested on a 32 bit Ubuntu (LE) and 64 bit Solaris (BE).
 
 libUEMF is released under the GPL 2 license, read the file 'COPYING' for more information
 
-Version 0.0.6, released August 21, 2012.
+Version 0.0.7, released August 30, 2012.
 
 To report bugs or provide feedback send email to David Mathog, mathog@caltech.edu.
 
@@ -192,6 +192,9 @@ History
   (Note, version numbers in files represent the libUEMF release where it was last modified, so not
   all files will show the same version numbers in each release.)
   
+0.0.7 2012-08-30 Added/fixed tests for hatched, DIB, and mono strokes.
+  Corrected error in U_EMREXTCREATEPEN_set.
+
 0.0.6 2012-08-21 Added/fixed tests for hatched, DIB, and mono fills.
 
 0.0.5 2012-08-08 Minor changes to uemf.c to suppress compiler warnings. Fixed

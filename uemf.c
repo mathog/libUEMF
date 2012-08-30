@@ -14,8 +14,8 @@
 
 /*
 File:      uemf.c
-Version:   0.0.6
-Date:      21-AUG-2012
+Version:   0.0.7
+Date:      28-AUG-2012
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2012 David Mathog and California Institute of Technology (Caltech)
@@ -5213,7 +5213,12 @@ char *U_EMREXTCREATEPEN_set(
       ((PU_EMR)                 record)->nSize      = irecsize;
       ((PU_EMREXTCREATEPEN)     record)->ihPen      = ihPen;
       memcpy(&(((PU_EMREXTCREATEPEN) record)->elp),elp,cbElp);
-      off = sizeof(U_EMREXTCREATEPEN) + cbStyleArray - sizeof(U_STYLEENTRY);
+      if(cbStyleArray){
+         off = sizeof(U_EMREXTCREATEPEN) + cbStyleArray - sizeof(U_STYLEENTRY);
+      }
+      else {
+         off = sizeof(U_EMREXTCREATEPEN);
+      }
       // Cannot use APPEND_PXBMISRC here because there is no "Src" in the field names 
       if(cbBmi){
          memcpy(record + off, Bmi, cbBmi);

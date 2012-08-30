@@ -49,6 +49,11 @@
 #include "extension/print.h"
 #include "document.h"
 #include "path-prefix.h"
+#include "sp-pattern.h"
+#include "sp-image.h"
+#include "sp-gradient.h"
+#include "sp-radial-gradient.h"
+#include "sp-linear-gradient.h"
 #include <string.h>
 extern "C" {
 #include "libunicode-convert/unicode-convert.h"
@@ -59,6 +64,10 @@ namespace Inkscape {
 namespace Extension {
 namespace Internal {
 
+#define PXPERMETER 2835
+
+
+enum drawmode {DRAW_PAINT, DRAW_PATTERN, DRAW_IMAGE, DRAW_LINEAR_GRADIENT, DRAW_RADIAL_GRADIENT};
 
 struct FFNEXUS {
    char    *fontname; //Font name
@@ -71,7 +80,7 @@ struct FFNEXUS {
 
 static float PX2WORLD = 20.0f;
 static U_XFORM worldTransform;
-static bool FixPPT1;
+static bool FixPPTCharPos, FixPPTDashLine, FixPPTGrad2Polys, FixPPTPatternAsHatch;
 static FFNEXUS *short_fflist=NULL;  //only those fonts so far encountered
 static FFNEXUS *long_fflist=NULL;   //all the fonts described in ...\share\extensions\fontfix.conf
 static EMFTRACK* et = NULL;
@@ -111,7 +120,7 @@ std::string path_to_ffconf;
     temp->f1=f1;
     temp->f2=f2;
     temp->f3=f3;
-    temp->fontname=strdup(fontname);
+    temp->fontname=strdup(fontname); //This will never be freed
     temp->next=NULL;  //just to be explicit, it is already 0
     if(ptr){
        ptr->next=temp;
@@ -195,6 +204,21 @@ void smuggle_adx_out(const char *string, uint32_t **adx, int *ndx, float scale){
     }
 }
 
+/* convert an  0RGB color to EMF U_COLORREF.
+inverse of sethexcolor() in emf-inout.cpp
+*/
+U_COLORREF  gethexcolor(uint32_t color){
+
+    U_COLORREF out;
+    out = U_RGB( 
+            (color >> 16) & 0xFF,
+            (color >>  8) & 0xFF,
+            (color >>  0) & 0xFF
+          );
+    return(out);
+}
+
+
 /* Translate inkscape weights to EMF weights.
 */
 uint32_t transweight(const unsigned int inkweight){
@@ -248,7 +272,10 @@ unsigned int PrintEmf::begin (Inkscape::Extension::Print *mod, SPDocument *doc)
     char *rec;
 
     gchar const *utf8_fn = mod->get_param_string("destination");
-    FixPPT1 = mod->get_param_bool("FixPPT1");
+    FixPPTCharPos = mod->get_param_bool("FixPPTCharPos");
+    FixPPTDashLine = mod->get_param_bool("FixPPTDashLine");
+    FixPPTGrad2Polys = mod->get_param_bool("FixPPTGrad2Polys");
+    FixPPTPatternAsHatch = mod->get_param_bool("FixPPTPatternAsHatch");
 
     (void) emf_start(utf8_fn, 1000000, 250000, &et);  // Initialize the et structure
     (void) htable_create(128, 128, &eht);             // Initialize the eht structure
@@ -385,44 +412,290 @@ unsigned int PrintEmf::comment (Inkscape::Extension::Print * /*module*/,
     return 0;
 }
 
+// Extracth hatchType, hatchColor from a name like
+// EMFhatch<hatchType>_<hatchColor>
+// Where the first one is a number and the second a color in hex.
+// hatchType and hatchColor have been set with defaults before this is called.
+//
+void hatch_classify(char *name, int *hatchType, U_COLORREF *hatchColor){
+   int val;
+   uint32_t hcolor=0;
+   if(0!=strncmp(name,"EMFhatch",8)){ return; } // not anything we can parse
+   name+=8; // EMFhatch already detected
+   val = 0;
+   while(*name && isdigit(*name)){ 
+      val = 10*val + *name - '0';
+      name++;
+   }
+   *hatchType = val;
+   if(*name != '_' || val > U_HS_DITHEREDBKCLR){ // wrong syntax, cannot classify
+      *hatchType = -1;
+   }
+   else {
+      name++;
+      if(1 != sscanf(name,"%X",&hcolor)){ *hatchType = -1; } // again wrong syntax, cannot classify
+      *hatchColor = gethexcolor(hcolor);
+   }
+   if(*hatchType > U_HS_SOLIDCLR)*hatchType = U_HS_SOLIDCLR;
+}
+
+//
+//  Recurse down from a brush pattern, try to figure out what it is. 
+//  If an image is found set a pointer to the epixbuf, else set that to NULL
+//  If a pattern is found with a name like EMFhatch3_3F7FFF return hatchType=3, hatchColor=3F7FFF (as a uint32_t),
+//    otherwise hatchType is set to -1 and hatchColor is not defined.
+//
+
+void brush_classify(SPObject *parent, int depth, GdkPixbuf **epixbuf, int *hatchType, U_COLORREF *hatchColor){
+   if(depth==0){
+      *epixbuf    = NULL;
+      *hatchType  = -1;
+      *hatchColor = U_RGB(0,0,0);
+   }
+   depth++;
+   // first look along the pattern chain, if there is one 
+   if(SP_IS_PATTERN(parent)){
+      for (SPPattern *pat_i = SP_PATTERN(parent); pat_i != NULL; pat_i = pat_i->ref ? pat_i->ref->getObject() : NULL) {
+         if(SP_IS_IMAGE(pat_i)){
+            *epixbuf = ((SPImage *)pat_i)->pixbuf;
+            return;
+         }
+         char temp[32];  // large enough
+         temp[31]='\0';
+         strncpy(temp,pat_i->getAttribute("id"),31);  // Some names may be longer than EMFhatch#_###### 
+         hatch_classify(temp,hatchType,hatchColor);
+         if(*hatchType != -1)return;
+
+         // still looking?  Look at this pattern's children, if there are any
+         SPObject *child = pat_i->firstChild();
+         while(child && !(*epixbuf) && (*hatchType == -1)){
+            brush_classify(child, depth, epixbuf, hatchType, hatchColor);
+            child = child->getNext();
+         }
+      }
+   }
+   else if(SP_IS_IMAGE(parent)){
+       *epixbuf = ((SPImage *)parent)->pixbuf;
+       return;
+   }
+   else { // some inkscape rearrangements pass through nodes between pattern and image which are not classified as either.
+       SPObject *child = parent->firstChild();
+       while(child && !(*epixbuf) && (*hatchType == -1)){
+          brush_classify(child, depth, epixbuf, hatchType, hatchColor);
+          child = child->getNext();
+       }
+   }
+}
+
+//swap R/B in 4 byte pixel
+void swapRBinRGBA(char *px, int pixels){
+  char tmp;
+  for(int i=0;i<pixels*4;px+=4,i+=4){
+      tmp=px[2];
+      px[2]=px[0];
+      px[0]=tmp;
+  }
+}
+
+#define LOUDGRADIENT 0  // for development, 
+U_COLORREF avg_stop_color(SPGradient *gr){
+   U_COLORREF cr;
+   if(gr->vector.stops.size()==2){
+      float rgbs[3];
+      float rgbe[3];
+      sp_color_get_rgb_floatv(&gr->vector.stops[0].color, rgbs);
+      sp_color_get_rgb_floatv(&gr->vector.stops[1].color, rgbe);
+      cr = U_RGB(
+             255*((rgbs[0]+rgbe[0])/2.0), 
+             255*((rgbs[1]+rgbe[1])/2.0), 
+             255*((rgbs[2]+rgbe[2])/2.0)
+           );
+   }
+   else {
+      cr = U_RGB(0, 0, 0);  // The default fill
+   }
+   return cr;
+}
 
 int PrintEmf::create_brush(SPStyle const *style)
 {
 // std::cout << "create_brush " << std::endl;
-    float rgb[3];
-    char *rec;
-    U_LOGBRUSH lb;
-    uint32_t brush, fmode;
+    float         rgb[3];
+    char         *rec;
+    U_LOGBRUSH    lb;
+    uint32_t      brush, fmode;
+    enum drawmode fill_mode;
+    GdkPixbuf    *pixbuf;
+    uint32_t      brushStyle;
+    int           hatchType;
+    U_COLORREF    hatchColor;
+    uint32_t      width,height;
 
     if (!et) return 0;
+
+    // set a default fill in case we can't figure out a better way to do it
+    fill_mode  = DRAW_PAINT;
+    brushStyle = U_BS_SOLID;
+    hatchType  = U_HS_SOLIDCLR;
+    hatchColor = U_RGB(0, 0, 0);
+    fmode      = U_ALTERNATE;
+
     if (style) {
-        float opacity = SP_SCALE24_TO_FLOAT(style->fill_opacity.value);
-        if (opacity <= 0.0) return 1;  // opacity isn't used here beyond this
+        if(style->fill.isColor()){
+           fill_mode = DRAW_PAINT;
+           float opacity = SP_SCALE24_TO_FLOAT(style->fill_opacity.value);
+           if (opacity <= 0.0) return 1;  // opacity isn't used here beyond this
 
-        sp_color_get_rgb_floatv( &style->fill.value.color, rgb );
-        lb   = (U_LOGBRUSH) { U_BS_SOLID, U_RGB(255*rgb[0], 255*rgb[1], 255*rgb[2]), U_HS_HORIZONTAL };
+           sp_color_get_rgb_floatv( &style->fill.value.color, rgb );
+           hatchColor = U_RGB(255*rgb[0], 255*rgb[1], 255*rgb[2]);
 
-        fmode = style->fill_rule.computed == 0 ? U_WINDING : (style->fill_rule.computed == 2 ? U_ALTERNATE : U_ALTERNATE);
-    } else { // if (!style)
-        lb   = (U_LOGBRUSH) { U_BS_SOLID, U_RGB(0, 0, 0), U_HS_HORIZONTAL };
+           fmode = style->fill_rule.computed == 0 ? U_WINDING : (style->fill_rule.computed == 2 ? U_ALTERNATE : U_ALTERNATE);
+        }
+        else if(SP_IS_PATTERN(SP_STYLE_FILL_SERVER(style))){ // must be paint-server
+           SPPaintServer *paintserver = style->fill.value.href->getObject();
+           SPPattern *pat = SP_PATTERN (paintserver);
+           double dwidth  = pattern_width(pat);
+           double dheight = pattern_height(pat);
+           width  = dwidth;
+           height = dheight;
+           brush_classify(pat,0,&pixbuf,&hatchType,&hatchColor);
+           if(pixbuf){ fill_mode = DRAW_IMAGE;  }
+           else {  // pattern
+              fill_mode = DRAW_PATTERN;
+              if(hatchType == -1){  // Not a standard hatch, so force it to something
+                 hatchType  = U_HS_CROSS;
+                 hatchColor = U_RGB(0xFF,0xC3,0xC3);
+              }
+           }
+           if(FixPPTPatternAsHatch){
+              if(hatchType == -1){  // image or unclassified 
+                 fill_mode  = DRAW_PATTERN;
+                 hatchType  = U_HS_DIAGCROSS;
+                 hatchColor = U_RGB(0xFF,0xC3,0xC3);
+              } 
+           }
+           brushStyle = U_BS_HATCHED;
+        }
+        else if(SP_IS_GRADIENT(SP_STYLE_FILL_SERVER(style))){ // must be a gradient
+           // currently we do not do anything with gradients, the code below just sets the color to the average of the stops
+           SPPaintServer *paintserver = style->fill.value.href->getObject();
+           if (SP_IS_LINEARGRADIENT (paintserver)) {
+              fill_mode = DRAW_LINEAR_GRADIENT;
+              SPLinearGradient *lg=SP_LINEARGRADIENT(paintserver);
 
-        fmode = U_ALTERNATE;
+              SP_GRADIENT(lg)->ensureVector(); // when exporting from commandline, vector is not built
+
+              Geom::Point p1 (lg->x1.computed, lg->y1.computed);
+              Geom::Point p2 (lg->x2.computed, lg->y2.computed);
+              if (lg->gradientTransform_set) {
+                 p1 = p1 * lg->gradientTransform;
+                 p2 = p2 * lg->gradientTransform;
+              }
+              hatchColor = avg_stop_color(lg);
+#if LOUDGRADIENT
+std::cout << "create_brush, LINEAR_GRADIENT"
+<< " x1,y1:" << p1[Geom::X] << "," << p1[Geom::Y]
+<< " x1,y1:" << p2[Geom::X] << "," << p2[Geom::Y]
+<< " hatchColor: "
+<< 1L*hatchColor.Red << ","
+<< 1L*hatchColor.Green << ","
+<< 1L*hatchColor.Blue
+<< std::endl;
+#endif
+           }
+           else if (SP_IS_RADIALGRADIENT (paintserver)) {
+              fill_mode = DRAW_RADIAL_GRADIENT;
+              SPRadialGradient *rg=SP_RADIALGRADIENT(paintserver);
+
+              SP_GRADIENT(rg)->ensureVector(); // when exporting from commandline, vector is not built
+              double r = rg->r.computed;
+
+              Geom::Point c (rg->cx.computed, rg->cy.computed);
+              Geom::Point xhandle_point(r, 0);
+              Geom::Point yhandle_point(0, -r);
+              yhandle_point += c;
+              xhandle_point += c;
+              if (rg->gradientTransform_set) {
+                 c           = c           * rg->gradientTransform;
+                 yhandle_point = yhandle_point * rg->gradientTransform;
+                 xhandle_point = xhandle_point * rg->gradientTransform;
+              }
+              hatchColor = avg_stop_color(rg);
+#if LOUDGRADIENT
+std::cout << "create_brush, RADIAL_GRADIENT"
+<< " x1,y1:" << c[Geom::X] << "," << c[Geom::Y]
+<< " xhand x1,y1:" << xhandle_point[Geom::X] << "," << xhandle_point[Geom::Y]
+<< " yhand x1,y1:" << yhandle_point[Geom::X] << "," << yhandle_point[Geom::Y]
+<< " radius:" << r
+<< " hatchColor: "
+<< 1L*hatchColor.Red << ","
+<< 1L*hatchColor.Green << ","
+<< 1L*hatchColor.Blue
+<< std::endl;
+#endif
+           }
+           else {
+             // default fill
+           }
+        }
+    } 
+    else { // if (!style)
+      // default fill
     }
 
-    rec = createbrushindirect_set(&brush, eht, lb);
-    if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
-       throw "Fatal programming error in PrintEmf::create_brush at createbrushindirect_set";
-    }
-    hbrush = brush;  // need this later for destroy_brush
+    lb   = logbrush_set(brushStyle, hatchColor, hatchType);
 
-    rec = selectobject_set(brush, eht);
-    if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
-       throw "Fatal programming error in PrintEmf::create_brush at selectobject_set";
-    }
+    switch(fill_mode){
+       case DRAW_LINEAR_GRADIENT: // for now fill with average color
+       case DRAW_RADIAL_GRADIENT: // for now fill with average color
+       case DRAW_PAINT:
+       case DRAW_PATTERN:
+          rec = createbrushindirect_set(&brush, eht, lb);
+          if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
+             throw "Fatal programming error in PrintEmf::create_brush at createbrushindirect_set";
+          }
+          hbrush = brush;  // need this later for destroy_brush
 
+          rec = selectobject_set(brush, eht);
+          if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
+             throw "Fatal programming error in PrintEmf::create_brush at selectobject_set";
+          }
+
+          break;
+       case DRAW_IMAGE:
+          char                *px;
+          char                *rgba_px;
+          uint32_t             cbPx;
+          uint32_t             colortype;
+          PU_RGBQUAD           ct;
+          int                  numCt;
+          U_BITMAPINFOHEADER   Bmih;
+          PU_BITMAPINFO        Bmi;
+          rgba_px = (char *) gdk_pixbuf_get_pixels(pixbuf); // Do NOT free this!!!
+          colortype = U_BCBM_COLOR32;
+          (void) RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  width, height, width*4, colortype, 0, 1);
+          // Not sure why the next swap is needed because the preceding does it, and the code is identical
+          // to that in stretchdibits_set, which does not need this.
+          swapRBinRGBA(px, width*height);
+          Bmih = bitmapinfoheader_set(width, height, 1, colortype, U_BI_RGB, 0, PXPERMETER, PXPERMETER, numCt, 0);
+          Bmi = bitmapinfo_set(Bmih, ct);
+          rec = createdibpatternbrushpt_set(&brush, eht, U_DIB_RGB_COLORS, Bmi, cbPx, px);
+          if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
+             throw "Fatal programming error in PrintEmf::create_brush at createdibpatternbrushpt_set";
+          }
+          free(px);
+          free(Bmi); // ct will be NULL because of colortype
+
+          rec = selectobject_set(brush, eht);
+          if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
+             throw "Fatal programming error in PrintEmf::create_brush at selectobject_set";
+          }
+          break;
+          break;
+    }
     rec = U_EMRSETPOLYFILLMODE_set(fmode); 
     if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
-       throw "Fatal programming error in PrintEmf::create_brush at U_EMRSETPOLYFILLMODE_set";
+       throw "Fatal programming error in PrintEmf::create_brush at U_EMRSETPOLYdrawmode_set";
     }
 // std::cout << "end create_brush " << std::endl;
     return 0;
@@ -451,26 +724,147 @@ void PrintEmf::destroy_brush()
 }
 
 
-void PrintEmf::create_pen(SPStyle const *style, const Geom::Affine &transform)
+int PrintEmf::create_pen(SPStyle const *style, const Geom::Affine &transform)
 {
-    U_COLORREF         cr;
-    U_LOGBRUSH         lb;
-    U_EXTLOGPEN       *elp;
-    U_NUM_STYLEENTRY   n_dash    = 0;
-    U_STYLEENTRY      *dash      = NULL;
-    char              *rec       = NULL;
-    int                linestyle = U_PS_SOLID;
-    int                linecap   = 0;
-    int                linejoin  = 0;
-    uint32_t           pen;
+    U_EXTLOGPEN         *elp;
+    U_NUM_STYLEENTRY     n_dash    = 0;
+    U_STYLEENTRY        *dash      = NULL;
+    char                *rec       = NULL;
+    int                  linestyle = U_PS_SOLID;
+    int                  linecap   = 0;
+    int                  linejoin  = 0;
+    uint32_t             pen;
+    uint32_t             penStyle;
+    GdkPixbuf           *pixbuf;
+    int                  hatchType;
+    U_COLORREF           hatchColor;
+    uint32_t             width,height;
+    char                *px=NULL;
+    char                *rgba_px;
+    uint32_t             cbPx=0;
+    uint32_t             colortype;
+    PU_RGBQUAD           ct=NULL;
+    int                  numCt=0;
+    U_BITMAPINFOHEADER   Bmih;
+    PU_BITMAPINFO        Bmi=NULL;
 // std::cout << "create_pen " << std::endl;
   
+    if (!et) return 0;
+
+    // set a default stroke  in case we can't figure out a better way to do it
+    penStyle   = U_BS_SOLID;
+    hatchColor = U_RGB(0, 0, 0);
+    hatchType  = U_HS_HORIZONTAL;
+
     if (style) {
         float rgb[3];
 
-        sp_color_get_rgb_floatv(&style->stroke.value.color, rgb);
+        if(SP_IS_PATTERN(SP_STYLE_STROKE_SERVER(style))){ // must be paint-server
+           SPPaintServer *paintserver = style->stroke.value.href->getObject();
+           SPPattern *pat = SP_PATTERN (paintserver);
+           double dwidth  = pattern_width(pat);
+           double dheight = pattern_height(pat);
+           width  = dwidth;
+           height = dheight;
+           brush_classify(pat,0,&pixbuf,&hatchType,&hatchColor);
+           if(pixbuf){
+              penStyle    = U_BS_DIBPATTERN;
+              rgba_px = (char *) gdk_pixbuf_get_pixels(pixbuf); // Do NOT free this!!!
+              colortype = U_BCBM_COLOR32;
+              (void) RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  width, height, width*4, colortype, 0, 1);
+              // Not sure why the next swap is needed because the preceding does it, and the code is identical
+              // to that in stretchdibits_set, which does not need this.
+              swapRBinRGBA(px, width*height);
+              Bmih = bitmapinfoheader_set(width, height, 1, colortype, U_BI_RGB, 0, PXPERMETER, PXPERMETER, numCt, 0);
+              Bmi = bitmapinfo_set(Bmih, ct);
+           }
+           else {  // pattern
+              penStyle    = U_BS_HATCHED;
+              if(hatchType == -1){  // Not a standard hatch, so force it to something
+                 hatchType  = U_HS_CROSS;
+                 hatchColor = U_RGB(0xFF,0xC3,0xC3);
+              }
+           }
+           if(FixPPTPatternAsHatch){
+              if(hatchType == -1){  // image or unclassified 
+                 penStyle     = U_BS_HATCHED;
+                 hatchType    = U_HS_DIAGCROSS;
+                 hatchColor   = U_RGB(0xFF,0xC3,0xC3);
+              } 
+           }
+        }
+        else if(SP_IS_GRADIENT(SP_STYLE_STROKE_SERVER(style))){ // must be a gradient
+           // currently we do not do anything with gradients, the code below has no net effect.
 
-        lb = logbrush_set(U_BS_SOLID, U_RGB( 255*rgb[0], 255*rgb[1], 255*rgb[2] ), U_HS_SOLIDCLR);
+           SPPaintServer *paintserver = style->stroke.value.href->getObject();
+           if (SP_IS_LINEARGRADIENT (paintserver)) {
+              SPLinearGradient *lg=SP_LINEARGRADIENT(paintserver);
+
+              SP_GRADIENT(lg)->ensureVector(); // when exporting from commandline, vector is not built
+
+              Geom::Point p1 (lg->x1.computed, lg->y1.computed);
+              Geom::Point p2 (lg->x2.computed, lg->y2.computed);
+
+              if (lg->gradientTransform_set) {
+                 p1 = p1 * lg->gradientTransform;
+                 p2 = p2 * lg->gradientTransform;
+              }
+              hatchColor = avg_stop_color(lg);
+#if LOUDGRADIENT
+std::cout << "create_pen, LINEAR_GRADIENT"
+<< " x1,y1:" << p1[Geom::X] << "," << p1[Geom::Y]
+<< " x1,y1:" << p2[Geom::X] << "," << p2[Geom::Y]
+<< " hatchColor: "
+<< 1L*hatchColor.Red << ","
+<< 1L*hatchColor.Green << ","
+<< 1L*hatchColor.Blue
+<< std::endl;
+#endif
+           }
+           else if (SP_IS_RADIALGRADIENT (paintserver)) {
+              SPRadialGradient *rg=SP_RADIALGRADIENT(paintserver);
+
+              SP_GRADIENT(rg)->ensureVector(); // when exporting from commandline, vector is not built
+              double r = rg->r.computed;
+
+              Geom::Point c (rg->cx.computed, rg->cy.computed);
+              Geom::Point xhandle_point(r, 0);
+              Geom::Point yhandle_point(0, -r);
+              yhandle_point += c;
+              xhandle_point += c;
+              if (rg->gradientTransform_set) {
+                 c           = c           * rg->gradientTransform;
+                 yhandle_point = yhandle_point * rg->gradientTransform;
+                 xhandle_point = xhandle_point * rg->gradientTransform;
+              }
+              hatchColor = avg_stop_color(rg);
+#if LOUDGRADIENT
+std::cout << "create_pen, RADIAL_GRADIENT"
+<< " x1,y1:" << c[Geom::X] << "," << c[Geom::Y]
+<< " xhand x1,y1:" << xhandle_point[Geom::X] << "," << xhandle_point[Geom::Y]
+<< " yhand x1,y1:" << yhandle_point[Geom::X] << "," << yhandle_point[Geom::Y]
+<< " radius:" << r
+<< " hatchColor: "
+<< 1L*hatchColor.Red << ","
+<< 1L*hatchColor.Green << ","
+<< 1L*hatchColor.Blue
+<< std::endl;
+#endif
+           }
+           else {
+             // default fill
+           }
+        }
+        else if(style->stroke.isColor()){ // test last, always seems to be set, even for other types above
+           sp_color_get_rgb_floatv( &style->stroke.value.color, rgb );
+           penStyle   = U_BS_SOLID;
+           hatchColor = U_RGB(255*rgb[0], 255*rgb[1], 255*rgb[2]);
+           hatchType  = U_HS_SOLIDCLR;
+        }
+        else {
+          // default fill
+        }
+
 
 
         using Geom::X;
@@ -484,7 +878,7 @@ void PrintEmf::create_pen(SPStyle const *style, const Geom::Affine &transform)
 
         double scale = sqrt( (p[X]*p[X]) + (p[Y]*p[Y]) ) / sqrt(2);
 
-        if(!style->stroke_width.computed){return;}  //if width is 0 do not (reset) the pen, it should already be NULL_PEN
+        if(!style->stroke_width.computed){return 0;}  //if width is 0 do not (reset) the pen, it should already be NULL_PEN
         uint32_t linewidth = MAX( 1, (uint32_t) (scale * style->stroke_width.computed * PX2WORLD) );
 
         if (style->stroke_linecap.computed == 0) {
@@ -522,18 +916,17 @@ void PrintEmf::create_pen(SPStyle const *style, const Geom::Affine &transform)
                 n_dash = style->stroke_dash.n_dash;
                 dash = new uint32_t[n_dash];
                 for (i = 0; i < style->stroke_dash.n_dash; i++) {
-                    dash[i] = (uint32_t) (style->stroke_dash.dash[i] * PX2WORLD);
+                    dash[i] = (uint32_t) (style->stroke_dash.dash[i]);
                 }
             }
         }
 
-        cr  = colorref_set(255*rgb[0], 255*rgb[1], 255*rgb[2]);
         elp = extlogpen_set(
             U_PS_GEOMETRIC | linestyle | linecap | linejoin,
             linewidth,
-            U_BS_SOLID,
-            cr,
-            U_HS_HORIZONTAL,
+            penStyle,
+            hatchColor,
+            hatchType,
             n_dash,
             dash);
 
@@ -550,11 +943,13 @@ void PrintEmf::create_pen(SPStyle const *style, const Geom::Affine &transform)
             NULL);
     }
 
-    rec = extcreatepen_set(&pen, eht,  NULL, 0, NULL, elp );
+    rec = extcreatepen_set(&pen, eht,  Bmi, cbPx, px, elp );
     if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
         throw "Fatal programming error in PrintEmf::create_pen at extcreatepen_set";
     }
     free(elp);
+    if(Bmi)free(Bmi);
+    if(px)free(px);  // ct will always be NULL
 
     rec = selectobject_set(pen, eht);
     if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
@@ -563,13 +958,9 @@ void PrintEmf::create_pen(SPStyle const *style, const Geom::Affine &transform)
     hpen = pen;  // need this later for destroy_pen
 
     if (linejoin == U_PS_JOIN_MITER) {
-        float miterlimit = style->stroke_miterlimit.value;
+        float miterlimit = style->stroke_miterlimit.value;  // This is a ratio.
 
-        miterlimit = miterlimit * 10.0 / 4.0;
-        if (miterlimit < 1)
-            miterlimit = 10.0;
-
-        miterlimit = miterlimit * PX2WORLD;
+        if (miterlimit < 1)miterlimit = 1;
 
         rec = U_EMRSETMITERLIMIT_set((uint32_t) miterlimit);
         if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
@@ -580,10 +971,11 @@ void PrintEmf::create_pen(SPStyle const *style, const Geom::Affine &transform)
     if (n_dash) {
         delete[] dash;
     }
+    return 0;
 // std::cout << "end create_pen" << std::endl;
 }
 
-
+// set the current pen to the stock object NULL_PEN and then delete the defined pen object, if there is one.
 void PrintEmf::destroy_pen()
 {
 // std::cout << "destroy_pen hpen: " << hpen<< std::endl;
@@ -609,20 +1001,10 @@ void PrintEmf::destroy_pen()
 void PrintEmf::flush_fill()
 {
 // std::cout << "flush_fill " << std::endl;
-    char *rec = NULL;
     if (!fill_pathv.empty()) {
         stroke_and_fill = false;
         fill_only = true;
         print_pathv(fill_pathv, fill_transform);
-        fill_only = false;
-        if (!simple_shape){
-            rec = U_EMRFILLPATH_set(U_RCL_DEF);
-            if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
-              throw "Fatal programming error in PrintEmf::flush_fill";
-            }
-        }
-        destroy_brush();
-        fill_pathv.clear();
     }
 // std::cout << "end flush_fill" << std::endl;
 }
@@ -654,8 +1036,6 @@ unsigned int PrintEmf::fill(Inkscape::Extension::Print * /*mod*/,
                     Geom::OptRect const &/*pbox*/, Geom::OptRect const &/*dbox*/, Geom::OptRect const &/*bbox*/)
 {
 // std::cout << "fill " << std::endl;
-    char *rec = NULL;
-
     Geom::Affine tf = m_tr_stack.top();
 
     flush_fill(); // flush any pending fills
@@ -664,20 +1044,10 @@ unsigned int PrintEmf::fill(Inkscape::Extension::Print * /*mod*/,
 //for the border if it is not specified, so no border can become border.  To avoid this specify "no pen" here if we can determine
 //that will not be needed after the fill.
     if (style->stroke.noneSet || style->stroke_width.computed == 0.0){
-          if(hpen)destroy_pen();
-          rec = selectobject_set(U_NULL_PEN, eht);                                                    
-          if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){                        
-              throw "Fatal programming error in PrintEmf::create_pen at selectobject_set"; 
-          }                                                                                     
+          destroy_pen();  //this sets the NULL_PEN
     }
 
-    if (style->fill.isColor()) {
-        if (create_brush(style))
-            return 0;
-    } else {
-        // create_brush(NULL);
-        return 0;
-    }
+    if (create_brush(style))return 0;
 
     fill_pathv.clear();
     std::copy(pathv.begin(), pathv.end(), std::back_inserter(fill_pathv));
@@ -685,7 +1055,7 @@ unsigned int PrintEmf::fill(Inkscape::Extension::Print * /*mod*/,
 
     // postpone fill in case of stroke-and-fill, otherwise do it now
     if (style->stroke.noneSet || style->stroke_width.computed == 0.0){
-      flush_fill(); // flush any pending fills
+       flush_fill(); // flush any pending fills
     }
 
 // std::cout << "end fill" << std::endl;
@@ -698,7 +1068,6 @@ unsigned int PrintEmf::stroke (Inkscape::Extension::Print * /*mod*/,
                        Geom::OptRect const &/*pbox*/, Geom::OptRect const &/*dbox*/, Geom::OptRect const &/*bbox*/)
 {
 // std::cout << "stroke " << std::endl;
-    char *rec = NULL;
     
     Geom::Affine tf = m_tr_stack.top();
 
@@ -708,40 +1077,19 @@ unsigned int PrintEmf::stroke (Inkscape::Extension::Print * /*mod*/,
         flush_fill(); // flush any pending fills
     }
 
-    if (style->stroke.isColor()) {
-        create_pen(style, tf);
-    } else {
-        // create_pen(NULL, tf);
-        return 0;
-    }
+    if (create_pen(style, tf))return 0;
 
     print_pathv(pathv, tf);
 
-    if (stroke_and_fill) {
-        if (!simple_shape){
-          rec  = U_EMRSTROKEANDFILLPATH_set(U_RCL_DEF);
-          if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){                        
-              throw "Fatal programming error in PrintEmf::stroke at U_EMRSTROKEANDFILLPATH_set"; 
-          }                                                                                     
-        }
-        destroy_brush();
-        fill_pathv.clear();
-    } else {
-        if (!simple_shape){
-          rec  = U_EMRSTROKEPATH_set(U_RCL_DEF);
-          if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){                        
-              throw "Fatal programming error in PrintEmf::stroke at U_EMRSTROKEANDFILLPATH_set"; 
-          }                                                                                     
-        }
-    }
-
-    destroy_pen();
 
 // std::cout << "end stroke " << std::endl;
     return 0;
 }
 
 
+// Draws simple_shapes, those with closed EMR_* primitives, like polygons, rectangles and ellipses.
+// These use whatever the current pen/brush are and need not be followed by a FILLPATH or STROKEPATH.
+// For other paths it sets a few flags and returns.
 bool PrintEmf::print_simple_shape(Geom::PathVector const &pathv, const Geom::Affine &transform)
 {
 // std::cout << "print_simple_shape " << std::endl <<std::flush;
@@ -970,7 +1318,7 @@ bool PrintEmf::print_simple_shape(Geom::PathVector const &pathv, const Geom::Aff
 */
 
 unsigned int PrintEmf::image(Inkscape::Extension::Print * /* module */,  /** not used */
-                           unsigned char *px,   /** array of pixel values, Gdk::Pixbuf bitmap format */
+                           unsigned char *rgba_px,   /** array of pixel values, Gdk::Pixbuf bitmap format */
                            unsigned int w,      /** width of bitmap */
                            unsigned int h,      /** height of bitmap */
                            unsigned int rs,     /** row stride (normally w*4) */
@@ -982,6 +1330,11 @@ unsigned int PrintEmf::image(Inkscape::Extension::Print * /* module */,  /** not
      char *rec = NULL;
      Geom::Affine tf = m_tr_stack.top();
 
+     rec = U_EMRSETSTRETCHBLTMODE_set(U_COLORONCOLOR);
+     if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
+        throw "Fatal programming error in PrintEmf::image at EMRHEADER";
+     }
+
      x1=     atof(style->object->getAttribute("x"));
      y1=     atof(style->object->getAttribute("y"));
      x2=x1 + atof(style->object->getAttribute("width"));
@@ -991,67 +1344,40 @@ unsigned int PrintEmf::image(Inkscape::Extension::Print * /* module */,  /** not
      Geom::Point p2LL = pLL * tf;
      Geom::Point p2UR = pUR * tf;
 
-     U_BITMAPINFO bmInfo = {
-        {
-           sizeof (U_BITMAPINFOHEADER), // bV4Size
-           w,        // biWidth
-           h,        // biHeight
-           1,        // biPlanes
-           32,       // biBitCount
-           U_BI_RGB, // biCompression
-           0,        // biSizeImage
-           2835,     // biXPelsPerMeter, ignore this???
-           2835,     // biYPelsPerMeter
-           0,        // biClrUsed
-           0         // biClrImportant
-        },
-        { { 0, 0, 0, 0 } } // bmiColors
-     };
-
-     unsigned int i,j;
-     /** Swap red and blue channels; Pixbuf is RGBA, Win32 GDI is BGRA. */
-     for ( i = 0 ; i < h * w ; i++ ) {
-     	unsigned char temp=px[i*4];
-     	px[i*4] = px[i*4+2];
-     	px[i*4+2] = temp;
-     }
-
-     /**  px has the lines reversed, so that when written to the EMF
-          x positions are correct but y are mirrored within the image.  Correct
-          that here.
-      */
-     char *tbuf= (char *) malloc(rs);
-     for(i = 0, j = (h-1)*rs ; i < j; i+=rs,j-=rs){
-       memcpy(tbuf,  &px[i],rs);
-       memcpy(&px[i],&px[j],rs);
-       memcpy(&px[j],tbuf,  rs);
-     }
-     free(tbuf);
-
-     rec = U_EMRSETSTRETCHBLTMODE_set(U_COLORONCOLOR);
-     if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
-        throw "Fatal programming error in PrintEmf::image at EMRHEADER";
-     }
+     char                *px;
+     uint32_t             cbPx;
+     uint32_t             colortype;
+     PU_RGBQUAD           ct;
+     int                  numCt;
+     U_BITMAPINFOHEADER   Bmih;
+     PU_BITMAPINFO        Bmi;
+     colortype = U_BCBM_COLOR32;
+     (void) RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  (char *) rgba_px,  w, h, w*4, colortype, 0, 1);
+     Bmih = bitmapinfoheader_set(w, h, 1, colortype, U_BI_RGB, 0, PXPERMETER, PXPERMETER, numCt, 0);
+     Bmi = bitmapinfo_set(Bmih, ct);
 
      U_POINTL Dest  = pointl_set(round(p2LL[Geom::X] * PX2WORLD), round(p2LL[Geom::Y] * PX2WORLD));
      U_POINTL cDest = pointl_set(round((p2UR[Geom::X]-p2LL[Geom::X]) * PX2WORLD), round((p2UR[Geom::Y]-p2LL[Geom::Y]) * PX2WORLD));
      U_POINTL Src   = pointl_set(0,0);
      U_POINTL cSrc  = pointl_set(w,h);
      rec = U_EMRSTRETCHDIBITS_set(
-           U_RCL_DEF,       //! Bounding rectangle in device units
-           Dest,            //! Destination UL corner in logical units
-           cDest,           //! Destination W & H in logical units
-           Src,             //! Source UL corner in logical units
-           cSrc,            //! Source W & H in logical units
+           U_RCL_DEF,           //! Bounding rectangle in device units
+           Dest,                //! Destination UL corner in logical units
+           cDest,               //! Destination W & H in logical units
+           Src,                 //! Source UL corner in logical units
+           cSrc,                //! Source W & H in logical units
            U_DIB_RGB_COLORS,    //! DIBColors Enumeration
            U_SRCCOPY,           //! RasterOPeration Enumeration
-           &bmInfo,             //! (Optional) bitmapbuffer (U_BITMAPINFO section)
+           Bmi,                 //! (Optional) bitmapbuffer (U_BITMAPINFO section)
            h*rs,                //! size in bytes of px          
-           (char *) px          //! (Optional) bitmapbuffer (U_BITMAPINFO section)
+           px                   //! (Optional) bitmapbuffer (U_BITMAPINFO section)
      );
      if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
         throw "Fatal programming error in PrintEmf::image at U_EMRSTRETCHDIBITS_set";
      }
+     free(px);
+     free(Bmi);
+     if(numCt)free(ct);
         
 // std::cout << "end image" << std::endl;
   return 0;
@@ -1068,11 +1394,6 @@ unsigned int PrintEmf::print_pathv(Geom::PathVector const &pathv, const Geom::Af
 
     Geom::PathVector pv = pathv_to_linear_and_cubic_beziers( pathv * transform );
     
-    rec = U_EMRBEGINPATH_set();
-    if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
-        throw "Fatal programming error in PrintEmf::print_pathv at U_EMRBEGINPATH_set";
-    }
- 
     /**
      * For all Subpaths in the <path>
      */
@@ -1081,6 +1402,11 @@ unsigned int PrintEmf::print_pathv(Geom::PathVector const &pathv, const Geom::Af
         using Geom::X;
         using Geom::Y;
 
+        rec = U_EMRBEGINPATH_set();
+        if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
+            throw "Fatal programming error in PrintEmf::print_pathv at U_EMRBEGINPATH_set";
+        }
+ 
         Geom::Point p0 = pit->initialPoint();
 
         p0[X] = (p0[X] * PX2WORLD);
@@ -1166,13 +1492,42 @@ unsigned int PrintEmf::print_pathv(Geom::PathVector const &pathv, const Geom::Af
             if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
                 throw "Fatal programming error in PrintEmf::print_pathv at U_EMRCLOSEFIGURE_set";
             }
-         }
+        }
+
+        rec = U_EMRENDPATH_set();
+        if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
+            throw "Fatal programming error in PrintEmf::print_pathv at U_EMRENDPATH_set";
+        }
+
+        // explicit FILL/STROKE commands are needed for each sub section of the path
+        if (fill_only){
+            rec = U_EMRFILLPATH_set(U_RCL_DEF);
+            if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
+              throw "Fatal programming error in PrintEmf::flush_fill";
+            }
+        }
+        else {
+           if (stroke_and_fill) {
+               rec  = U_EMRSTROKEANDFILLPATH_set(U_RCL_DEF);
+               if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){                        
+                   throw "Fatal programming error in PrintEmf::stroke at U_EMRSTROKEANDFILLPATH_set"; 
+               }                                                                                     
+           } else {
+              rec  = U_EMRSTROKEPATH_set(U_RCL_DEF);
+              if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){                        
+                  throw "Fatal programming error in PrintEmf::stroke at U_EMRSTROKEANDFILLPATH_set"; 
+              }                                                                                     
+           }
+        }
     }
 
-    rec = U_EMRENDPATH_set();
-    if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
-        throw "Fatal programming error in PrintEmf::print_pathv at U_EMRENDPATH_set";
+    // clean out brush and pen, but only after all parts of the draw complete
+    if (fill_only || stroke_and_fill){
+        destroy_brush();
+        fill_pathv.clear();
+        fill_only = false;
     }
+    destroy_pen();
 // std::cout << "end pathv" << std::endl;
 
     return TRUE;
@@ -1222,22 +1577,13 @@ unsigned int PrintEmf::text(Inkscape::Extension::Print * /*mod*/, char const *te
     free(text2);
     //translates Unicode to NonUnicode, if possible.  If any translate, all will, and all to
     //the same font, because of code in Layout::print
-    if(sizeof(wchar_t) == sizeof(uint16_t)){  // This will be true on Windows
-        UnicodeToNon((wchar_t *)unicode_text, &ccount, &newfont);
-    }
-    else { // assume uint32_t, as on Linux and OS/X
-        wchar_t *wtmp = (wchar_t *) U_Utf16leToUtf32le(unicode_text, 0, NULL);
-        free(unicode_text);
-        UnicodeToNon(wtmp, &ccount, &newfont);
-        unicode_text = U_Utf32leToUtf16le((uint32_t*) wtmp, 0, NULL);
-        free(wtmp);
-    }
+    UnicodeToNon(unicode_text, &ccount, &newfont);
 
     //PPT gets funky with text within +-1 degree of a multiple of 90, but only for SOME fonts.Snap those to the central value
     //Some funky ones:  Arial, Times New Roman
     //Some not funky ones: Symbol and Verdana.
     //Without a huge table we cannot catch them all, so just the most common problem ones.
-    if(FixPPT1){
+    if(FixPPTCharPos){
       switch(newfont){
         case CVTSYM:
           search_short_fflist("Convert To Symbol", &f1, &f2, &f3);
@@ -1265,24 +1611,35 @@ unsigned int PrintEmf::text(Inkscape::Extension::Print * /*mod*/, char const *te
 
     int textheight = -style->font_size.computed * PX2WORLD * std::min(tf.expansionX(),tf.expansionY());
     if (!hfont) {
+
+        // Get font face name.  Use changed font name if unicode mapped to one
+        // of the special fonts.
+        uint16_t *wfacename;
+        if(!newfont){
+           wfacename = U_Utf8ToUtf16le(style->text->font_family.value, 0, NULL);
+        }
+        else {
+           wfacename = U_Utf8ToUtf16le(FontName(newfont), 0, NULL);
+        }
+
         // Scale the text to the minimum stretch. (It tends to stay within bounding rectangles even if
         // it was streteched asymmetrically.)  Few applications support text from EMF which is scaled
-        // differently by height/width, so leave lfWidth alone.
-        uint16_t *wfacename = U_Utf8ToUtf16le(style->text->font_family.value, 0, NULL);
+        // differently by height/width, so leave lfWidth alone.  
+
         U_LOGFONT lf = logfont_set(
             textheight, 
             0,        
-            rot,             
-            rot,             
-            transweight(style->font_weight.computed),                  
-            (style->font_style.computed == SP_CSS_FONT_STYLE_ITALIC),                
-            style->text_decoration.underline,           
-            style->text_decoration.line_through,        
-            U_DEFAULT_CHARSET,                
-            U_OUT_DEFAULT_PRECIS,             
-            U_CLIP_DEFAULT_PRECIS,            
-            U_DEFAULT_QUALITY,                
-            U_DEFAULT_PITCH | U_FF_DONTCARE,    
+            rot,
+            rot,
+            transweight(style->font_weight.computed),
+            (style->font_style.computed == SP_CSS_FONT_STYLE_ITALIC),
+            style->text_decoration.underline,
+            style->text_decoration.line_through,
+            U_DEFAULT_CHARSET,
+            U_OUT_DEFAULT_PRECIS,
+            U_CLIP_DEFAULT_PRECIS,
+            U_DEFAULT_QUALITY,
+            U_DEFAULT_PITCH | U_FF_DONTCARE,
             wfacename);
 	free(wfacename);
        
@@ -1326,7 +1683,7 @@ unsigned int PrintEmf::text(Inkscape::Extension::Print * /*mod*/, char const *te
     p2[Geom::Y] -= style->baseline_shift.computed * std::cos( rotb );
 
     //Conditionally handle compensation for PPT EMF import bug (affects PPT 2003-2010, at least)
-    if(FixPPT1){
+    if(FixPPTCharPos){
        if(fix90n==1){ //vertical
          dx= 0.0;
          dy= f3 * style->font_size.computed * std::cos( rotb );
@@ -1396,7 +1753,10 @@ void PrintEmf::init (void)
         "<param name=\"destination\" type=\"string\"></param>\n"
         "<param name=\"textToPath\" type=\"boolean\">true</param>\n"
         "<param name=\"pageBoundingBox\" type=\"boolean\">true</param>\n"
-        "<param name=\"FixPPT1\" type=\"boolean\">false</param>\n"
+        "<param name=\"FixPPTCharPos\" type=\"boolean\">false</param>\n"
+        "<param name=\"FixPPTDashLine\" type=\"boolean\">false</param>\n"
+        "<param name=\"FixPPTGrad2Polys\" type=\"boolean\">false</param>\n"
+        "<param name=\"FixPPTPatternAsHatch\" type=\"boolean\">false</param>\n"
         "<print/>\n"
         "</inkscape-extension>", new PrintEmf());
 

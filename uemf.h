@@ -13,8 +13,8 @@
 
 /*
 File:      uemf.h
-Version:   0.0.6
-Date:      21-AUG-2012
+Version:   0.0.7
+Date:      28-AUG-2012
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2012 David Mathog and California Institute of Technology (Caltech)
@@ -1106,6 +1106,12 @@ extern "C" {
 #define U_RGBAGetG(rgb)     ((U_COLORREF)rgb).Green             //!<  Color RGB Get Green Macro.
 #define U_RGBAGetB(rgb)     ((U_COLORREF)rgb).Blue              //!<  Color RGB Get Blue Macro.
 #define U_RGBAGetA(rgb)     ((U_COLORREF)rgb).Reserved          //!<  Color RGBA Get A/reserved Macro.
+
+//   color type conversions
+#define U_RGB2BGR(rgb)        (U_RGBQUAD){ U_RGBAGetB(rgb),U_RGBAGetG(rgb),U_RGBAGetR(rgb),0}   //!<  Set any BGR color from an RGB color
+#define U_BGR2RGB(rgb)        (U_COLORREF){U_BGRAGetR(rgb),U_BGRAGetG(rgb),U_BGRAGetB(rgb),0}   //!<  Set any RGB color from an BGR color
+#define U_RGBA2BGRA(rgb)      (U_RGBQUAD){ U_RGBAGetB(rgb),U_RGBAGetG(rgb),U_RGBAGetR(rgb),U_RGBAGetA(rgb)}   //!<  Set any BGRA color from an RGBA color
+#define U_BGRA2RGBA(rgb)      (U_COLORREF){U_BGRAGetR(rgb),U_BGRAGetG(rgb),U_BGRAGetB(rgb),U_BGRAGetA(rgb)}   //!<  Set any RGBA color from an BGRA color
 
 //  Color CMYK Get/Set Macros
 #define U_CMYK(c,m,y,k)\

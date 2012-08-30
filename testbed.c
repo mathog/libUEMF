@@ -23,8 +23,8 @@
 
 /*
 File:      testbed.c
-Version:   0.0.6
-Date:      21-AUG-2012
+Version:   0.0.7
+Date:      28-AUG-2012
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2012 David Mathog and California Institute of Technology (Caltech)
@@ -67,12 +67,27 @@ void taf(char *rec,EMFTRACK *et, char *text){  // Test, append, free
     if(!rec){ printf("%s failed",text);                     }
     else {    printf("%s recsize: %d",text,U_EMRSIZE(rec)); }
     (void) emf_append((PU_ENHMETARECORD)rec, et, 1);
-#ifndef U_VALGRIND
+#ifdef U_VALGRIND
     printf("\n");
     fflush(stdout);  // helps keep lines ordered within Valgrind
 #endif
 }
 
+/* Call this to figure out where a missing piece of memory is */
+void findhole(char *rec, char *text){  // Test
+    int i,length;
+    unsigned char uc;
+    if(!rec){ printf("%s failed",text);                     }
+    else { 
+        length = U_EMRSIZE(rec);
+        printf("%s recsize: %d",text,length);
+    }
+    for(i=0;i<length;i++){
+      uc = (unsigned char) rec[i];
+      printf("byte:%d value:%X\n",i,uc); 
+      fflush(stdout);  // helps keep lines ordered within Valgrind
+    }   
+}
 
 
 uint32_t  makeindex(int i, int j, int w, int h, uint32_t colortype){
@@ -274,12 +289,15 @@ int main(int argc, char *argv[]){
     PU_BITMAPINFO        Bmi;
     U_LOGFONT            lf;
     U_LOGFONT_PANOSE     elfw;
+    U_NUM_STYLEENTRY     elpNumEntries;
+    U_STYLEENTRY        *elpStyleEntry;
+    uint32_t             elpBrushStyle;
     uint32_t             cbDesc;
     uint32_t             cbPx;
     uint32_t             colortype;
     PU_RGBQUAD           ct;         //color table
     int                  numCt;      //number of entries in the color table
-    int                  i;
+    int                  i,j,k;
 
     int                  mode = 0;   // conditional for some tests
     
@@ -366,6 +384,20 @@ int main(int argc, char *argv[]){
     rec = U_EMRSETPOLYFILLMODE_set(U_WINDING); //! iMode uses PolygonFillMode Enumeration
     taf(rec,et,"U_EMRSETPOLYFILLMODE_set");
 
+    /* **********put a rectangle under everything, so that transparency is obvious ******************* */
+    cr = colorref_set(255,255,173);  //yellowish color, only use here
+    lb = logbrush_set(U_BS_SOLID, cr, U_HS_SOLIDCLR);
+    rec = createbrushindirect_set(&brush, eht,lb);     taf(rec,et,"createbrushindirect_set");
+    rec = selectobject_set(brush, eht);                taf(rec,et,"selectobject_set");
+    rec = selectobject_set(U_BLACK_PEN, eht);          taf(rec,et,"selectobject_set");
+
+    rclBox = rectl_set(pointl_set(0,0),pointl_set(14031,9921));
+    rec = U_EMRRECTANGLE_set(rclBox);                  taf(rec,et,"U_EMRRECTANGLE_set");
+
+    rec = U_EMRSTROKEANDFILLPATH_set(rclFrame);        taf(rec,et,"U_EMRSTROKEANDFILLPATH_set");
+    rec  = deleteobject_set(&brush, eht);              taf(rec,et,"deleteobject_set");
+
+    /* ********** other drawing tests ******************* */
 
     cr = colorref_set(196, 127, 255);
     lb = logbrush_set(U_BS_SOLID, cr, U_HS_SOLIDCLR);
@@ -390,10 +422,11 @@ int main(int argc, char *argv[]){
     rec = selectobject_set(pen, eht); // make pen just created active
     taf(rec,et,"selectobject_set");
 
+
     /* label the drawing */
     
-    textlabel(400, "libUEMF v0.0.6", 10000, 200, &font, et, eht);
-    textlabel(400, "August 21, 2012",  10000, 500, &font, et, eht);
+    textlabel(400, "libUEMF v0.0.7", 10000, 200, &font, et, eht);
+    textlabel(400, "August 24, 2012",  10000, 500, &font, et, eht);
 
 
     /* ********************************************************************** */
@@ -405,8 +438,7 @@ int main(int argc, char *argv[]){
     rec = U_EMRELLIPSE_set(rclBox);
     taf(rec,et,"U_EMRELLIPSE_set");
 
-    rec = U_EMRSTROKEANDFILLPATH_set(rclFrame);
-    taf(rec,et,"U_EMRSTROKEANDFILLPATH_set");
+    rec = U_EMRSTROKEANDFILLPATH_set(rclFrame);   taf(rec,et,"U_EMRSTROKEANDFILLPATH_set");
 
 
     ul     = pointl_set(500,1300);
@@ -415,8 +447,7 @@ int main(int argc, char *argv[]){
     rec = U_EMRRECTANGLE_set(rclBox);
     taf(rec,et,"U_EMRRECTANGLE_set");
 
-    rec = U_EMRSTROKEANDFILLPATH_set(rclFrame);
-    taf(rec,et,"U_EMRSTROKEANDFILLPATH_set");
+    rec = U_EMRSTROKEANDFILLPATH_set(rclFrame);   taf(rec,et,"U_EMRSTROKEANDFILLPATH_set");
 
 
     rec = U_EMRBEGINPATH_set();                                   taf(rec,et,"U_EMRBEGINPATH_set");
@@ -1207,8 +1238,10 @@ int main(int argc, char *argv[]){
     free(rec2);
     free(string);
 
-    rec = U_EMRSETTEXTCOLOR_set(colorref_set(0,0,0));
-    taf(rec,et,"U_EMRSETTEXTCOLOR_set");
+    // In some monochrome modes these are used.  0 gets the bk color and !0 gets the text color.
+    // Make these distinctive colors so it is obvious where it is happening.  Background is "Aqua", foreground is "Fuchsia"
+    rec = U_EMRSETTEXTCOLOR_set(colorref_set(255,0,255));    taf(rec,et,"U_EMRSETTEXTCOLOR_set");
+    rec = U_EMRSETBKCOLOR_set(colorref_set(0,255,255));      taf(rec,et,"U_EMRSETBKCOLOR_set");
 
     text16 = U_Utf8ToUtf16le("Text16 from U_EMREXTTEXTOUTW", 0, NULL);
     slen   = wchar16len(text16);
@@ -1321,7 +1354,8 @@ int main(int argc, char *argv[]){
     rec = U_EMRSETTEXTALIGN_set(U_TA_BASELINE); // go back to baseline
     taf(rec,et,"U_EMRSETTEXTALIGN_set");
     
-    /* ***************    test hatched fill (standard patterns)  *************** */
+
+    /* ***************    test hatched fill and stroke (standard patterns)  *************** */
     
     // use BLACK_PEN (edge on drawn rectangle)
     rec = selectobject_set(U_BLACK_PEN, eht);    taf(rec,et,"selectobject_set");
@@ -1331,6 +1365,8 @@ int main(int argc, char *argv[]){
     ul = pointl_set(0,0);
     lr = pointl_set(300,300);
     rclBox = rectl_set(ul,lr);
+
+    /* *** fill *** */
     for(i=0;i<=U_HS_DITHEREDBKCLR;i++){
       if(brush){
          rec = deleteobject_set(&brush, eht); // disable brush which is at handle 1, it should not be selected when this happens!!!
@@ -1344,22 +1380,46 @@ int main(int argc, char *argv[]){
       free(points);
     }
 
+    rec = selectobject_set(U_NULL_BRUSH, eht);    taf(rec,et,"selectobject_set");
+    rec  = deleteobject_set(&brush, eht);         taf(rec,et,"deleteobject_set");
+
+    /* *** stroke *** */
+    for(i=0; i<=U_HS_DITHEREDBKCLR; i++){
+      if(pen){ rec = deleteobject_set(&pen, eht);  taf(rec,et,"deleteobject_set"); }
+      elp = extlogpen_set(U_PS_GEOMETRIC|U_PS_ENDCAP_FLAT, 300, U_BS_HATCHED, cr, i, 0, NULL);
+      rec = extcreatepen_set(&pen, eht,  NULL, 0, NULL, elp );        taf(rec,et,"emrextcreatepen_set");
+      free(elp);
+
+      rec = selectobject_set(pen, eht);    taf(rec,et,"selectobject_set");
+
+      rec = U_EMRMOVETOEX_set(pointl_set(6300+i*330, 3600));               taf(rec,et,"U_EMRMOVETOEX_set");
+      rec = U_EMRLINETO_set(pointl_set(6300+i*330, 4100));                 taf(rec,et,"U_EMRLINETO_set");
+    }
+    if(pen){ rec = deleteobject_set(&pen, eht);  taf(rec,et,"deleteobject_set"); }
+
+
     //repeat with red background, green text
 
     rec = U_EMRSETBKCOLOR_set(colorref_set(255, 0, 0));  taf(rec,et,"U_EMRSETBKCOLOR_set");
     rec = U_EMRSETTEXTCOLOR_set(colorref_set(0,255,0));  taf(rec,et,"U_EMRSETTEXTCOLOR_set");
+    rec = selectobject_set(U_BLACK_PEN, eht);            taf(rec,et,"selectobject_set");
+    if(pen){ rec  = deleteobject_set(&pen, eht);         taf(rec,et,"deleteobject_set"); }
     for(i=0;i<=U_HS_DITHEREDBKCLR;i++){
-      if(brush){ rec = deleteobject_set(&brush, eht);  taf(rec,et,"deleteobject_set"); }
-      lb = logbrush_set(U_BS_HATCHED, cr, i);
-      rec = createbrushindirect_set(&brush, eht,lb); taf(rec,et,"createbrushindirect_set");
-      rec = selectobject_set(brush, eht);            taf(rec,et,"selectobject_set");
-      points = points_transform((PU_POINT) &rclBox, 2, xform_alt_set(1.0, 1.0, 0.0, 0.0, 2000+i*330, 3830));
-      rec = U_EMRRECTANGLE_set(*(U_RECTL*)points); taf(rec,et,"U_EMRRECTANGLE_set");
-      free(points);
+       if(brush){ rec = deleteobject_set(&brush, eht);  taf(rec,et,"deleteobject_set"); }
+       lb = logbrush_set(U_BS_HATCHED, cr, i);
+       rec = createbrushindirect_set(&brush, eht,lb); taf(rec,et,"createbrushindirect_set");
+       rec = selectobject_set(brush, eht);            taf(rec,et,"selectobject_set");
+       points = points_transform((PU_POINT) &rclBox, 2, xform_alt_set(1.0, 1.0, 0.0, 0.0, 2000+i*330, 3830));
+       rec = U_EMRRECTANGLE_set(*(U_RECTL*)points); taf(rec,et,"U_EMRRECTANGLE_set");
+       free(points);
     }
+    
+    // restore original settings
+    rec = U_EMRSETTEXTCOLOR_set(colorref_set(255,0,255));    taf(rec,et,"U_EMRSETTEXTCOLOR_set");
+    rec = U_EMRSETBKCOLOR_set(colorref_set(0,255,255));       taf(rec,et,"U_EMRSETBKCOLOR_set");
 
     
-    /* ***************    test pattern fill  *************** */
+    /* ***************    test image fill and stroke  *************** */
      
     // this will draw a series of squares of increasing size, all with the same color fill pattern  
     
@@ -1384,19 +1444,76 @@ int main(int argc, char *argv[]){
       rec = U_EMRRECTANGLE_set(*(U_RECTL*)points); taf(rec,et,"U_EMRRECTANGLE_set");
       free(points);
     }
+
+    /* also with createmonobrush_set on the same image
+       Near as I can tell GDI acts as if this record was just a plain textColor brush no matter what is in the
+       bitmap when the bitmap type is U_BCBM_COLOR32, this was true when pixels were specifically set to white,
+       black, and a variety of other colors.
+       So createmonobrush only does something useful when it is given a  monochrome bitmap.
+    */
+
+    if(brush){ rec = deleteobject_set(&brush, eht);  taf(rec,et,"deleteobject_set"); }
+    rec = createmonobrush_set(&brush, eht, U_DIB_RGB_COLORS, Bmi, cbPx, px);
+    taf(rec,et,"createmonobrush_set");
+    rec = selectobject_set(brush, eht);              taf(rec,et,"selectobject_set");
+
+    lr = pointl_set(30*i,30*i);
+    rclBox = rectl_set(ul,lr);
+    points = points_transform((PU_POINT) &rclBox, 2, xform_alt_set(1.0, 1.0, 0.0, 0.0, 2000+i*330, 4160));
+    rec = U_EMRRECTANGLE_set(*(U_RECTL*)points); taf(rec,et,"U_EMRRECTANGLE_set");
+    free(points);
+
+    /* *** stroke *** */
+
+    rec = selectobject_set(U_NULL_BRUSH, eht);    taf(rec,et,"selectobject_set");
+    rec = deleteobject_set(&brush, eht);          taf(rec,et,"deleteobject_set");
+
+    for(i=k=0;i<3;i++){
+       if(     i==0){ elpBrushStyle = U_BS_DIBPATTERN;   } // Imports into PPT correctly.
+       else if(i==1){ elpBrushStyle = U_BS_DIBPATTERNPT; } // Imports into PPT correctly.
+       else if(i==2){ elpBrushStyle = U_BS_PATTERN;      } // Displays as Solid using TextColor
+       for(j=0;j<2;j++,k++){
+          if(j==0){    // solid line works
+             elpNumEntries = 0;
+             elpStyleEntry = NULL;
+          }
+          else {       // dashed line does not, nothing is drawn
+             elpNumEntries = 4;
+             elpStyleEntry = (uint32_t *)&(pl12[3]);
+          }
+          rec = selectobject_set(U_BLACK_PEN, eht);     taf(rec,et,"selectobject_set");
+          if(pen){  rec = deleteobject_set(&pen, eht);  taf(rec,et,"deleteobject_set"); }
+          rec = U_EMRMOVETOEX_set(pointl_set(6600+k*330, 4150));               taf(rec,et,"U_EMRMOVETOEX_set");
+          rec = U_EMRLINETO_set(pointl_set(6600+k*330, 4870));                 taf(rec,et,"U_EMRLINETO_set");
+
+          // NOTE, the 0,0,0 color is actually used to set U_DIB_RGB_COLORS.  (The types don't match.).  U_HS_HORIZONTAL is ignored.
+          elp = extlogpen_set(U_PS_GEOMETRIC|U_PS_ENDCAP_SQUARE|U_PS_JOIN_MITER, 150, elpBrushStyle, colorref_set(0, 0, 0), U_HS_HORIZONTAL,elpNumEntries,elpStyleEntry);
+          rec = extcreatepen_set(&pen, eht,  Bmi, cbPx, px, elp );    taf(rec,et,"emrextcreatepen_set");
+          free(elp);
+
+          rec = selectobject_set(pen, eht);   taf(rec,et,"selectobject_set");
+          rec = U_EMRMOVETOEX_set(pointl_set(6600+k*330, 4260));               taf(rec,et,"U_EMRMOVETOEX_set");
+          rec = U_EMRLINETO_set(pointl_set(6600+k*330, 4760));                 taf(rec,et,"U_EMRLINETO_set");
+
+       }
+    }
+
     free(rgba_px);
     free(px);
     free(Bmi);
-
     /* ***************    test mono fill  *************** */
      
+    rec = selectobject_set(U_BLACK_PEN, eht);            taf(rec,et,"selectobject_set");
+    if(pen){ rec  = deleteobject_set(&pen, eht);         taf(rec,et,"deleteobject_set"); }
+
     // this will draw a series of squares of increasing size, all with the same monobrush fill pattern  
     
     // Make the first test image, it is 4 x 4 and has various colors, R,G,B in each of 3 corners
     rgba_px = (char *) malloc(4*4*4);
     FillImage(rgba_px,4,4,16);
 
-    // make a two color image in the existing RGBA array
+    // make a two color image in the existing RGBA array.  The image is B/W with a color map having the two colors
+    // in the following memset.  However, the color map is ignored when these are displayed and 1 goes to textcolor, 0 to bk color.
     memset(rgba_px, 0x55, 4*4*4);
     memset(rgba_px, 0xAA, 4*4*2);
     colortype = U_BCBM_MONOCHROME;
@@ -1417,6 +1534,56 @@ int main(int argc, char *argv[]){
       rec = U_EMRRECTANGLE_set(*(U_RECTL*)points); taf(rec,et,"U_EMRRECTANGLE_set");
       free(points);
     }
+    
+    /* also with createdibpatternbrushpt_set on the same image */
+
+    if(brush){ rec = deleteobject_set(&brush, eht);  taf(rec,et,"deleteobject_set"); }
+    rec = createdibpatternbrushpt_set(&brush, eht, U_DIB_RGB_COLORS, Bmi, cbPx, px);
+    taf(rec,et,"createmonobrush_set");
+    rec = selectobject_set(brush, eht);              taf(rec,et,"selectobject_set");
+
+    lr = pointl_set(30*i,30*i);
+    rclBox = rectl_set(ul,lr);
+    points = points_transform((PU_POINT) &rclBox, 2, xform_alt_set(1.0, 1.0, 0.0, 0.0, 2000+i*330, 4520));
+    rec = U_EMRRECTANGLE_set(*(U_RECTL*)points); taf(rec,et,"U_EMRRECTANGLE_set");
+    free(points);
+
+    /* *** stroke *** */
+    rec = selectobject_set(U_NULL_BRUSH, eht);    taf(rec,et,"selectobject_set");
+    rec = deleteobject_set(&brush, eht);          taf(rec,et,"deleteobject_set");
+    if(pen){  rec = deleteobject_set(&pen, eht);  taf(rec,et,"deleteobject_set"); }
+
+    for(i=k=0;i<3;i++){
+       if(     i==0){ elpBrushStyle = U_BS_DIBPATTERN;   } // This uses the color map.  Imports into PPT that way too, which is odd, because the fill doesn't import.
+       else if(i==1){ elpBrushStyle = U_BS_DIBPATTERNPT; } // This uses the color map.  Imports into PPT that way too, which is odd, because the fill doesn't import.
+       else if(i==2){ elpBrushStyle = U_BS_PATTERN;      } // This uses Text/Bk colors instead of grey, like the fill tests above.
+       for(j=0;j<2;j++,k++){
+          if(j==0){    // solid line works
+             elpNumEntries = 0;
+             elpStyleEntry = NULL;
+          }
+          else {       // dashed line does not, nothing is drawn
+             elpNumEntries = 4;
+             elpStyleEntry = (uint32_t *)&(pl12[3]);
+          }
+          rec = selectobject_set(U_BLACK_PEN, eht);     taf(rec,et,"selectobject_set");
+          if(pen){  rec = deleteobject_set(&pen, eht);  taf(rec,et,"deleteobject_set"); }
+          rec = U_EMRMOVETOEX_set(pointl_set(9300+k*330, 4150));               taf(rec,et,"U_EMRMOVETOEX_set");
+          rec = U_EMRLINETO_set(pointl_set(9300+k*330, 4870));                 taf(rec,et,"U_EMRLINETO_set");
+
+
+          // NOTE, the 0,0,0 color is actually used to set U_DIB_RGB_COLORS.  (The types don't match.).  U_HS_HORIZONTAL is ignored.
+          elp = extlogpen_set(U_PS_GEOMETRIC|U_PS_ENDCAP_SQUARE|U_PS_JOIN_MITER, 150, elpBrushStyle, colorref_set(0, 0, 0), U_HS_HORIZONTAL,elpNumEntries,elpStyleEntry);
+          rec = extcreatepen_set(&pen, eht,  Bmi, cbPx, px, elp );    taf(rec,et,"emrextcreatepen_set");
+          free(elp);
+
+          rec = selectobject_set(pen, eht);   taf(rec,et,"selectobject_set");
+          rec = U_EMRMOVETOEX_set(pointl_set(9300+k*330, 4260));               taf(rec,et,"U_EMRMOVETOEX_set");
+          rec = U_EMRLINETO_set(pointl_set(9300+k*330, 4760));                 taf(rec,et,"U_EMRLINETO_set");
+
+       }
+    }
+
     free(rgba_px);
     free(px);
     free(Bmi);
