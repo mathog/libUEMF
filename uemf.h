@@ -13,8 +13,8 @@
 
 /*
 File:      uemf.h
-Version:   0.0.7
-Date:      28-AUG-2012
+Version:   0.0.8
+Date:      14-SEP-2012
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2012 David Mathog and California Institute of Technology (Caltech)
@@ -2649,6 +2649,7 @@ void      wchar16strncpy(uint16_t *dst, const uint16_t *src, size_t nchars);
 void      wchar16strncpypad(uint16_t *dst, const uint16_t *src, size_t nchars);
 uint16_t *U_Utf8ToUtf16le(const char *src, size_t max, size_t *len);
 uint32_t *U_Utf8ToUtf32le(const char *src, size_t max, size_t *len);
+uint32_t *U_Latin1ToUtf32le(const char *src, size_t max, size_t *len);
 uint16_t *U_Utf32leToUtf16le(const uint32_t *src, size_t max, size_t *len);
 char     *U_Utf32leToUtf8(const uint32_t *src, size_t max, size_t *len);
 uint32_t *U_Utf16leToUtf32le(const uint16_t *src, size_t max, size_t *len);

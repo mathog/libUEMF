@@ -18,13 +18,13 @@
  The latter from enables code which lets valgrind check each record for
  uninitialized data.
  
- Takes one 
 */
 
-/*
+/* If Version or Date are changed also edit the text labels for the output.
+
 File:      testbed.c
-Version:   0.0.7
-Date:      28-AUG-2012
+Version:   0.0.8
+Date:      11-SEP-2012
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2012 David Mathog and California Institute of Technology (Caltech)
@@ -67,8 +67,8 @@ void taf(char *rec,EMFTRACK *et, char *text){  // Test, append, free
     if(!rec){ printf("%s failed",text);                     }
     else {    printf("%s recsize: %d",text,U_EMRSIZE(rec)); }
     (void) emf_append((PU_ENHMETARECORD)rec, et, 1);
-#ifdef U_VALGRIND
     printf("\n");
+#ifdef U_VALGRIND
     fflush(stdout);  // helps keep lines ordered within Valgrind
 #endif
 }
@@ -425,8 +425,8 @@ int main(int argc, char *argv[]){
 
     /* label the drawing */
     
-    textlabel(400, "libUEMF v0.0.7", 10000, 200, &font, et, eht);
-    textlabel(400, "August 24, 2012",  10000, 500, &font, et, eht);
+    textlabel(400, "libUEMF v0.0.8",      9700, 200, &font, et, eht);
+    textlabel(400, "September 11, 2012",  9700, 500, &font, et, eht);
 
 
     /* ********************************************************************** */
@@ -817,32 +817,43 @@ int main(int argc, char *argv[]){
     free(point16);
     free(points);
 
+    PU_TRIVERTEX         tvs;
+    U_TRIVERTEX          tvtrig[3]    = {{0,0,0xFFFF,0,0,0}, {50,100,0,0,0xFFFF,0}, {100,0,0,0xFFFF,0,0}};
+    U_GRADIENT3          grtrig[1]    = {{0,1,2}};
+    U_TRIVERTEX          tvrect4[4]   = {{0,0,0xFFFF,0,0,0}, {0,100,0xFFFF,0,0,0}, {100,100,0,0xFFFF,0,0}, {100,00,0,0xFFFF,0,0}};
+    U_GRADIENT3          grrect3[2]   = {{0,1,2},{0,2,3}};
     if(mode & PREVIEW_BLOCKERS){
     /*  gradientfill
         These appear to create the proper binary records, but XP cannot use them and they poison the EMF so that nothing shows.
+        Color is not the problem, does the same thing with 0x0F00 and other simpler colors.
     */
         
-        PU_TRIVERTEX         tvs;
         U_TRIVERTEX          tvrect[2]    = {{0,0,0xFFFF,0,0,0}, {100,100,0,0xFFFF,0,0}};
         U_GRADIENT4          grrect[1]    = {{0,1}};
-        U_TRIVERTEX          tvtrig[3]    = {{0,0,0xFFFF,0,0,0}, {50,100,0,0,0xFFFF,0}, {100,0,0,0xFFFF,0,0}};
-        U_GRADIENT3          grtrig[1]    = {{0,1,2}};
 
-        tvs = trivertex_transform(tvrect, 2, xform_alt_set(1.0, 1.0, 0.0, 0.0, 1900, 1300));
-        rec = U_EMRGRADIENTFILL_set(U_RCL_DEF, 2, 1, U_GRADIENT_FILL_RECT_H, tvs, (uint32_t *) grrect );
-        taf(rec,et,"U_EMRGRADIENTFILL_set");
-        free(tvs);
-
-        tvs = trivertex_transform(tvrect, 2, xform_alt_set(1.0, 1.0, 0.0, 0.0, 2200, 1300));
+        tvs = trivertex_transform(tvrect, 2, xform_alt_set(2.0, 1.0, 0.0, 0.0, 200, 4300));
         rec = U_EMRGRADIENTFILL_set(U_RCL_DEF, 2, 1, U_GRADIENT_FILL_RECT_V, tvs, (uint32_t *) grrect );
         taf(rec,et,"U_EMRGRADIENTFILL_set");
         free(tvs);
 
-        tvs = trivertex_transform(tvtrig, 3, xform_alt_set(1.0, 1.0, 0.0, 0.0, 2500, 1300));
-        rec = U_EMRGRADIENTFILL_set(U_RCL_DEF, 3, 1, U_GRADIENT_FILL_TRIANGLE, tvs, (uint32_t *) grtrig );
+        tvs = trivertex_transform(tvrect, 2, xform_alt_set(2.0, 1.0, 0.0, 0.0, 300, 4300));
+        rec = U_EMRGRADIENTFILL_set(U_RCL_DEF, 2, 1, U_GRADIENT_FILL_RECT_H, tvs, (uint32_t *) grrect );
         taf(rec,et,"U_EMRGRADIENTFILL_set");
         free(tvs);
+
     } // PREVIEW_BLOCKERS
+
+    /* this one works and does not poison the EMF file */
+    tvs = trivertex_transform(tvtrig, 3, xform_alt_set(2.0, 1.0, 0.0, 0.0, 100, 4300));
+    rec = U_EMRGRADIENTFILL_set(U_RCL_DEF, 3, 1, U_GRADIENT_FILL_TRIANGLE, tvs, (uint32_t *) grtrig );
+    taf(rec,et,"U_EMRGRADIENTFILL_set");
+    free(tvs);
+
+    tvs = trivertex_transform(tvrect4, 4, xform_alt_set(2.0, 1.0, 0.0, 0.0, 100, 4550));
+    rec = U_EMRGRADIENTFILL_set(U_RCL_DEF, 4, 2, U_GRADIENT_FILL_TRIANGLE, tvs, (uint32_t *) grrect3 );
+    taf(rec,et,"U_EMRGRADIENTFILL_set");
+    free(tvs);
+
     /* ********************************************************************** */
     // line types
 

@@ -14,8 +14,8 @@
 
 /*
 File:      uemf.c
-Version:   0.0.7
-Date:      28-AUG-2012
+Version:   0.0.8
+Date:      14-SEP-2012
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2012 David Mathog and California Institute of Technology (Caltech)
@@ -330,6 +330,41 @@ uint32_t *U_Utf16leToUtf32le(
    if(!dst)return(NULL);
    iconv_t conv = iconv_open("UTF-32LE",   "UTF-16LE");
    if ( conv == (iconv_t)-1)return(NULL);
+   status = iconv(conv, ICONV_CAST &src2, &srclen, &dst, &dstlen);
+   iconv_close(conv);
+   if(status == (size_t) -1)return(NULL);
+   if(len)*len=wchar32len((uint32_t *)dst2);
+   return((uint32_t *) dst2);
+}
+
+/**
+    \brief  Convert a Latin1 string to a UTF32LE string.
+    \return pointer to new string or NULL if it fails
+    \param src Latin1 string to convert
+    \param max number of characters to convert, if 0, until terminator
+    \param len number of characters in new string, NOT including terminator
+    
+    
+    U_EMR_EXTTEXTOUTA records are "8 bit ASCII".  In theory that is ASCII in an 8
+    bit character, but numerous applications store Latin1 in them, and some
+    _may_ store UTF-8 in them.  Since very vew Latin1 strings are valid UTF-8 strings,
+    call U_Utf8ToUtf32le first, and if it fails, then call this function.
+*/
+uint32_t *U_Latin1ToUtf32le(
+      const char *src,
+      size_t      max,
+      size_t     *len
+   ){
+   char *dst,*dst2;
+   char *src2 = (char *) src;
+   size_t srclen,dstlen,status;
+   if(max){ srclen = max; }
+   else {   srclen = strlen(src)+1; }       // include terminator, length in BYTES
+   dstlen = sizeof(uint32_t)*(1 + srclen);  // This should always work but might waste some space
+   dst2 = dst = calloc(dstlen,1);
+   if(!dst)return(NULL);
+   iconv_t conv = iconv_open("UTF-32LE",   "LATIN1");
+   if ( conv == (iconv_t) -1)return(NULL);
    status = iconv(conv, ICONV_CAST &src2, &srclen, &dst, &dstlen);
    iconv_close(conv);
    if(status == (size_t) -1)return(NULL);
@@ -1490,9 +1525,11 @@ int htable_insert(
      newsize=eht->allocated + eht->chunk;
      eht->table = realloc(eht->table,newsize * sizeof(uint32_t));
      if(!eht->table)return(5);
+     memset(&eht->table[eht->allocated] , 0, eht->chunk * sizeof(uint32_t));  // zero all NEW slots in the table
+ 
      eht->stack = realloc(eht->stack,newsize * sizeof(uint32_t));
      if(!eht->stack)return(6);
-     for(i=eht->allocated; i<newsize;i++){ eht->stack[i] = i; }
+     for(i=eht->allocated; i<newsize;i++){ eht->stack[i] = i; }  // init all NEW slots in the stack
      eht->allocated = newsize;
    }
    *ih = eht->stack[eht->sptr];     // handle that is inserted

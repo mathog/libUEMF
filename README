@@ -15,7 +15,7 @@ This code has been tested on a 32 bit Ubuntu (LE) and 64 bit Solaris (BE).
 
 libUEMF is released under the GPL 2 license, read the file 'COPYING' for more information
 
-Version 0.0.7, released August 30, 2012.
+Version 0.0.8, released September 17, 2012.
 
 To report bugs or provide feedback send email to David Mathog, mathog@caltech.edu.
 
@@ -192,6 +192,10 @@ History
   (Note, version numbers in files represent the libUEMF release where it was last modified, so not
   all files will show the same version numbers in each release.)
   
+0.0.8 2012-09-10 Fixed bug in htable_insert, failed to celear newly added table
+  slots.  Fixed test for EMR_GRADIENTFILL triangle mode (rectangle still produces toxic EMF files.)
+  Fixed bug in gradientfill_swap on Solaris.
+
 0.0.7 2012-08-30 Added/fixed tests for hatched, DIB, and mono strokes.
   Corrected error in U_EMREXTCREATEPEN_set.
 
