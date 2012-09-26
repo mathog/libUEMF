@@ -23,8 +23,8 @@
 /* If Version or Date are changed also edit the text labels for the output.
 
 File:      testbed.c
-Version:   0.0.8
-Date:      11-SEP-2012
+Version:   0.0.9
+Date:      29-OCT-2012
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2012 David Mathog and California Institute of Technology (Caltech)
@@ -249,6 +249,196 @@ void textlabel(uint32_t size, const char *string, uint32_t x, uint32_t y, uint32
     free(FontStyle);
 }
 
+void image_column(EMFTRACK *et, int x1, int y1, int w, int h, PU_BITMAPINFO Bmi, uint32_t cbPx, char *px){
+    char *rec;
+    int   step=0;
+    rec = U_EMRSTRETCHDIBITS_set(
+       U_RCL_DEF,
+       pointl_set(x1,y1 + step),
+       pointl_set(200,200),
+       pointl_set(0,0), 
+       pointl_set(w,h),
+       U_DIB_RGB_COLORS, 
+       U_SRCCOPY,
+       Bmi, 
+       cbPx, 
+       px);
+    taf(rec,et,"U_EMRSTRETCHDIBITS_set");
+    step += 220;
+
+    rec = U_EMRBITBLT_set(
+       U_RCL_DEF,
+       pointl_set(x1,y1 + step),
+       pointl_set(200,200),
+       pointl_set(0,0),
+       xform_set(1, 0, 0, 1, 0, 0),
+       colorref_set(64,64,64),
+       U_DIB_RGB_COLORS, 
+       U_SRCCOPY,
+       Bmi, 
+       cbPx, 
+       px);
+    taf(rec,et,"U_EMRBITBLT_set");
+    step += 220;
+
+    rec = U_EMRSTRETCHBLT_set(
+       U_RCL_DEF,
+       pointl_set(x1,y1 + step),
+       pointl_set(200,200),
+       pointl_set(0,0), 
+       pointl_set(w,h),
+       xform_set(1, 0, 0, 1, 0, 0),
+       colorref_set(64,64,64),
+       U_DIB_RGB_COLORS, 
+       U_SRCCOPY,
+       Bmi, 
+       cbPx, 
+       px);
+    taf(rec,et,"U_EMRSTRETCHBLT_set");
+    step += 240;
+
+    /* offset in src, not all of src, nothing ambiguous about piece requested */
+    rec = U_EMRSTRETCHDIBITS_set(
+       U_RCL_DEF,
+       pointl_set(x1,y1 + step),
+       pointl_set(200,200),
+       pointl_set(2,2), 
+       pointl_set(w-2,h-2),
+       U_DIB_RGB_COLORS, 
+       U_SRCCOPY,
+       Bmi, 
+       cbPx, 
+       px);
+    taf(rec,et,"U_EMRSTRETCHDIBITS_set");
+    step += 220;
+
+    /* Because there is no w,h, so offset must go back to 0,0*/
+    rec = U_EMRBITBLT_set(
+       U_RCL_DEF,
+       pointl_set(x1,y1 + step),
+       pointl_set(200,200),
+       pointl_set(2,2),
+       xform_set(1, 0, 0, 1, -2, -2),
+       colorref_set(64,64,64),
+       U_DIB_RGB_COLORS, 
+       U_SRCCOPY,
+       Bmi, 
+       cbPx, 
+       px);
+    taf(rec,et,"U_EMRBITBLT_set");
+    step += 220;
+
+    rec = U_EMRSTRETCHBLT_set(
+       U_RCL_DEF,
+       pointl_set(x1,y1 + step),
+       pointl_set(200,200),
+       pointl_set(3,3), 
+       pointl_set(w-2,h-2),
+       xform_set(1, 0, 0, 1, -1, -1),
+       colorref_set(64,64,64),
+       U_DIB_RGB_COLORS, 
+       U_SRCCOPY,
+       Bmi, 
+       cbPx, 
+       px);
+    taf(rec,et,"U_EMRSTRETCHBLT_set");
+    step += 240;
+
+    /* offset in src, not all of src, both offset and w/h are reduced by 2, so some of the selected area is outside of the array */
+    rec = U_EMRSTRETCHDIBITS_set(
+       U_RCL_DEF,
+       pointl_set(x1,y1 + step),
+       pointl_set(200,200),
+       pointl_set(-2,-2), 
+       pointl_set(w-2,h-2),
+       U_DIB_RGB_COLORS, 
+       U_SRCCOPY,
+       Bmi, 
+       cbPx, 
+       px);
+    taf(rec,et,"U_EMRSTRETCHDIBITS_set");
+    step += 220;
+
+    /* There is no w,h so size is what, whole bitmap?*/
+    rec = U_EMRBITBLT_set(
+       U_RCL_DEF,
+       pointl_set(x1,y1 + step),
+       pointl_set(200,200),
+       pointl_set(-3,-3),
+       xform_set(1, 0, 0, 1, 1, 1),
+       colorref_set(64,64,64),
+       U_DIB_RGB_COLORS, 
+       U_SRCCOPY,
+       Bmi, 
+       cbPx, 
+       px);
+    taf(rec,et,"U_EMRBITBLT_set");
+    step += 220;
+
+    rec = U_EMRSTRETCHBLT_set(
+       U_RCL_DEF,
+       pointl_set(x1,y1 + step),
+       pointl_set(200,200),
+       pointl_set(-3,-3), 
+       pointl_set(w-2,h-2),
+       xform_set(1, 0, 0, 1, 1, 1),
+       colorref_set(64,64,64),
+       U_DIB_RGB_COLORS, 
+       U_SRCCOPY,
+       Bmi, 
+       cbPx, 
+       px);
+    taf(rec,et,"U_EMRSTRETCHBLT_set");
+    step += 240;
+
+    /* offset in src,no w,h change, so selected region starts in bitmap and extends outside  */
+    rec = U_EMRSTRETCHDIBITS_set(
+       U_RCL_DEF,
+       pointl_set(x1,y1 + step),
+       pointl_set(200,200),
+       pointl_set(2,2), 
+       pointl_set(w,h),
+       U_DIB_RGB_COLORS, 
+       U_SRCCOPY,
+       Bmi, 
+       cbPx, 
+       px);
+    taf(rec,et,"U_EMRSTRETCHDIBITS_set");
+    step += 220;
+
+    /* There is no w,h so size is what, whole bitmap?*/
+    rec = U_EMRBITBLT_set(
+       U_RCL_DEF,
+       pointl_set(x1,y1 + step),
+       pointl_set(200,200),
+       pointl_set(1,1),
+       xform_set(1, 0, 0, 1, 1, 1),
+       colorref_set(64,64,64),
+       U_DIB_RGB_COLORS, 
+       U_SRCCOPY,
+       Bmi, 
+       cbPx, 
+       px);
+    taf(rec,et,"U_EMRBITBLT_set");
+    step += 220;
+
+    rec = U_EMRSTRETCHBLT_set(
+       U_RCL_DEF,
+       pointl_set(x1,y1 + step),
+       pointl_set(200,200),
+       pointl_set(1,1), 
+       pointl_set(w,h),
+       xform_set(1, 0, 0, 1, 1, 1),
+       colorref_set(64,64,64),
+       U_DIB_RGB_COLORS, 
+       U_SRCCOPY,
+       Bmi, 
+       cbPx, 
+       px);
+    taf(rec,et,"U_EMRSTRETCHBLT_set");
+    step += 220;
+
+}
 
 int main(int argc, char *argv[]){
     EMFTRACK            *et;
@@ -425,8 +615,8 @@ int main(int argc, char *argv[]){
 
     /* label the drawing */
     
-    textlabel(400, "libUEMF v0.0.8",      9700, 200, &font, et, eht);
-    textlabel(400, "September 11, 2012",  9700, 500, &font, et, eht);
+    textlabel(400, "libUEMF v0.0.9",      9700, 200, &font, et, eht);
+    textlabel(400, "October 26, 2012",  9700, 500, &font, et, eht);
 
 
     /* ********************************************************************** */
@@ -959,18 +1149,7 @@ int main(int argc, char *argv[]){
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(10, 10, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
     Bmi = bitmapinfo_set(Bmih, ct);
-    rec = U_EMRSTRETCHDIBITS_set(
-       U_RCL_DEF,
-       pointl_set(5000,5000),
-       pointl_set(2000,2000),
-       pointl_set(0,0), 
-       pointl_set(10,10),
-       U_DIB_RGB_COLORS, 
-       U_SRCCOPY,
-       Bmi, 
-       cbPx, 
-       px);
-    taf(rec,et,"U_EMRSTRETCHDIBITS_set");
+    image_column(et, 5000,5000,10,10,Bmi, cbPx, px);
 
     // we are going to step on this one with little rectangles using different binary raster operations
     rec = U_EMRSTRETCHDIBITS_set(
@@ -999,20 +1178,10 @@ int main(int argc, char *argv[]){
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(10, 10, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
     Bmi = bitmapinfo_set(Bmih, NULL);
-    rec = U_EMRSTRETCHDIBITS_set(
-       U_RCL_DEF,
-       pointl_set(7020,5000),
-       pointl_set(2000,2000),
-       pointl_set(0,0), 
-       pointl_set(10,10),
-       U_DIB_RGB_COLORS, 
-       U_SRCCOPY,
-       Bmi, 
-       cbPx, 
-       px);
+    image_column(et, 5220,5000,10,10,Bmi, cbPx, px);
     free(Bmi);
     free(px);
-    taf(rec,et,"U_EMRSTRETCHDIBITS_set");
+
     // 16 bit, 5 bits per color, no table
     colortype = U_BCBM_COLOR16;
     status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  10, 10, 40, colortype, 0, 1);
@@ -1022,33 +1191,12 @@ int main(int argc, char *argv[]){
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(10, 10, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
     Bmi = bitmapinfo_set(Bmih, ct);
-    rec = U_EMRSTRETCHDIBITS_set(
-       U_RCL_DEF,
-       pointl_set(9040,5000),
-       pointl_set(2000,2000),
-       pointl_set(0,0), 
-       pointl_set(10,10),
-       U_DIB_RGB_COLORS, 
-       U_SRCCOPY,
-       Bmi, 
-       cbPx, 
-       px);
-    taf(rec,et,"U_EMRSTRETCHDIBITS_set");
+    image_column(et, 5440,5000,10,10,Bmi, cbPx, px);
        
     // write a second copy next to it using the negative height method to indicate it should be upside down
     Bmi->bmiHeader.biHeight *= -1;
-    rec = U_EMRSTRETCHDIBITS_set(
-       U_RCL_DEF,
-       pointl_set(11060,5000),
-       pointl_set(2000,2000),
-       pointl_set(0,0), 
-       pointl_set(10,10),
-       U_DIB_RGB_COLORS, 
-       U_SRCCOPY,
-       Bmi, 
-       cbPx, 
-       px);
-    taf(rec,et,"U_EMRSTRETCHDIBITS_set");       
+    image_column(et, 5660,5000,10,10,Bmi, cbPx, px);
+
     free(Bmi);
     free(px);
 
@@ -1062,20 +1210,9 @@ int main(int argc, char *argv[]){
     Bmih = bitmapinfoheader_set(10, 10, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
     Bmi = bitmapinfo_set(Bmih, ct);
     free(ct);
-    rec = U_EMRSTRETCHDIBITS_set(
-       U_RCL_DEF,
-       pointl_set(5000,7020),
-       pointl_set(2000,2000),
-       pointl_set(0,0), 
-       pointl_set(10,10),
-       U_DIB_RGB_COLORS, 
-       U_SRCCOPY,
-       Bmi, 
-       cbPx, 
-       px);
+    image_column(et, 5880,5000,10,10,Bmi, cbPx, px);
     free(Bmi);
     free(px);
-    taf(rec,et,"U_EMRSTRETCHDIBITS_set");
 
     // done with the first test image, make the 2nd
 
@@ -1092,20 +1229,9 @@ int main(int argc, char *argv[]){
     Bmih = bitmapinfoheader_set(4, 4, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
     Bmi = bitmapinfo_set(Bmih, ct);
     free(ct);
-    rec = U_EMRSTRETCHDIBITS_set(
-       U_RCL_DEF,
-       pointl_set(7020,7020),
-       pointl_set(2000,2000),
-       pointl_set(0,0), 
-       pointl_set(4,4),
-       U_DIB_RGB_COLORS, 
-       U_SRCCOPY,
-       Bmi, 
-       cbPx, 
-       px);
+    image_column(et, 6100,5000,4,4,Bmi, cbPx, px);
     free(Bmi);
     free(px);
-    taf(rec,et,"U_EMRSTRETCHDIBITS_set");
 
     // make a two color image in the existing RGBA array
     memset(rgba_px, 0x55, 4*4*4);
@@ -1121,33 +1247,12 @@ int main(int argc, char *argv[]){
     Bmi = bitmapinfo_set(Bmih, ct);
     
     free(ct);
-    rec = U_EMRSTRETCHDIBITS_set(
-       U_RCL_DEF,
-       pointl_set(9040,7020),
-       pointl_set(2000,2000),
-       pointl_set(0,0), 
-       pointl_set(4,4),
-       U_DIB_RGB_COLORS, 
-       U_SRCCOPY,
-       Bmi, 
-       cbPx, 
-       px);
-    taf(rec,et,"U_EMRSTRETCHDIBITS_set");
+    image_column(et, 6320,5000,10,10,Bmi, cbPx, px);
+
     // write a second copy next to it using the negative height method to indicate it should be upside down
     Bmi->bmiHeader.biHeight *= -1;
-    rec = U_EMRSTRETCHDIBITS_set(
-       U_RCL_DEF,
-       pointl_set(11060,7020),
-       pointl_set(2000,2000),
-       pointl_set(0,0), 
-       pointl_set(4,4),
-       U_DIB_RGB_COLORS, 
-       U_SRCCOPY,
-       Bmi, 
-       cbPx, 
-       px);
-    taf(rec,et,"U_EMRSTRETCHDIBITS_set");
-       
+    image_column(et, 6540,5000,10,10,Bmi, cbPx, px);
+
     free(Bmi);
     free(px);
 
@@ -1169,6 +1274,7 @@ int main(int argc, char *argv[]){
     taf(rec,et,"U_EMRBITBLT_set");
 
 
+    // testing binary raster operations
     // make a series of rectangle draws with grey rectangles under various binary raster operations
     for(i=1;i<=16;i++){
        rec = U_EMRSETROP2_set(i);                                                taf(rec,et,"U_EMRSETROP2_set");
@@ -1195,7 +1301,6 @@ int main(int argc, char *argv[]){
     //restore the previous defaults
     rec = U_EMRSETROP2_set(U_R2_COPYPEN);
     taf(rec,et,"U_EMRSETROP2_set");
-
 
 
     FontName = U_Utf8ToUtf16le("Arial", 0, NULL);  // Helvetica originally, but that does not work

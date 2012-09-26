@@ -4,8 +4,8 @@
 
 /*
 File:      uemf_print.c
-Version:   0.0.4
-Date:      25-JUL-2012
+Version:   0.0.9
+Date:      19-OCT-2012
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2012 David Mathog and California Institute of Technology (Caltech)
@@ -294,6 +294,7 @@ void logfont_panose_print(
    printf("elfLogFont:");       logfont_print(lfp.elfLogFont);
      string = U_Utf16leToUtf8(lfp.elfFullName, U_LF_FULLFACESIZE, NULL);
    printf("elfFullName:%s ",    string );
+   free(string);
      string = U_Utf16leToUtf8(lfp.elfStyle, U_LF_FACESIZE, NULL);
    printf("elfStyle:%s ",       string );
    free(string);
@@ -859,15 +860,24 @@ void U_EMRHEADER_print(char *contents, int recnum, size_t off){
    printf("   nPalEntries:    %d\n",       pEmr->nPalEntries   );
    printf("   szlDevice:      {%d,%d} \n", pEmr->szlDevice.cx,pEmr->szlDevice.cy);
    printf("   szlMillimeters: {%d,%d} \n", pEmr->szlMillimeters.cx,pEmr->szlMillimeters.cy);
-   printf("   cbPixelFormat:  %d\n",       pEmr->cbPixelFormat );
-   printf("   offPixelFormat: %d\n",       pEmr->offPixelFormat);
-   if(pEmr->cbPixelFormat){
-      printf("      PFD:");
-      pixelformatdescriptor_print( *(PU_PIXELFORMATDESCRIPTOR) (contents + off + pEmr->offPixelFormat));
-      printf("\n");
+   if((pEmr->nDescription && (pEmr->offDescription >= 100)) || 
+      (!pEmr->offDescription && pEmr->emr.nSize >= 100)
+     ){
+      printf("   cbPixelFormat:  %d\n",       pEmr->cbPixelFormat );
+      printf("   offPixelFormat: %d\n",       pEmr->offPixelFormat);
+      if(pEmr->cbPixelFormat){
+         printf("      PFD:");
+         pixelformatdescriptor_print( *(PU_PIXELFORMATDESCRIPTOR) (contents + off + pEmr->offPixelFormat));
+         printf("\n");
+      }
+      printf("   bOpenGL:        %d\n",pEmr->bOpenGL       );
+      if((pEmr->nDescription    && (pEmr->offDescription >= 108)) || 
+              (pEmr->cbPixelFormat   && (pEmr->offPixelFormat >=108)) ||
+              (!pEmr->offDescription && !pEmr->cbPixelFormat && pEmr->emr.nSize >= 108)
+             ){
+         printf("   szlMicrometers: {%d,%d} \n", pEmr->szlMicrometers.cx,pEmr->szlMicrometers.cy);
+     }
    }
-   printf("   bOpenGL:        %d\n",pEmr->bOpenGL       );
-   printf("   szlMicrometers: {%d,%d} \n", pEmr->szlMicrometers.cx,pEmr->szlMicrometers.cy);
 }
 
 // U_EMRPOLYBEZIER                       2
@@ -1710,16 +1720,50 @@ void U_EMRABORTPATH_print(char *contents, int recnum, size_t off){
 */
 void U_EMRCOMMENT_print(char *contents, int recnum, size_t off){
    char *string;
+   char *src;
+   uint32_t cIdent,cbData;
    core5_print("U_EMRCOMMENT", contents, recnum, off);
    PU_EMRCOMMENT pEmr = (PU_EMRCOMMENT)(contents+off);
-   printf("   cbData:         %d\n",pEmr->cbData        );
-   if(pEmr->cbData){ // The data may not be printable, but try it just in case
-      string = malloc(pEmr->cbData + 1);
-      (void)strncpy(string, (char *)&(pEmr->Data), pEmr->cbData);
-      string[pEmr->cbData] = '\0'; // it might not be terminated - it might not even be text!
+
+   /* There are several different types of comments */
+
+   cbData = pEmr->cbData;
+   printf("   cbData:         %d\n",cbData        );
+   src = (char *)&(pEmr->Data);  // default
+   if(cbData >= 4){
+      cIdent = *(uint32_t *)&(pEmr->Data);
+      if(     cIdent == U_EMR_COMMENT_PUBLIC       ){
+         printf("   cIdent:  Public\n");
+         PU_EMRCOMMENT_PUBLIC pEmrp = (PU_EMRCOMMENT_PUBLIC) pEmr;
+         printf("   pcIdent:        %8.8x\n",pEmrp->pcIdent);
+         src = (char *)&(pEmrp->Data);
+         cbData -= 8;
+      }
+      else if(cIdent == U_EMR_COMMENT_SPOOL        ){
+         printf("   cIdent:  Spool\n");
+         PU_EMRCOMMENT_SPOOL pEmrs = (PU_EMRCOMMENT_SPOOL) pEmr;
+         printf("   esrIdent:       %8.8x\n",pEmrs->esrIdent);
+         src = (char *)&(pEmrs->Data);
+         cbData -= 8;
+      }
+      else if(cIdent == U_EMR_COMMENT_EMFPLUSRECORD){
+         printf("   cIdent:  EMF+\n");
+         PU_EMRCOMMENT_EMFPLUS pEmrpl = (PU_EMRCOMMENT_EMFPLUS) pEmr;
+         src = (char *)&(pEmrpl->Data);
+         cbData -= 4;
+      }
+      else {
+         printf("   cIdent:         not (Public or Spool or EMF+)\n");
+      }
+   }
+   if(cbData){ // The data may not be printable, but try it just in case
+      string = malloc(cbData + 1);
+      (void)strncpy(string, src, cbData);
+      string[cbData] = '\0'; // it might not be terminated - it might not even be text!
       printf("   Data:           <%s>\n",string);
       free(string);
    }
+
 } 
 
 // U_EMRFILLRGN              71

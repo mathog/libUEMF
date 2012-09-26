@@ -40,8 +40,8 @@ class PrintEmf : public Inkscape::Extension::Implementation::Implementation
     std::stack<Geom::Affine> m_tr_stack;
     Geom::PathVector fill_pathv;
     Geom::Affine fill_transform;
-    bool stroke_and_fill;
-    bool fill_only;
+    bool use_stroke;
+    bool use_fill;
     bool simple_shape;
 
     unsigned int print_pathv (Geom::PathVector const &pathv, const Geom::Affine &transform);
@@ -84,15 +84,13 @@ public:
 
     static void init (void);
 protected:
-    int create_brush(SPStyle const *style);
+    int create_brush(SPStyle const *style, PU_COLORREF fcolor);
 
     void destroy_brush();
 
     int create_pen(SPStyle const *style, const Geom::Affine &transform);
 
     void destroy_pen();
-
-    void flush_fill();
 
 };
 

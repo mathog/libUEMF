@@ -29,10 +29,14 @@
 #endif
 
 
-#include <2geom/pathvector.h>
-#include <2geom/rect.h>
-#include <2geom/bezier-curve.h>
-#include <2geom/hvlinesegment.h>
+#include "2geom/sbasis-to-bezier.h"
+#include "2geom/svg-elliptical-arc.h"
+
+#include "2geom/path.h"
+#include "2geom/pathvector.h"
+#include "2geom/rect.h"
+#include "2geom/bezier-curve.h"
+#include "2geom/hvlinesegment.h"
 #include "helper/geom.h"
 #include "helper/geom-curves.h"
 #include "sp-item.h"
@@ -54,6 +58,11 @@
 #include "sp-gradient.h"
 #include "sp-radial-gradient.h"
 #include "sp-linear-gradient.h"
+
+#include "splivarot.h"             // pieces for union on shapes
+#include "2geom/svg-path-parser.h" // to get from SVG text to Geom::Path
+#include "display/canvas-bpath.h"  // for SPWindRule
+
 #include <string.h>
 extern "C" {
 #include "libunicode-convert/unicode-convert.h"
@@ -77,14 +86,26 @@ struct FFNEXUS {
    double   f3;       //Horizontal (nonrotating) offset factor (* font height)
   };
 
+struct GRADVALUES{
+   Geom::Point p1;      // center   or start
+   Geom::Point p2;      // xhandle  or end
+   Geom::Point p3;      // yhandle  or unused
+   double       r;      // radius   or unused
+   void        *grad;   // to access the stops information
+   int          mode;   // DRAW_LINEAR_GRADIENT or DRAW_RADIAL_GRADIENT, if GRADVALUES is valid, else any value
+   U_COLORREF   bgc;    // document background color, this is as good a place as any to keep it
+   float        rgb[3]; // also background color, but as 0-1 float.
+  };
 
-static float PX2WORLD = 20.0f;
-static U_XFORM worldTransform;
+/* globals */
+static double PX2WORLD = 20.0f;
+static U_XFORM     worldTransform;
 static bool FixPPTCharPos, FixPPTDashLine, FixPPTGrad2Polys, FixPPTPatternAsHatch;
-static FFNEXUS *short_fflist=NULL;  //only those fonts so far encountered
-static FFNEXUS *long_fflist=NULL;   //all the fonts described in ...\share\extensions\fontfix.conf
-static EMFTRACK* et = NULL;
-static EMFHANDLES* eht = NULL;
+static FFNEXUS    *short_fflist = NULL;  //only those fonts so far encountered
+static FFNEXUS    *long_fflist  = NULL;   //all the fonts described in ...\share\extensions\fontfix.conf
+static EMFTRACK   *et           = NULL;
+static EMFHANDLES *eht          = NULL;
+static GRADVALUES  gv;
 
 void read_system_fflist(void){  //this is not called by any other source files
 FFNEXUS *temp=NULL;
@@ -186,22 +207,27 @@ static FFNEXUS *last=NULL;
   search_long_fflist(fontname, f1, f2, f3);
 }
 
-void smuggle_adx_out(const char *string, uint32_t **adx, int *ndx, float scale){
+void smuggle_adxky_out(const char *string, uint32_t **adx, double *ky, int *ndx, float scale){
     float       fdx;
     int         i;
     uint32_t   *ladx;
-    const char *cptr=&string[strlen(string)+1];
+    const char *cptr=&string[strlen(string)+1]; // this works because of the first fake terminator
 
-    *adx=NULL;
+    *adx = NULL;
+    *ky  = 0.0;       // set a default value
     sscanf(cptr,"%7d",ndx);
     if(!*ndx)return;  // this could happen with an empty string
     cptr += 7;
     ladx = (uint32_t *) malloc(*ndx * sizeof(uint32_t) );
+    if(!ladx)throw "Out of memory";
     *adx=ladx;
     for(i=0; i<*ndx; i++,cptr+=7, ladx++){
       sscanf(cptr,"%7f",&fdx);
       *ladx=(uint32_t) round(fdx * scale);
     }
+    cptr++; // skip 2nd fake terminator
+    sscanf(cptr,"%7f",&fdx);
+    *ky=fdx;
 }
 
 /* convert an  0RGB color to EMF U_COLORREF.
@@ -241,8 +267,8 @@ PrintEmf::PrintEmf (void):
     hbrush(0),
     hbrushOld(0),
     hpen(0),
-    stroke_and_fill(false),
-    fill_only(false),
+    use_stroke(false),
+    use_fill(false),
     simple_shape(false)
 {
 }
@@ -283,8 +309,20 @@ unsigned int PrintEmf::begin (Inkscape::Extension::Print *mod, SPDocument *doc)
     char *ansi_uri = (char *) utf8_fn;
 
     // width and height in px
-    _width = doc->getWidth();
+    _width  = doc->getWidth();
     _height = doc->getHeight();
+    
+    Inkscape::XML::Node *nv = sp_repr_lookup_name (doc->rroot, "sodipodi:namedview");
+    if(nv){
+       const char *p1 = nv->attribute("pagecolor");
+       char *p2;
+       uint32_t lc = strtoul( &p1[1], &p2, 16 );  // it looks like "#ABC123"
+       if(*p2)lc=0;
+       gv.bgc = gethexcolor(lc);
+       gv.rgb[0] = (float) U_RGBAGetR(gv.bgc)/255.0;
+       gv.rgb[1] = (float) U_RGBAGetG(gv.bgc)/255.0;
+       gv.rgb[2] = (float) U_RGBAGetB(gv.bgc)/255.0;
+    }
 
     bool pageBoundingBox;
     pageBoundingBox = mod->get_param_bool("pageBoundingBox");
@@ -306,10 +344,10 @@ unsigned int PrintEmf::begin (Inkscape::Extension::Print *mod, SPDocument *doc)
     // dwInchesX x dwInchesY in micrometer units, dpi=90 -> 3543.3 dpm
     (void) drawing_size((int) ceil(dwInchesX*25.4), (int) ceil(dwInchesY*25.4), 3.543307, &rclBounds, &rclFrame);
 
-    // set up the device as A4 horizontal, 47.244094 dpmm (1200 dpi)
-    int MMX = 216;
-    int MMY = 279;
-    (void) device_size(MMX, MMY, 47.244094, &szlDev, &szlMm); // Drawing: A4 horizontal,  42744 dpm (1200 dpi)
+    // set up the reference device as 100 X A4 horizontal, (1200 dpi/25.4 -> dpmm).  Extra digits maintain dpi better in EMF
+    int MMX = 21600;
+    int MMY = 27900;
+    (void) device_size(MMX, MMY, 1200.0/25.4, &szlDev, &szlMm);
     int PixelsX = szlDev.cx;
     int PixelsY = szlDev.cy;
 
@@ -343,17 +381,15 @@ unsigned int PrintEmf::begin (Inkscape::Extension::Print *mod, SPDocument *doc)
     }
     
 
-    //  Correct for dpi in EMF vs dpi in Inkscape (always 90?)
-    //  Also correct for the scaling in PX2WORLD, which is set to 20.  Doesn't hurt for high resolution,
-    //  helps prevent rounding errors for low resolution EMF.  Low resolution EMF is possible if there
-    //  are no print devices and the screen resolution is low.
+    //  Correct for dpi in EMF (1200) vs dpi in Inkscape (always 90).
+    //  Also correct for the scaling in PX2WORLD, which is set to 20.
 
-    worldTransform.eM11 = ((float)PixelsX * 25.4f)/((float)MMX*90.0f*PX2WORLD);
-    worldTransform.eM12 = 0.0f;
-    worldTransform.eM21 = 0.0f;
-    worldTransform.eM22 = ((float)PixelsY * 25.4f)/((float)MMY*90.0f*PX2WORLD);
-    worldTransform.eDx = 0;
-    worldTransform.eDy = 0;
+    worldTransform.eM11 = 1200./(90.0*PX2WORLD);
+    worldTransform.eM12 = 0.0;
+    worldTransform.eM21 = 0.0;
+    worldTransform.eM22 = 1200./(90.0*PX2WORLD);
+    worldTransform.eDx  = 0;
+    worldTransform.eDy  = 0;
 
     rec = U_EMRMODIFYWORLDTRANSFORM_set(worldTransform, U_MWT_LEFTMULTIPLY);
     if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
@@ -385,7 +421,8 @@ unsigned int PrintEmf::finish (Inkscape::Extension::Print * /*mod*/)
     char *rec;
     if (!et) return 0;
 
-    flush_fill(); // flush any pending fills
+    
+    // earlier versions had flush of fill here, but it never executed and was removed
 
     rec = U_EMREOF_set(0,NULL,et);  // generate the EOF record
     if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
@@ -406,7 +443,7 @@ unsigned int PrintEmf::comment (Inkscape::Extension::Print * /*module*/,
 // std::cout << "comment " << std::endl;
     if (!et) return 0;
 
-    flush_fill(); // flush any pending fills
+    // earlier versions had flush of fill here, but it never executed and was removed
 
 // std::cout << "end comment" << std::endl;
     return 0;
@@ -497,18 +534,29 @@ void swapRBinRGBA(char *px, int pixels){
   }
 }
 
-#define LOUDGRADIENT 0  // for development, 
+/* opacity weighting of two colors as float.  v1 is the color, op is its opacity, v2 is the background color */
+inline float opweight(float v1, float v2, float op){
+  return v1*op + v2*(1.0-op);
+}
+
 U_COLORREF avg_stop_color(SPGradient *gr){
    U_COLORREF cr;
-   if(gr->vector.stops.size()==2){
+   int last = gr->vector.stops.size() -1;
+   if(last>=1){
       float rgbs[3];
       float rgbe[3];
-      sp_color_get_rgb_floatv(&gr->vector.stops[0].color, rgbs);
-      sp_color_get_rgb_floatv(&gr->vector.stops[1].color, rgbe);
+      float ops,ope;
+
+      ops = gr->vector.stops[0   ].opacity;
+      ope = gr->vector.stops[last].opacity;
+      sp_color_get_rgb_floatv(&gr->vector.stops[0   ].color, rgbs);
+      sp_color_get_rgb_floatv(&gr->vector.stops[last].color, rgbe);
+
+      /* Replace opacity at start & stop with that fraction background color, then average those two for final color. */
       cr = U_RGB(
-             255*((rgbs[0]+rgbe[0])/2.0), 
-             255*((rgbs[1]+rgbe[1])/2.0), 
-             255*((rgbs[2]+rgbe[2])/2.0)
+             255*(( opweight(rgbs[0],gv.rgb[0],ops)   +   opweight(rgbe[0],gv.rgb[0],ope) )/2.0),
+             255*(( opweight(rgbs[1],gv.rgb[1],ops)   +   opweight(rgbe[1],gv.rgb[1],ope) )/2.0),
+             255*(( opweight(rgbs[2],gv.rgb[2],ops)   +   opweight(rgbe[2],gv.rgb[2],ope) )/2.0)
            );
    }
    else {
@@ -517,7 +565,40 @@ U_COLORREF avg_stop_color(SPGradient *gr){
    return cr;
 }
 
-int PrintEmf::create_brush(SPStyle const *style)
+int hold_gradient(void *gr, int mode){
+   gv.mode = mode;
+   gv.grad = gr;
+   if(mode==DRAW_RADIAL_GRADIENT){
+      SPRadialGradient *rg = (SPRadialGradient *) gr;
+      gv.r  = rg->r.computed;                                 // radius, but of what???
+      gv.p1 = Geom::Point(rg->cx.computed, rg->cy.computed);  // center
+      gv.p2 = Geom::Point(gv.r, 0) + gv.p1;                   // xhandle
+      gv.p3 = Geom::Point(0, -gv.r) + gv.p1;                  // yhandle
+      if (rg->gradientTransform_set) {
+         gv.p1 = gv.p1 * rg->gradientTransform;
+         gv.p2 = gv.p2 * rg->gradientTransform;
+         gv.p3 = gv.p3 * rg->gradientTransform;
+      }
+   }
+   else if(mode==DRAW_LINEAR_GRADIENT){
+      SPLinearGradient *lg = (SPLinearGradient *) gr;
+      gv.r = 0;                                               // unused
+      gv.p1 = Geom::Point (lg->x1.computed, lg->y1.computed); // start
+      gv.p2 = Geom::Point (lg->x2.computed, lg->y2.computed); // end
+      gv.p3 = Geom::Point (0, 0);                             // unused
+      if (lg->gradientTransform_set) {
+         gv.p1 = gv.p1 * lg->gradientTransform;
+         gv.p2 = gv.p2 * lg->gradientTransform;
+      }
+   }
+   else {
+      throw "Fatal programming error, hold_gradient() in emf-print.cpp called with invalid draw mode";
+   }
+   return 1;
+}
+
+// fcolor is defined when gradients are being expanded, it is the color of one stripe or ring.
+int PrintEmf::create_brush(SPStyle const *style, PU_COLORREF fcolor)
 {
 // std::cout << "create_brush " << std::endl;
     float         rgb[3];
@@ -529,18 +610,20 @@ int PrintEmf::create_brush(SPStyle const *style)
     uint32_t      brushStyle;
     int           hatchType;
     U_COLORREF    hatchColor;
-    uint32_t      width,height;
+    uint32_t      width  = 0; // quiets a harmless compiler warning, initialization not otherwise required.
+    uint32_t      height = 0;
 
     if (!et) return 0;
 
     // set a default fill in case we can't figure out a better way to do it
+    fmode      = U_ALTERNATE;
     fill_mode  = DRAW_PAINT;
     brushStyle = U_BS_SOLID;
     hatchType  = U_HS_SOLIDCLR;
-    hatchColor = U_RGB(0, 0, 0);
-    fmode      = U_ALTERNATE;
+    if(fcolor){ hatchColor = *fcolor;        }
+    else {      hatchColor = U_RGB(0, 0, 0); }
 
-    if (style) {
+    if (!fcolor && style) {
         if(style->fill.isColor()){
            fill_mode = DRAW_PAINT;
            float opacity = SP_SCALE24_TO_FLOAT(style->fill_opacity.value);
@@ -579,63 +662,30 @@ int PrintEmf::create_brush(SPStyle const *style)
         else if(SP_IS_GRADIENT(SP_STYLE_FILL_SERVER(style))){ // must be a gradient
            // currently we do not do anything with gradients, the code below just sets the color to the average of the stops
            SPPaintServer *paintserver = style->fill.value.href->getObject();
+           SPLinearGradient *lg = NULL;
+           SPRadialGradient *rg = NULL;
+
            if (SP_IS_LINEARGRADIENT (paintserver)) {
-              fill_mode = DRAW_LINEAR_GRADIENT;
-              SPLinearGradient *lg=SP_LINEARGRADIENT(paintserver);
-
+              lg = SP_LINEARGRADIENT(paintserver);
               SP_GRADIENT(lg)->ensureVector(); // when exporting from commandline, vector is not built
-
-              Geom::Point p1 (lg->x1.computed, lg->y1.computed);
-              Geom::Point p2 (lg->x2.computed, lg->y2.computed);
-              if (lg->gradientTransform_set) {
-                 p1 = p1 * lg->gradientTransform;
-                 p2 = p2 * lg->gradientTransform;
-              }
-              hatchColor = avg_stop_color(lg);
-#if LOUDGRADIENT
-std::cout << "create_brush, LINEAR_GRADIENT"
-<< " x1,y1:" << p1[Geom::X] << "," << p1[Geom::Y]
-<< " x1,y1:" << p2[Geom::X] << "," << p2[Geom::Y]
-<< " hatchColor: "
-<< 1L*hatchColor.Red << ","
-<< 1L*hatchColor.Green << ","
-<< 1L*hatchColor.Blue
-<< std::endl;
-#endif
+              fill_mode = DRAW_LINEAR_GRADIENT;
            }
            else if (SP_IS_RADIALGRADIENT (paintserver)) {
-              fill_mode = DRAW_RADIAL_GRADIENT;
-              SPRadialGradient *rg=SP_RADIALGRADIENT(paintserver);
-
+              rg = SP_RADIALGRADIENT(paintserver);
               SP_GRADIENT(rg)->ensureVector(); // when exporting from commandline, vector is not built
-              double r = rg->r.computed;
-
-              Geom::Point c (rg->cx.computed, rg->cy.computed);
-              Geom::Point xhandle_point(r, 0);
-              Geom::Point yhandle_point(0, -r);
-              yhandle_point += c;
-              xhandle_point += c;
-              if (rg->gradientTransform_set) {
-                 c           = c           * rg->gradientTransform;
-                 yhandle_point = yhandle_point * rg->gradientTransform;
-                 xhandle_point = xhandle_point * rg->gradientTransform;
-              }
-              hatchColor = avg_stop_color(rg);
-#if LOUDGRADIENT
-std::cout << "create_brush, RADIAL_GRADIENT"
-<< " x1,y1:" << c[Geom::X] << "," << c[Geom::Y]
-<< " xhand x1,y1:" << xhandle_point[Geom::X] << "," << xhandle_point[Geom::Y]
-<< " yhand x1,y1:" << yhandle_point[Geom::X] << "," << yhandle_point[Geom::Y]
-<< " radius:" << r
-<< " hatchColor: "
-<< 1L*hatchColor.Red << ","
-<< 1L*hatchColor.Green << ","
-<< 1L*hatchColor.Blue
-<< std::endl;
-#endif
+              fill_mode = DRAW_RADIAL_GRADIENT;
            }
            else {
              // default fill
+           }
+
+           if(rg){
+              if(FixPPTGrad2Polys){  return hold_gradient(rg, fill_mode); }
+              else {                 hatchColor = avg_stop_color(rg);  }
+           }
+           else if(lg){
+              if(FixPPTGrad2Polys){  return hold_gradient(lg, fill_mode); }
+              else {                 hatchColor = avg_stop_color(lg);   }
            }
         }
     } 
@@ -646,8 +696,8 @@ std::cout << "create_brush, RADIAL_GRADIENT"
     lb   = logbrush_set(brushStyle, hatchColor, hatchType);
 
     switch(fill_mode){
-       case DRAW_LINEAR_GRADIENT: // for now fill with average color
-       case DRAW_RADIAL_GRADIENT: // for now fill with average color
+       case DRAW_LINEAR_GRADIENT: // fill with average color unless gradients are converted to slices
+       case DRAW_RADIAL_GRADIENT: // ditto
        case DRAW_PAINT:
        case DRAW_PATTERN:
           rec = createbrushindirect_set(&brush, eht, lb);
@@ -691,7 +741,6 @@ std::cout << "create_brush, RADIAL_GRADIENT"
              throw "Fatal programming error in PrintEmf::create_brush at selectobject_set";
           }
           break;
-          break;
     }
     rec = U_EMRSETPOLYFILLMODE_set(fmode); 
     if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
@@ -734,7 +783,7 @@ int PrintEmf::create_pen(SPStyle const *style, const Geom::Affine &transform)
     int                  linecap   = 0;
     int                  linejoin  = 0;
     uint32_t             pen;
-    uint32_t             penStyle;
+    uint32_t             brushStyle;
     GdkPixbuf           *pixbuf;
     int                  hatchType;
     U_COLORREF           hatchColor;
@@ -752,7 +801,7 @@ int PrintEmf::create_pen(SPStyle const *style, const Geom::Affine &transform)
     if (!et) return 0;
 
     // set a default stroke  in case we can't figure out a better way to do it
-    penStyle   = U_BS_SOLID;
+    brushStyle  = U_BS_SOLID;
     hatchColor = U_RGB(0, 0, 0);
     hatchType  = U_HS_HORIZONTAL;
 
@@ -768,7 +817,7 @@ int PrintEmf::create_pen(SPStyle const *style, const Geom::Affine &transform)
            height = dheight;
            brush_classify(pat,0,&pixbuf,&hatchType,&hatchColor);
            if(pixbuf){
-              penStyle    = U_BS_DIBPATTERN;
+              brushStyle    = U_BS_DIBPATTERN;
               rgba_px = (char *) gdk_pixbuf_get_pixels(pixbuf); // Do NOT free this!!!
               colortype = U_BCBM_COLOR32;
               (void) RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  width, height, width*4, colortype, 0, 1);
@@ -779,7 +828,7 @@ int PrintEmf::create_pen(SPStyle const *style, const Geom::Affine &transform)
               Bmi = bitmapinfo_set(Bmih, ct);
            }
            else {  // pattern
-              penStyle    = U_BS_HATCHED;
+              brushStyle    = U_BS_HATCHED;
               if(hatchType == -1){  // Not a standard hatch, so force it to something
                  hatchType  = U_HS_CROSS;
                  hatchColor = U_RGB(0xFF,0xC3,0xC3);
@@ -787,7 +836,7 @@ int PrintEmf::create_pen(SPStyle const *style, const Geom::Affine &transform)
            }
            if(FixPPTPatternAsHatch){
               if(hatchType == -1){  // image or unclassified 
-                 penStyle     = U_BS_HATCHED;
+                 brushStyle   = U_BS_HATCHED;
                  hatchType    = U_HS_DIAGCROSS;
                  hatchColor   = U_RGB(0xFF,0xC3,0xC3);
               } 
@@ -810,16 +859,6 @@ int PrintEmf::create_pen(SPStyle const *style, const Geom::Affine &transform)
                  p2 = p2 * lg->gradientTransform;
               }
               hatchColor = avg_stop_color(lg);
-#if LOUDGRADIENT
-std::cout << "create_pen, LINEAR_GRADIENT"
-<< " x1,y1:" << p1[Geom::X] << "," << p1[Geom::Y]
-<< " x1,y1:" << p2[Geom::X] << "," << p2[Geom::Y]
-<< " hatchColor: "
-<< 1L*hatchColor.Red << ","
-<< 1L*hatchColor.Green << ","
-<< 1L*hatchColor.Blue
-<< std::endl;
-#endif
            }
            else if (SP_IS_RADIALGRADIENT (paintserver)) {
               SPRadialGradient *rg=SP_RADIALGRADIENT(paintserver);
@@ -838,18 +877,6 @@ std::cout << "create_pen, LINEAR_GRADIENT"
                  xhandle_point = xhandle_point * rg->gradientTransform;
               }
               hatchColor = avg_stop_color(rg);
-#if LOUDGRADIENT
-std::cout << "create_pen, RADIAL_GRADIENT"
-<< " x1,y1:" << c[Geom::X] << "," << c[Geom::Y]
-<< " xhand x1,y1:" << xhandle_point[Geom::X] << "," << xhandle_point[Geom::Y]
-<< " yhand x1,y1:" << yhandle_point[Geom::X] << "," << yhandle_point[Geom::Y]
-<< " radius:" << r
-<< " hatchColor: "
-<< 1L*hatchColor.Red << ","
-<< 1L*hatchColor.Green << ","
-<< 1L*hatchColor.Blue
-<< std::endl;
-#endif
            }
            else {
              // default fill
@@ -857,7 +884,7 @@ std::cout << "create_pen, RADIAL_GRADIENT"
         }
         else if(style->stroke.isColor()){ // test last, always seems to be set, even for other types above
            sp_color_get_rgb_floatv( &style->stroke.value.color, rgb );
-           penStyle   = U_BS_SOLID;
+           brushStyle = U_BS_SOLID;
            hatchColor = U_RGB(255*rgb[0], 255*rgb[1], 255*rgb[2]);
            hatchType  = U_HS_SOLIDCLR;
         }
@@ -904,27 +931,33 @@ std::cout << "create_pen, RADIAL_GRADIENT"
         if (style->stroke_dash.n_dash   &&
             style->stroke_dash.dash       )
         {
-            int i = 0;
-            while (linestyle != U_PS_USERSTYLE &&
-                   (i < style->stroke_dash.n_dash)) {
-                if (style->stroke_dash.dash[i] > 0.00000001)
-                    linestyle = U_PS_USERSTYLE;
-                i++;
+            if(FixPPTDashLine){ // will break up line into many smaller lines.  Override gradient if that was set, cannot do both.
+               brushStyle = U_BS_SOLID;
+               hatchType  = U_HS_HORIZONTAL;
             }
+            else {
+               int i = 0;
+               while (linestyle != U_PS_USERSTYLE &&
+                      (i < style->stroke_dash.n_dash)) {
+                   if (style->stroke_dash.dash[i] > 0.00000001)
+                       linestyle = U_PS_USERSTYLE;
+                   i++;
+               }
 
-            if (linestyle == U_PS_USERSTYLE) {
-                n_dash = style->stroke_dash.n_dash;
-                dash = new uint32_t[n_dash];
-                for (i = 0; i < style->stroke_dash.n_dash; i++) {
-                    dash[i] = (uint32_t) (style->stroke_dash.dash[i]);
-                }
+               if (linestyle == U_PS_USERSTYLE) {
+                   n_dash = style->stroke_dash.n_dash;
+                   dash = new uint32_t[n_dash];
+                   for (i = 0; i < style->stroke_dash.n_dash; i++) {
+                       dash[i] = (uint32_t) (style->stroke_dash.dash[i]);
+                   }
+               }
             }
         }
 
         elp = extlogpen_set(
             U_PS_GEOMETRIC | linestyle | linecap | linejoin,
             linewidth,
-            penStyle,
+            brushStyle,
             hatchColor,
             hatchType,
             n_dash,
@@ -998,16 +1031,6 @@ void PrintEmf::destroy_pen()
 }
 
 
-void PrintEmf::flush_fill()
-{
-// std::cout << "flush_fill " << std::endl;
-    if (!fill_pathv.empty()) {
-        stroke_and_fill = false;
-        fill_only = true;
-        print_pathv(fill_pathv, fill_transform);
-    }
-// std::cout << "end flush_fill" << std::endl;
-}
 
 unsigned int PrintEmf::bind(Inkscape::Extension::Print * /*mod*/, Geom::Affine const &transform, float /*opacity*/)
 {   
@@ -1031,32 +1054,342 @@ unsigned int PrintEmf::release(Inkscape::Extension::Print * /*mod*/)
     return 1;
 }
 
+#define clrweight(a,b,t) ((1-t)*((double) a) + (t)*((double) b))
+inline U_COLORREF weight_opacity(U_COLORREF c1){
+    float opa = c1.Reserved/255.0;
+    U_COLORREF result = U_RGB(
+        255*opweight((float)c1.Red  /255.0, gv.rgb[0], opa),
+        255*opweight((float)c1.Green/255.0, gv.rgb[1], opa),
+        255*opweight((float)c1.Blue /255.0, gv.rgb[2], opa)
+    );
+    return result;
+}
+
+
+// return the color between c1 and c2, c1 for t=0, c2 for t=1.0
+U_COLORREF weight_colors(U_COLORREF c1, U_COLORREF c2, double t){
+    U_COLORREF result;
+    result.Red      = clrweight(c1.Red,      c2.Red,      t);
+    result.Green    = clrweight(c1.Green,    c2.Green,    t);
+    result.Blue     = clrweight(c1.Blue,     c2.Blue,     t);
+    result.Reserved = clrweight(c1.Reserved, c2.Reserved, t);
+
+    // now handle the opacity, mix the RGB with background at the weighted opacity
+    
+    if(result.Reserved != 255)result = weight_opacity(result);
+
+    return result;
+}
+
+/*  convert from center ellipse to SVGEllipticalArc ellipse
+   
+   From:
+   http://www.w3.org/TR/SVG/implnote.html#ArcConversionEndpointToCenter
+   A point (x,y) on the arc can be found by:
+   
+   {x,y} = {cx,cy} + {cosF,-sinF,sinF,cosF} x {rxcosT,rysinT}
+   
+   where 
+     {cx,cy} is the center of the ellipse
+     F       is the rotation angle of the X axis of the ellipse from the true X axis
+     T       is the rotation angle around the ellipse
+     {,,,}   is the rotation matrix
+     rx,ry   are the radii of the ellipse's axes
+
+   For SVG parameterization need two points.  
+   Arbitrarily we can use T=0 and T=pi
+   Since the sweep is 180 the flags are always 0:
+
+   F is in RADIANS, but the SVGEllipticalArc needs degrees!
+
+*/
+Geom::PathVector center_ellipse_as_SVG_PathV(Geom::Point ctr, double rx, double ry, double F){
+    using Geom::X;
+    using Geom::Y;
+    double x1,y1,x2,y2;
+    Geom::Path SVGep;
+ 
+    x1 = ctr[X]  +  cos(F) * rx * cos(0)      +   sin(-F) * ry * sin(0);
+    y1 = ctr[Y]  +  sin(F) * rx * cos(0)      +   cos(F)  * ry * sin(0);
+    x2 = ctr[X]  +  cos(F) * rx * cos(M_PI)   +   sin(-F) * ry * sin(M_PI);
+    y2 = ctr[Y]  +  sin(F) * rx * cos(M_PI)   +   cos(F)  * ry * sin(M_PI);
+
+    char text[256];
+    sprintf(text," M %f,%f A %f %f %f 0 0 %f %f A %f %f %f 0 0 %f %f z",x1,y1,  rx,ry,F*360./(2.*M_PI),x2,y2,   rx,ry,F*360./(2.*M_PI),x1,y1);
+    std::vector<Geom::Path> outres =  Geom::parse_svg_path(text);
+    return outres;
+}
+
+
+/*  rx2,ry2 must be larger than rx1,ry1!
+    angle is in RADIANS
+*/
+Geom::PathVector center_elliptical_ring_as_SVG_PathV(Geom::Point ctr, double rx1, double ry1, double rx2, double ry2, double F){
+    using Geom::X;
+    using Geom::Y;
+    double x11,y11,x12,y12;
+    double x21,y21,x22,y22;
+    double degrot = F*360./(2.*M_PI);
+ 
+    x11 = ctr[X]  +  cos(F) * rx1 * cos(0)      +   sin(-F) * ry1 * sin(0);
+    y11 = ctr[Y]  +  sin(F) * rx1 * cos(0)      +   cos(F)  * ry1 * sin(0);
+    x12 = ctr[X]  +  cos(F) * rx1 * cos(M_PI)   +   sin(-F) * ry1 * sin(M_PI);
+    y12 = ctr[Y]  +  sin(F) * rx1 * cos(M_PI)   +   cos(F)  * ry1 * sin(M_PI);
+
+    x21 = ctr[X]  +  cos(F) * rx2 * cos(0)      +   sin(-F) * ry2 * sin(0);
+    y21 = ctr[Y]  +  sin(F) * rx2 * cos(0)      +   cos(F)  * ry2 * sin(0);
+    x22 = ctr[X]  +  cos(F) * rx2 * cos(M_PI)   +   sin(-F) * ry2 * sin(M_PI);
+    y22 = ctr[Y]  +  sin(F) * rx2 * cos(M_PI)   +   cos(F)  * ry2 * sin(M_PI);
+
+    char text[512];
+    sprintf(text," M %f,%f A %f %f %f 0 1 %f %f A %f %f %f 0 1 %f %f z M %f,%f  A %f %f %f 0 0 %f %f A %f %f %f 0 0 %f %f z",
+      x11,y11,  rx1,ry1,degrot,x12,y12,   rx1,ry1,degrot,x11,y11,
+      x21,y21,  rx2,ry2,degrot,x22,y22,   rx2,ry2,degrot,x21,y21);
+    std::vector<Geom::Path> outres =  Geom::parse_svg_path(text);
+
+    return outres;
+}
+
+/* Elliptical hole in a large square extending from -50k to +50k */
+Geom::PathVector center_elliptical_hole_as_SVG_PathV(Geom::Point ctr, double rx, double ry, double F){
+    using Geom::X;
+    using Geom::Y;
+    double x1,y1,x2,y2;
+    Geom::Path SVGep;
+ 
+    x1 = ctr[X]  +  cos(F) * rx * cos(0)      +   sin(-F) * ry * sin(0);
+    y1 = ctr[Y]  +  sin(F) * rx * cos(0)      +   cos(F)  * ry * sin(0);
+    x2 = ctr[X]  +  cos(F) * rx * cos(M_PI)   +   sin(-F) * ry * sin(M_PI);
+    y2 = ctr[Y]  +  sin(F) * rx * cos(M_PI)   +   cos(F)  * ry * sin(M_PI);
+
+    char text[256];
+    sprintf(text," M %f,%f A %f %f %f 0 0 %f %f A %f %f %f 0 0 %f %f z M 50000,50000 50000,-50000 -50000,-50000 -50000,50000 z",
+     x1,y1,  rx,ry,F*360./(2.*M_PI),x2,y2,   rx,ry,F*360./(2.*M_PI),x1,y1);
+    std::vector<Geom::Path> outres =  Geom::parse_svg_path(text);
+    return outres;
+}
+
+/* rectangular cutter. 
+ctr    "center" of rectangle (might not actually be in the center with respect to leading/trailing edges
+pos    vector from center to leading edge
+neg    vector from center to trailing edge
+width  vector to side edge 
+*/
+Geom::PathVector rect_cutter(Geom::Point ctr, Geom::Point pos, Geom::Point neg, Geom::Point width){
+    std::vector<Geom::Path> outres;
+    Geom::Path cutter;
+    cutter.start(                       ctr + pos - width);
+    cutter.appendNew<Geom::LineSegment>(ctr + pos + width);
+    cutter.appendNew<Geom::LineSegment>(ctr + neg + width);
+    cutter.appendNew<Geom::LineSegment>(ctr + neg - width);
+    cutter.close();
+    outres.push_back(cutter);
+    return outres;
+}
+
+/* Convert from SPWindRule to livarot's FillRule
+   This is similar to what sp_selected_path_boolop() does
+*/
+FillRule SPWR_to_LVFR(SPWindRule wr){
+    FillRule fr;
+    if(wr ==  SP_WIND_RULE_EVENODD){
+       fr = fill_oddEven;
+    }
+    else {
+       fr = fill_nonZero;
+    }
+    return fr;
+}
+
+
 unsigned int PrintEmf::fill(Inkscape::Extension::Print * /*mod*/,
                     Geom::PathVector const &pathv, Geom::Affine const & /*transform*/, SPStyle const *style,
                     Geom::OptRect const &/*pbox*/, Geom::OptRect const &/*dbox*/, Geom::OptRect const &/*bbox*/)
 {
 // std::cout << "fill " << std::endl;
+    using Geom::X;
+    using Geom::Y;
+
     Geom::Affine tf = m_tr_stack.top();
 
-    flush_fill(); // flush any pending fills
+    use_fill   = true;
+    use_stroke = false;
 
-//Inkscape is NOT calling create_pen for objects with no border.  PPT, and presumably others, pick whatever they want
-//for the border if it is not specified, so no border can become border.  To avoid this specify "no pen" here if we can determine
-//that will not be needed after the fill.
-    if (style->stroke.noneSet || style->stroke_width.computed == 0.0){
-          destroy_pen();  //this sets the NULL_PEN
-    }
+    // earlier versions had flush of fill here, but it never executed and was removed
 
-    if (create_brush(style))return 0;
-
-    fill_pathv.clear();
-    std::copy(pathv.begin(), pathv.end(), std::back_inserter(fill_pathv));
     fill_transform = tf;
 
-    // postpone fill in case of stroke-and-fill, otherwise do it now
-    if (style->stroke.noneSet || style->stroke_width.computed == 0.0){
-       flush_fill(); // flush any pending fills
+    if (create_brush(style, NULL)){ 
+       /*
+          Handle gradients.  Uses modified livarot as 2geom boolops is currently broken.
+          Can handle gradients with multiple stops.
+
+          The overlap is needed to avoid antialiasing artifacts when edges are not strictly aligned on pixel boundaries.
+          There is an inevitable loss of accuracy saving through an EMF file because of the integer coordinate system.
+          Keep the overlap quite large so that loss of accuracy does not remove an overlap.
+       */
+       destroy_pen();  //this sets the NULL_PEN, otherwise gradient slices may display with boundaries, see longer explanation below
+       Geom::Path cutter;
+       float      rgb[3];
+       U_COLORREF wc,c1,c2;
+       FillRule   frb = SPWR_to_LVFR( (SPWindRule) style->fill_rule.computed);
+       double     doff,doff_base,doff_range;
+       double     divisions= 128.0;
+       int        nstops;
+       int        istop =     1;
+       float      opa;                     // opacity at stop
+ 
+       SPRadialGradient *tg = (SPRadialGradient *) (gv.grad);  // linear/radial are the same here
+       nstops = tg->vector.stops.size();
+       sp_color_get_rgb_floatv(&tg->vector.stops[0].color, rgb);
+       opa    = tg->vector.stops[0].opacity;
+       c1     = U_RGBA( 255*rgb[0], 255*rgb[1], 255*rgb[2], 255*opa );
+       sp_color_get_rgb_floatv(&tg->vector.stops[nstops-1].color, rgb);
+       opa    = tg->vector.stops[nstops-1].opacity;
+       c2     = U_RGBA( 255*rgb[0], 255*rgb[1], 255*rgb[2], 255*opa );
+
+       doff       = 0.0;
+       doff_base  = 0.0;
+       doff_range = tg->vector.stops[1].offset;              // next or last stop
+
+       if(gv.mode==DRAW_RADIAL_GRADIENT){
+          Geom::Point xv = gv.p2 - gv.p1;           // X'  vector
+          Geom::Point yv = gv.p3 - gv.p1;           // Y'  vector
+          Geom::Point xuv = Geom::unit_vector(xv);  // X' unit vector
+          double rx = hypot(xv[X],xv[Y]);
+          double ry = hypot(yv[X],yv[Y]);
+          double range    = fmax(rx,ry);            // length along the gradient
+          double step     = range/divisions;        // adequate approximation for gradient
+          double overlap  = step/4.0;               // overlap slices slightly
+          double start;
+          double stop;
+          Geom::PathVector pathvc, pathvr;
+
+          /*  radial gradient might stop part way through the shape, fill with outer color from there to "infinity".
+              Do this first so that outer colored ring will overlay it.
+          */
+          pathvc = center_elliptical_hole_as_SVG_PathV(gv.p1, rx*(1.0 - overlap/range), ry*(1.0 - overlap/range), asin(xuv[Y]));
+          pathvr = sp_pathvector_boolop(pathvc, pathv, bool_op_inters, (FillRule) fill_oddEven, frb);
+          wc = weight_opacity(c2); 
+          (void) create_brush(style, &wc);
+          print_pathv(pathvr, fill_transform);
+
+          sp_color_get_rgb_floatv(&tg->vector.stops[istop].color, rgb);
+          opa = tg->vector.stops[istop].opacity;
+          c2 = U_RGBA( 255*rgb[0], 255*rgb[1], 255*rgb[2], 255*opa );
+          
+          for(start = 0.0; start < range; start += step, doff += 1./divisions){
+             stop = start + step + overlap;
+             if(stop > range)stop=range;
+             wc = weight_colors(c1, c2, (doff - doff_base)/(doff_range-doff_base) );
+             (void) create_brush(style, &wc);
+
+             pathvc = center_elliptical_ring_as_SVG_PathV(gv.p1, rx*start/range, ry*start/range, rx*stop/range, ry*stop/range, asin(xuv[Y]));
+ 
+             pathvr = sp_pathvector_boolop(pathvc, pathv, bool_op_inters, (FillRule) fill_nonZero, frb);
+             print_pathv(pathvr, fill_transform);  // show the intersection
+
+             if(doff >= doff_range - doff_base){
+                istop++;
+                if(istop >= nstops)continue; // could happen on a rounding error
+                doff_base  = doff_range;
+                doff_range = tg->vector.stops[istop].offset;  // next or last stop
+                c1=c2;
+                sp_color_get_rgb_floatv(&tg->vector.stops[istop].color, rgb);
+                opa = tg->vector.stops[istop].opacity;
+                c2 = U_RGBA( 255*rgb[0], 255*rgb[1], 255*rgb[2], 255*opa );
+             }
+          }
+ 
+       }
+       else if(gv.mode == DRAW_LINEAR_GRADIENT){
+          Geom::Point uv  = Geom::unit_vector(gv.p2 - gv.p1);  // unit vector
+          Geom::Point puv = uv.cw();                           // perp. to unit vector
+          double range    = Geom::distance(gv.p1,gv.p2);       // length along the gradient
+          double step     = range/divisions;                   // adequate approximation for gradient
+          double overlap  = step/4.0;                          // overlap slices slightly
+          double start;
+          double stop;
+          Geom::PathVector pathvc, pathvr;
+
+          /* before lower end of gradient, overlap first slice position */
+          wc = weight_opacity(c1); 
+          (void) create_brush(style, &wc);
+          pathvc = rect_cutter(gv.p1, uv*(overlap), uv*(-50000.0), puv*50000.0);
+          pathvr = sp_pathvector_boolop(pathvc, pathv, bool_op_inters, (FillRule) fill_nonZero, frb);
+          print_pathv(pathvr, fill_transform);
+
+          /* after high end of gradient, overlap last slice poosition */
+          wc = weight_opacity(c2); 
+          (void) create_brush(style, &wc);
+          pathvc = rect_cutter(gv.p2, uv*(-overlap), uv*(50000.0), puv*50000.0);
+          pathvr = sp_pathvector_boolop(pathvc, pathv, bool_op_inters, (FillRule) fill_nonZero, frb);
+          print_pathv(pathvr, fill_transform);
+          
+          sp_color_get_rgb_floatv(&tg->vector.stops[istop].color, rgb);
+          opa = tg->vector.stops[istop].opacity;
+          c2 = U_RGBA( 255*rgb[0], 255*rgb[1], 255*rgb[2], 255*opa );
+
+          for(start = 0.0; start < range; start += step, doff += 1./divisions){
+             stop = start + step + overlap;
+             if(stop > range)stop=range;
+             pathvc = rect_cutter(gv.p1, uv*start, uv*stop, puv*50000.0);
+
+             wc = weight_colors(c1, c2, (doff - doff_base)/(doff_range-doff_base) );
+             (void) create_brush(style, &wc);
+             Geom::PathVector pathvr = sp_pathvector_boolop(pathvc, pathv, bool_op_inters, (FillRule) fill_nonZero, frb);
+             print_pathv(pathvr, fill_transform);  // show the intersection
+             
+             if(doff >= doff_range - doff_base){
+                istop++;
+                if(istop >= nstops)continue; // could happen on a rounding error
+                doff_base  = doff_range;
+                doff_range = tg->vector.stops[istop].offset;  // next or last stop
+                c1=c2;
+                sp_color_get_rgb_floatv(&tg->vector.stops[istop].color, rgb);
+                opa = tg->vector.stops[istop].opacity;
+                c2 = U_RGBA( 255*rgb[0], 255*rgb[1], 255*rgb[2], 255*opa );
+             }
+          }
+       }
+       else {
+          throw "Fatal programming error in PrintEmf::fill, invalid gradient type detected";
+       }
+       use_fill = false;  // gradients handled, be sure stroke does not use stroke and fill
     }
+    else {
+       /*
+           Inkscape was not calling create_pen for objects with no border. 
+           This was because it never called stroke() (next method).
+           PPT, and presumably others, pick whatever they want for the border if it is not specified, so no border can
+           become a visible border.
+           To avoid this force the pen to NULL_PEN if we can determine that no pen will be needed after the fill.
+       */
+       if (style->stroke.noneSet || style->stroke_width.computed == 0.0){
+          destroy_pen();  //this sets the NULL_PEN
+       }
+
+       /*  postpone fill in case stroke also required AND all stroke paths closed
+           Dashes converted to line segments will "open" a closed path.
+       */
+       bool all_closed = true;
+       for (Geom::PathVector::const_iterator pit = pathv.begin(); pit != pathv.end(); ++pit){
+           for (Geom::Path::const_iterator cit = pit->begin(); cit != pit->end_open(); ++cit){
+              if (pit->end_default() != pit->end_closed()) { all_closed=false; }
+           }
+       }
+       if (
+            (style->stroke.noneSet || style->stroke_width.computed == 0.0)               ||
+            (style->stroke_dash.n_dash   &&  style->stroke_dash.dash  && FixPPTDashLine) ||
+            !all_closed
+          )
+       {
+          print_pathv(pathv, fill_transform);  // do any fills. side effect: clears fill_pathv
+          use_fill = false;
+       }
+    }
+
+
 
 // std::cout << "end fill" << std::endl;
     return 0;
@@ -1071,15 +1404,49 @@ unsigned int PrintEmf::stroke (Inkscape::Extension::Print * /*mod*/,
     
     Geom::Affine tf = m_tr_stack.top();
 
-    stroke_and_fill = ( pathv == fill_pathv );
-
-    if (!stroke_and_fill) {
-        flush_fill(); // flush any pending fills
-    }
+    use_stroke = true;
+//  use_fill was set in ::fill, if it is needed
 
     if (create_pen(style, tf))return 0;
+    
+    if (style->stroke_dash.n_dash   &&  style->stroke_dash.dash  && FixPPTDashLine  ){
+       // convert the path, gets its complete length, and then make a new path with parameter length instead of t
+       Geom::Piecewise<Geom::D2<Geom::SBasis> > tmp_pathpw;  // pathv-> sbasis
+       Geom::Piecewise<Geom::D2<Geom::SBasis> > tmp_pathpw2; // sbasis using arc length parameter
+       Geom::Piecewise<Geom::D2<Geom::SBasis> > tmp_pathpw3; // new (discontinuous) path, composed of dots/dashes
+       Geom::Piecewise<Geom::D2<Geom::SBasis> > first_frag;  // first fragment, will be appended at end
+       int n_dash = style->stroke_dash.n_dash;
+       int i=0; //dash index
+       double tlength;                                       // length of tmp_pathpw
+       double slength=0.0;                                   // start of gragment
+       double elength;                                       // end of gragment
+       for (unsigned int i=0; i < pathv.size(); i++) {
+          tmp_pathpw.concat(pathv[i].toPwSb());
+       }
+       tlength = length(tmp_pathpw,0.1);
+       tmp_pathpw2 = arc_length_parametrization(tmp_pathpw);
 
-    print_pathv(pathv, tf);
+       // go around the dash array repeatedly until the entire path is consumed (but not beyond).
+       while(slength < tlength){
+          elength = slength + style->stroke_dash.dash[i++];
+          if(elength > tlength)elength = tlength;
+          Geom::Piecewise<Geom::D2<Geom::SBasis> > fragment(portion(tmp_pathpw2, slength, elength));
+          if(slength){  tmp_pathpw3.concat(fragment); }
+          else {        first_frag = fragment;        }
+          slength = elength;
+          slength += style->stroke_dash.dash[i++];  // the gap
+          if(i>=n_dash)i=0;
+       }
+       tmp_pathpw3.concat(first_frag); // may merge line around start point
+       Geom::PathVector out_pathv = Geom::path_from_piecewise(tmp_pathpw3, 0.01); 
+       print_pathv(out_pathv, tf);
+    }
+    else {
+       print_pathv(pathv, tf);
+    }
+
+    use_stroke = false;
+    use_fill   = false;
 
 
 // std::cout << "end stroke " << std::endl;
@@ -1238,18 +1605,16 @@ bool PrintEmf::print_simple_shape(Geom::PathVector const &pathv, const Geom::Aff
 
     if (polygon || ellipse) {
  
-        if (!stroke_and_fill) {
-            if (fill_only) {
-                rec = selectobject_set(U_NULL_PEN, eht);
-                if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
-                    throw "Fatal programming error in PrintEmf::print_simple_shape at selectobject_set pen";
-                }
+        if (use_fill && !use_stroke) {  // only fill
+            rec = selectobject_set(U_NULL_PEN, eht);
+            if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
+                throw "Fatal programming error in PrintEmf::print_simple_shape at selectobject_set pen";
             }
-            else { // if (stroke_only)
-                rec = selectobject_set(U_NULL_BRUSH, eht);
-                if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
-                    throw "Fatal programming error in PrintEmf::print_simple_shape at selectobject_set brush";
-                }
+        }
+        else if(!use_fill && use_stroke) { // only stroke
+            rec = selectobject_set(U_NULL_BRUSH, eht);
+            if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
+                throw "Fatal programming error in PrintEmf::print_simple_shape at selectobject_set brush";
             }
         }
 
@@ -1273,23 +1638,17 @@ bool PrintEmf::print_simple_shape(Geom::PathVector const &pathv, const Geom::Aff
         done = true;
 
         // replace the handle we moved above, assuming there was something set already
-        if (!stroke_and_fill) {
-            if (fill_only) {
-                if(hpen){
-                    rec = selectobject_set(hpen, eht);
-                    if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
-                        throw "Fatal programming error in PrintEmf::print_simple_shape at selectobject_set pen";
-                    }
-                }
-            }
-            else { // if (stroke_only)
-                if(hbrush){
-                    rec = selectobject_set(hbrush, eht);
-                    if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
-                        throw "Fatal programming error in PrintEmf::print_simple_shape at selectobject_set brush";
-                    }
-                }
-            }
+        if (use_fill && !use_stroke && hpen) { // only fill
+           rec = selectobject_set(hpen, eht);
+           if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
+               throw "Fatal programming error in PrintEmf::print_simple_shape at selectobject_set pen";
+           }
+        }
+        else if (!use_fill && use_stroke && hbrush){ // only stroke
+           rec = selectobject_set(hbrush, eht);
+           if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
+               throw "Fatal programming error in PrintEmf::print_simple_shape at selectobject_set brush";
+           }
         }
 
     }
@@ -1383,17 +1742,26 @@ unsigned int PrintEmf::image(Inkscape::Extension::Print * /* module */,  /** not
   return 0;
 }
 
+// may also be called with a simple_shape or an empty path, whereupon it just returns without doing anything
 unsigned int PrintEmf::print_pathv(Geom::PathVector const &pathv, const Geom::Affine &transform)
 {
 // std::cout << "print_pathv " << std::endl << std::flush;
     char *rec = NULL;
-    simple_shape = print_simple_shape(pathv, transform);
 
-    if (simple_shape)
-        return TRUE;
+    simple_shape = print_simple_shape(pathv, transform);
+    if (simple_shape || pathv.empty()){
+       if (use_fill){    destroy_brush(); }  // these must be cleared even if nothing is drawn or hbrush,hpen fill up
+       if (use_stroke){  destroy_pen();   }
+       return TRUE;
+    }
 
     Geom::PathVector pv = pathv_to_linear_and_cubic_beziers( pathv * transform );
     
+    rec = U_EMRBEGINPATH_set();
+    if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
+        throw "Fatal programming error in PrintEmf::print_pathv at U_EMRBEGINPATH_set";
+    }
+
     /**
      * For all Subpaths in the <path>
      */
@@ -1402,10 +1770,6 @@ unsigned int PrintEmf::print_pathv(Geom::PathVector const &pathv, const Geom::Af
         using Geom::X;
         using Geom::Y;
 
-        rec = U_EMRBEGINPATH_set();
-        if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
-            throw "Fatal programming error in PrintEmf::print_pathv at U_EMRBEGINPATH_set";
-        }
  
         Geom::Point p0 = pit->initialPoint();
 
@@ -1487,47 +1851,47 @@ unsigned int PrintEmf::print_pathv(Geom::PathVector const &pathv, const Geom::Af
             }
         }
 
-        if (pit->end_default() == pit->end_closed()) {
+        if (pit->end_default() == pit->end_closed()) {  // there may be multiples of this on a single path
             rec = U_EMRCLOSEFIGURE_set();
             if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
                 throw "Fatal programming error in PrintEmf::print_pathv at U_EMRCLOSEFIGURE_set";
             }
         }
 
-        rec = U_EMRENDPATH_set();
-        if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
-            throw "Fatal programming error in PrintEmf::print_pathv at U_EMRENDPATH_set";
-        }
+    }
 
-        // explicit FILL/STROKE commands are needed for each sub section of the path
-        if (fill_only){
-            rec = U_EMRFILLPATH_set(U_RCL_DEF);
-            if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
-              throw "Fatal programming error in PrintEmf::flush_fill";
-            }
+    rec = U_EMRENDPATH_set();  // there may be only be one of these on a single path
+    if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
+        throw "Fatal programming error in PrintEmf::print_pathv at U_EMRENDPATH_set";
+    }
+
+    // explicit FILL/STROKE commands are needed for each sub section of the path
+    if (use_fill && !use_stroke){
+        rec = U_EMRFILLPATH_set(U_RCL_DEF);
+        if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){
+          throw "Fatal programming error in PrintEmf::fill at U_EMRFILLPATH_set";
         }
-        else {
-           if (stroke_and_fill) {
-               rec  = U_EMRSTROKEANDFILLPATH_set(U_RCL_DEF);
-               if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){                        
-                   throw "Fatal programming error in PrintEmf::stroke at U_EMRSTROKEANDFILLPATH_set"; 
-               }                                                                                     
-           } else {
-              rec  = U_EMRSTROKEPATH_set(U_RCL_DEF);
-              if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){                        
-                  throw "Fatal programming error in PrintEmf::stroke at U_EMRSTROKEANDFILLPATH_set"; 
-              }                                                                                     
-           }
-        }
+    }
+    else if (use_fill && use_stroke) {
+        rec  = U_EMRSTROKEANDFILLPATH_set(U_RCL_DEF);
+        if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){                        
+            throw "Fatal programming error in PrintEmf::stroke at U_EMRSTROKEANDFILLPATH_set"; 
+        }                                                                                     
+    }
+    else if (!use_fill && use_stroke){
+        rec  = U_EMRSTROKEPATH_set(U_RCL_DEF);
+        if(!rec || emf_append((PU_ENHMETARECORD)rec, et, U_REC_FREE)){                        
+            throw "Fatal programming error in PrintEmf::stroke at U_EMRSTROKEPATH_set"; 
+        }                                                                                     
     }
 
     // clean out brush and pen, but only after all parts of the draw complete
-    if (fill_only || stroke_and_fill){
+    if (use_fill){
         destroy_brush();
-        fill_pathv.clear();
-        fill_only = false;
     }
-    destroy_pen();
+    if (use_stroke){
+        destroy_pen();
+    }
 // std::cout << "end pathv" << std::endl;
 
     return TRUE;
@@ -1554,23 +1918,12 @@ unsigned int PrintEmf::text(Inkscape::Extension::Print * /*mod*/, char const *te
     double rotb = -std::atan2(tf[1], tf[0]);  // rotation for baseline offset for superscript/subscript, used below
     double dx,dy;
     double f1,f2,f3;
-
-#ifdef USE_PANGO_WIN32
-/*
-    font_instance *tf = (font_factory::Default())->Face(style->text->font_family.value, font_style_to_pos(*style));
-    if (tf) {
-        LOGFONT *lf = pango_win32_font_logfont(tf->pFont);
-        tf->Unref();
-        hfont = CreateFontIndirect(lf);
-        g_free(lf);
-    }
-*/
-#endif
+    double ky;
 
     // the dx array is smuggled in like: text<nul>w1 w2 w3 ...wn<nul><nul>, where the widths are floats 7 characters wide, including the space
     int ndx;
     uint32_t *adx;
-    smuggle_adx_out(text, &adx, &ndx, PX2WORLD * std::min(tf.expansionX(),tf.expansionY())); // side effect: free() adx
+    smuggle_adxky_out(text, &adx, &ky, &ndx, PX2WORLD * std::min(tf.expansionX(),tf.expansionY())); // side effect: free() adx
     
     char *text2 = strdup(text);  // because U_Utf8ToUtf16le calls iconv which does not like a const char *
     uint16_t *unicode_text = U_Utf8ToUtf16le( text2, 0, NULL );
@@ -1609,7 +1962,12 @@ unsigned int PrintEmf::text(Inkscape::Extension::Print * /*mod*/, char const *te
       }
     }
 
-    int textheight = -style->font_size.computed * PX2WORLD * std::min(tf.expansionX(),tf.expansionY());
+    /* Note that text font sizes are stored into the EMF as fairly small integers and that limits their precision.  
+       The EMF output files produced here have been designed so that the integer valued pt sizes
+       land right on an integer value in the EMF file, so those are exact.  However, something like 18.1 pt will be
+       somewhat off, so that when it is read back in it becomes 18.11 pt.  (For instance.)   
+    */
+    int textheight = round(-style->font_size.computed * PX2WORLD * std::min(tf.expansionX(),tf.expansionY()));
     if (!hfont) {
 
         // Get font face name.  Use changed font name if unicode mapped to one
@@ -1678,9 +2036,13 @@ unsigned int PrintEmf::text(Inkscape::Extension::Print * /*mod*/, char const *te
 
     Geom::Point p2 = p * tf;
 
-    //Handle super/subscripts.  Negative sign because of geometry of MM_TEXT.
+    //Handle super/subscripts and vertical kerning
+/*  Previously used this, but vertical kerning was not supported
     p2[Geom::X] -= style->baseline_shift.computed * std::sin( rotb );
     p2[Geom::Y] -= style->baseline_shift.computed * std::cos( rotb );
+*/
+    p2[Geom::X] += ky * std::sin( rotb );
+    p2[Geom::Y] += ky * std::cos( rotb );
 
     //Conditionally handle compensation for PPT EMF import bug (affects PPT 2003-2010, at least)
     if(FixPPTCharPos){

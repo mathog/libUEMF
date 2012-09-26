@@ -59,10 +59,9 @@ namespace Extension {
 namespace Internal {
 
 
-static float device_scale = DEVICESCALE;
 static U_RECTL rc_old;
 static bool clipset = false;
-static uint32_t ICMmode=0;
+static uint32_t ICMmode=0;  // not used yet, but code to read it from EMF implemented
 static uint32_t BLTmode=0;
 
 /** Construct a PNG in memory from an RGB from the EMF file 
@@ -120,8 +119,8 @@ static pixel_t * pixel_at (bitmap_t * bitmap, int x, int y)
 void
 my_png_write_data(png_structp png_ptr, png_bytep data, png_size_t length)
 {
-  /* with libpng15 next line causes pointer deference error; use libpng12 */
-  PMEMPNG p=(PMEMPNG)png_ptr->io_ptr;
+  PMEMPNG p=(PMEMPNG)png_get_io_ptr(png_ptr);
+   
   size_t nsize = p->size + length;
 
   /* allocate or grow buffer */
@@ -138,7 +137,7 @@ my_png_write_data(png_structp png_ptr, png_bytep data, png_size_t length)
   p->size += length;
 }
 
-void toPNG(PMEMPNG accum, int width, int height, char *px, uint32_t cbPx){
+void toPNG(PMEMPNG accum, int width, int height, char *px){
     bitmap_t bmstore;
     bitmap_t *bitmap=&bmstore;
     accum->buffer=NULL;  // PNG constructed in memory will end up here, caller must free().
@@ -221,16 +220,6 @@ void toPNG(PMEMPNG accum, int width, int height, char *px, uint32_t cbPx){
     
 }
 
-/* Given "value" and "max", the maximum value which we expect "value"
-   to take, this returns an integer between 0 and 255 proportional to
-   "value" divided by "max". */
-
-static int pix (int value, int max)
-{
-    if (value < 0)
-        return 0;
-    return (int) (256.0 *((double) (value)/(double) max));
-}
 
 /* convert an EMF RGB(A) color to 0RGB
 inverse of gethexcolor() in emf-print.cpp
@@ -363,7 +352,7 @@ typedef struct {
 
 typedef struct emf_device_context {
     struct SPStyle style;
-    class SPTextStyle tstyle;
+    char *font_name;
     bool stroke_set;
     int  stroke_mode;  // enumeration from drawmode, not used if fill_set is not True
     int  stroke_idx;   // used with DRAW_PATTERN and DRAW_IMAGE to return the appropriate fill
@@ -373,8 +362,6 @@ typedef struct emf_device_context {
 
     U_SIZEL sizeWnd;
     U_SIZEL sizeView;
-    float PixelsInX, PixelsInY;
-    float PixelsOutX, PixelsOutY;
     U_POINTL winorg;
     U_POINTL vieworg;
     double ScaleInX, ScaleInY;
@@ -390,6 +377,7 @@ typedef struct emf_device_context {
 
 #define EMF_MAX_DC 128
 
+
 typedef struct emf_callback_data {
     Glib::ustring *outsvg;
     Glib::ustring *path;
@@ -399,17 +387,21 @@ typedef struct emf_callback_data {
     EMF_DEVICE_CONTEXT dc[EMF_MAX_DC+1]; // FIXME: This should be dynamic..
     int level;
     
-    double xDPI, yDPI;
-    uint32_t mask;          // Draw properties
-    int arcdir;             //U_AD_COUNTERCLOCKWISE 1 or U_AD_CLOCKWISE 2
+    double E2IdirY;               // EMF Y direction relative to Inkscape Y direction.  Will be negative for MM_LOMETRIC etc.
+    double D2PscaleX,D2PscaleY;   // EMF device to Inkscape Page scale.
+    float  MM100InX, MM100InY;    // size of the drawing in hundredths of a millimeter
+    float  PixelsInX, PixelsInY;  // size of the drawing, in EMF device pixels
+    float  PixelsOutX, PixelsOutY;// size of the drawing, in Inkscape pixels
+    double ulCornerInX,ulCornerInY;     // Upper left corner, from header rclBounds, in logical units
+    double ulCornerOutX,ulCornerOutY;   // Upper left corner, in Inkscape pixels
+    uint32_t mask;                // Draw properties
+    int arcdir;                   //U_AD_COUNTERCLOCKWISE 1 or U_AD_CLOCKWISE 2
     
-    uint32_t dwRop2;         // Binary raster operation, 0 if none (use brush/pen unmolested)
-    uint32_t dwRop3;         // Ternary raster operation, 0 if none (use brush/pen unmolested)
+    uint32_t dwRop2;              // Binary raster operation, 0 if none (use brush/pen unmolested)
+    uint32_t dwRop3;              // Ternary raster operation, 0 if none (use brush/pen unmolested)
 
     float MMX;
     float MMY;
-    float dwInchesX;
-    float dwInchesY;
 
     unsigned int id;
     unsigned int drawtype;  // one of 0 or U_EMR_FILLPATH, U_EMR_STROKEPATH, U_EMR_STROKEANDFILLPATH
@@ -638,8 +630,8 @@ uint32_t add_image(PEMF_CALLBACK_DATA d,  void *pEmr, uint32_t cbBits, uint32_t 
             ct,         // DIB color table                                                          
             numCt,      // DIB color table number of entries                                        
             &rgba_px,   // U_RGBA pixel array (32 bits), created by this routine, caller must free. 
-            width,      // Width of pixel array                                                     
-            height,     // Height of pixel array                                                    
+            width,      // Width of pixel array in record                                                    
+            height,     // Height of pixel array in record                                                   
             colortype,  // DIB BitCount Enumeration                                                 
             numCt,      // Color table used if not 0                                                
             invert      // If DIB rows are in opposite order from RGBA rows                         
@@ -648,9 +640,8 @@ uint32_t add_image(PEMF_CALLBACK_DATA d,  void *pEmr, uint32_t cbBits, uint32_t 
       {                                                                                             
          toPNG(         // Get the image from the RGBA px into mempng                               
              &mempng,                                                                               
-             width, height,                                                                         
-             rgba_px,                                                                               
-             4 * width * height);                                                                   
+             width, height,    // of the SRC bitmap                                                                     
+             rgba_px);                                                                   
          free(rgba_px);                                                                             
       }                                                                                             
    }
@@ -898,58 +889,54 @@ output_style(PEMF_CALLBACK_DATA d, int iType)
 static double
 _pix_x_to_point(PEMF_CALLBACK_DATA d, double px)
 {
-    double tmp = px - d->dc[d->level].winorg.x;
-    tmp *= d->dc[d->level].ScaleInX ? d->dc[d->level].ScaleInX : 1.0;
-    tmp += d->dc[d->level].vieworg.x;
-    return tmp;
+    double scale = (d->dc[d->level].ScaleInX ? d->dc[d->level].ScaleInX : 1.0);
+    double tmp;
+    tmp = ((((double) (px - d->dc[d->level].winorg.x))*scale) + d->dc[d->level].vieworg.x) * d->D2PscaleX;
+    tmp -= d->ulCornerOutX; //The EMF boundary rectangle can be anywhere, place its upper left corner in the Inkscape upper left corner
+    return(tmp);
 }
 
 static double
-_pix_y_to_point(PEMF_CALLBACK_DATA d, double px)
+_pix_y_to_point(PEMF_CALLBACK_DATA d, double py)
 {
-    double tmp = px - d->dc[d->level].winorg.y;
-    tmp *= d->dc[d->level].ScaleInY ? d->dc[d->level].ScaleInY : 1.0;
-    tmp += d->dc[d->level].vieworg.y;
-    return tmp;
+    double scale = (d->dc[d->level].ScaleInY ? d->dc[d->level].ScaleInY : 1.0);
+    double tmp;
+    tmp = ((((double) (py - d->dc[d->level].winorg.y))*scale) * d->E2IdirY + d->dc[d->level].vieworg.y) * d->D2PscaleY;
+    tmp -= d->ulCornerOutY; //The EMF boundary rectangle can be anywhere, place its upper left corner in the Inkscape upper left corner
+    return(tmp);
 }
 
 
 static double
 pix_to_x_point(PEMF_CALLBACK_DATA d, double px, double py)
 {
-    double ppx = _pix_x_to_point(d, px);
-    double ppy = _pix_y_to_point(d, py);
+    double wpx = px * d->dc[d->level].worldTransform.eM11 + py * d->dc[d->level].worldTransform.eM21 + d->dc[d->level].worldTransform.eDx;
+    double x   = _pix_x_to_point(d, wpx);
 
-    double x = ppx * d->dc[d->level].worldTransform.eM11 + ppy * d->dc[d->level].worldTransform.eM21 + d->dc[d->level].worldTransform.eDx;
-    x *= device_scale;
-    
     return x;
 }
 
 static double
 pix_to_y_point(PEMF_CALLBACK_DATA d, double px, double py)
 {
-    double ppx = _pix_x_to_point(d, px);
-    double ppy = _pix_y_to_point(d, py);
 
-    double y = ppx * d->dc[d->level].worldTransform.eM12 + ppy * d->dc[d->level].worldTransform.eM22 + d->dc[d->level].worldTransform.eDy;
-    y *= device_scale;
+    double wpy = px * d->dc[d->level].worldTransform.eM12 + py * d->dc[d->level].worldTransform.eM22 + d->dc[d->level].worldTransform.eDy;
+    double y   = _pix_y_to_point(d, wpy);
     
     return y;
+
 }
 
 static double
 pix_to_size_point(PEMF_CALLBACK_DATA d, double px)
 {
-    double ppx = px * (d->dc[d->level].ScaleInX ? d->dc[d->level].ScaleInX : 1.0);
-    double ppy = 0;
+    double ppx = px * (d->dc[d->level].ScaleInX ? d->dc[d->level].ScaleInX : 1.0) * d->D2PscaleX;
+    // double ppy = 0;
 
-    double dx = ppx * d->dc[d->level].worldTransform.eM11 + ppy * d->dc[d->level].worldTransform.eM21;
-    dx *= device_scale;
-    double dy = ppx * d->dc[d->level].worldTransform.eM12 + ppy * d->dc[d->level].worldTransform.eM22;
-    dy *= device_scale;
+    double dx = ppx * d->dc[d->level].worldTransform.eM11;  // + ppy * d->dc[d->level].worldTransform.eM21
+    double dy = ppx * d->dc[d->level].worldTransform.eM12;  // + ppy * d->dc[d->level].worldTransform.eM22
 
-    double tmp = sqrt(dx * dx + dy * dy);
+    double tmp =  sqrt(dx * dx + dy * dy);
     return tmp;
 }
 
@@ -1133,8 +1120,13 @@ select_extpen(PEMF_CALLBACK_DATA d, int index)
             d->dc[d->level].style.stroke_dasharray_set = 1;
             break;
         }
-        
         case U_PS_SOLID:
+/* includes these for now, some should maybe not be in here
+        case U_PS_NULL:
+        case  U_PS_INSIDEFRAME:
+        case  U_PS_ALTERNATE:
+        case  U_PS_STYLE_MASK:
+*/
         default:
         {
             d->dc[d->level].style.stroke_dasharray_set = 0;
@@ -1182,51 +1174,60 @@ select_extpen(PEMF_CALLBACK_DATA d, int index)
 
     d->dc[d->level].stroke_set = true;
 
-    if (pEmr->elp.elpPenStyle == U_PS_NULL) {
+    if (pEmr->elp.elpPenStyle == U_PS_NULL) { // draw nothing, but fill out all the values with something
+        double r, g, b;
+        r = SP_COLOR_U_TO_F( U_RGBAGetR(d->dc[d->level].textColor));
+        g = SP_COLOR_U_TO_F( U_RGBAGetG(d->dc[d->level].textColor));
+        b = SP_COLOR_U_TO_F( U_RGBAGetB(d->dc[d->level].textColor));
+        d->dc[d->level].style.stroke.value.color.set( r, g, b );
         d->dc[d->level].style.stroke_width.value = 0;
         d->dc[d->level].stroke_set = false;
-    } else if (pEmr->elp.elpWidth) {
-        int cur_level = d->level;
-        d->level = d->emf_obj[index].level;
-        double pen_width = pix_to_size_point( d, pEmr->elp.elpWidth );
-        d->level = cur_level;
-        d->dc[d->level].style.stroke_width.value = pen_width;
-    } else { // this stroke should always be rendered as 1 pixel wide, independent of zoom level (can that be done in SVG?)
-        //d->dc[d->level].style.stroke_width.value = 1.0;
-        int cur_level = d->level;
-        d->level = d->emf_obj[index].level;
-        double pen_width = pix_to_size_point( d, 1 );
-        d->level = cur_level;
-        d->dc[d->level].style.stroke_width.value = pen_width;
+        d->dc[d->level].stroke_mode = DRAW_PAINT;
     }
+    else {
+       if (pEmr->elp.elpWidth) {
+           int cur_level = d->level;
+           d->level = d->emf_obj[index].level;
+           double pen_width = pix_to_size_point( d, pEmr->elp.elpWidth );
+           d->level = cur_level;
+           d->dc[d->level].style.stroke_width.value = pen_width;
+       } else { // this stroke should always be rendered as 1 pixel wide, independent of zoom level (can that be done in SVG?)
+           //d->dc[d->level].style.stroke_width.value = 1.0;
+           int cur_level = d->level;
+           d->level = d->emf_obj[index].level;
+           double pen_width = pix_to_size_point( d, 1 );
+           d->level = cur_level;
+           d->dc[d->level].style.stroke_width.value = pen_width;
+       }
 
-    if(     pEmr->elp.elpBrushStyle == U_BS_SOLID){
-       double r, g, b;
-       r = SP_COLOR_U_TO_F( U_RGBAGetR(pEmr->elp.elpColor) );
-       g = SP_COLOR_U_TO_F( U_RGBAGetG(pEmr->elp.elpColor) );
-       b = SP_COLOR_U_TO_F( U_RGBAGetB(pEmr->elp.elpColor) );
-       d->dc[d->level].style.stroke.value.color.set( r, g, b );
-       d->dc[d->level].stroke_mode = DRAW_PAINT;
-       d->dc[d->level].stroke_set  = true;
-    }
-    else if(pEmr->elp.elpBrushStyle == U_BS_HATCHED){
-       d->dc[d->level].stroke_idx  = add_hatch(d, pEmr->elp.elpHatch, pEmr->elp.elpColor);
-       d->dc[d->level].stroke_mode = DRAW_PATTERN;
-       d->dc[d->level].stroke_set  = true;
-    }
-    else if(pEmr->elp.elpBrushStyle == U_BS_DIBPATTERN || pEmr->elp.elpBrushStyle == U_BS_DIBPATTERNPT){
-       d->dc[d->level].stroke_idx  = add_image(d, pEmr, pEmr->cbBits, pEmr->cbBmi, *(uint32_t *) &(pEmr->elp.elpColor), pEmr->offBits, pEmr->offBmi);
-       d->dc[d->level].stroke_mode = DRAW_IMAGE;
-       d->dc[d->level].stroke_set  = true;
-    }
-    else { // U_BS_PATTERN and anything strange that falls in, stroke is solid textColor
-       double r, g, b;
-       r = SP_COLOR_U_TO_F( U_RGBAGetR(d->dc[d->level].textColor));
-       g = SP_COLOR_U_TO_F( U_RGBAGetG(d->dc[d->level].textColor));
-       b = SP_COLOR_U_TO_F( U_RGBAGetB(d->dc[d->level].textColor));
-       d->dc[d->level].style.stroke.value.color.set( r, g, b );
-       d->dc[d->level].stroke_mode = DRAW_PAINT;
-       d->dc[d->level].stroke_set  = true;
+       if(     pEmr->elp.elpBrushStyle == U_BS_SOLID){
+          double r, g, b;
+          r = SP_COLOR_U_TO_F( U_RGBAGetR(pEmr->elp.elpColor) );
+          g = SP_COLOR_U_TO_F( U_RGBAGetG(pEmr->elp.elpColor) );
+          b = SP_COLOR_U_TO_F( U_RGBAGetB(pEmr->elp.elpColor) );
+          d->dc[d->level].style.stroke.value.color.set( r, g, b );
+          d->dc[d->level].stroke_mode = DRAW_PAINT;
+          d->dc[d->level].stroke_set  = true;
+       }
+       else if(pEmr->elp.elpBrushStyle == U_BS_HATCHED){
+          d->dc[d->level].stroke_idx  = add_hatch(d, pEmr->elp.elpHatch, pEmr->elp.elpColor);
+          d->dc[d->level].stroke_mode = DRAW_PATTERN;
+          d->dc[d->level].stroke_set  = true;
+       }
+       else if(pEmr->elp.elpBrushStyle == U_BS_DIBPATTERN || pEmr->elp.elpBrushStyle == U_BS_DIBPATTERNPT){
+          d->dc[d->level].stroke_idx  = add_image(d, pEmr, pEmr->cbBits, pEmr->cbBmi, *(uint32_t *) &(pEmr->elp.elpColor), pEmr->offBits, pEmr->offBmi);
+          d->dc[d->level].stroke_mode = DRAW_IMAGE;
+          d->dc[d->level].stroke_set  = true;
+       }
+       else { // U_BS_PATTERN and anything strange that falls in, stroke is solid textColor
+          double r, g, b;
+          r = SP_COLOR_U_TO_F( U_RGBAGetR(d->dc[d->level].textColor));
+          g = SP_COLOR_U_TO_F( U_RGBAGetG(d->dc[d->level].textColor));
+          b = SP_COLOR_U_TO_F( U_RGBAGetB(d->dc[d->level].textColor));
+          d->dc[d->level].style.stroke.value.color.set( r, g, b );
+          d->dc[d->level].stroke_mode = DRAW_PAINT;
+          d->dc[d->level].stroke_set  = true;
+       }
     }
 }
 
@@ -1295,6 +1296,12 @@ select_font(PEMF_CALLBACK_DATA d, int index)
     int cur_level = d->level;
     d->level = d->emf_obj[index].level;
     double font_size = pix_to_size_point( d, pEmr->elfw.elfLogFont.lfHeight );
+    /* snap the font_size to the nearest 1/32nd of a point.
+       (The size is converted from Pixels to points, snapped, and converted back.)
+       See the notes where d->D2Pscale[XY] are set for the reason why.
+       Typically this will set the font to the desired exact size.  If some peculiar size
+       was intended this will, at worst, make it .03125 off, which is unlikely to be a problem. */
+    font_size = round(20.0 * 0.8 * font_size)/(20.0 * 0.8);
     d->level = cur_level;
     d->dc[d->level].style.font_size.computed = font_size;
     d->dc[d->level].style.font_weight.value =
@@ -1315,9 +1322,18 @@ select_font(PEMF_CALLBACK_DATA d, int index)
     d->dc[d->level].style.font_style.value = (pEmr->elfw.elfLogFont.lfItalic ? SP_CSS_FONT_STYLE_ITALIC : SP_CSS_FONT_STYLE_NORMAL);
     d->dc[d->level].style.text_decoration.underline = pEmr->elfw.elfLogFont.lfUnderline;
     d->dc[d->level].style.text_decoration.line_through = pEmr->elfw.elfLogFont.lfStrikeOut;
-    if (d->dc[d->level].tstyle.font_family.value){ free(d->dc[d->level].tstyle.font_family.value); }
-    d->dc[d->level].tstyle.font_family.value =
-        U_Utf16leToUtf8((uint16_t *) (pEmr->elfw.elfLogFont.lfFaceName), U_LF_FACESIZE, NULL);
+    // malformed  EMF with empty filename may exist, ignore font change if encountered
+    char *ctmp = U_Utf16leToUtf8((uint16_t *) (pEmr->elfw.elfLogFont.lfFaceName), U_LF_FACESIZE, NULL);
+    if(ctmp){
+       if (d->dc[d->level].font_name){ free(d->dc[d->level].font_name); }
+       if(*ctmp){ 
+          d->dc[d->level].font_name = ctmp;
+       }
+       else {  // Malformed EMF might specify an empty font name
+          free(ctmp);
+          d->dc[d->level].font_name = strdup("Arial");  // Default font, EMF spec says device can pick whatever it wants
+       }
+    }
     d->dc[d->level].style.baseline_shift.value = ((pEmr->elfw.elfLogFont.lfEscapement + 3600) % 3600) / 10;   // use baseline_shift instead of text_transform to avoid overflow
 }
 
@@ -1348,6 +1364,140 @@ insert_object(PEMF_CALLBACK_DATA d, int index, int type, PU_ENHMETARECORD pObj)
     }
 }
 
+/* Identify probable Adobe Illustrator produced EMF files, which do strange things with the scaling. 
+   The few so far observed all had this format.
+*/
+int AI_hack(PU_EMRHEADER pEmr){
+  int ret=0;
+  char *ptr;
+  ptr = (char *)pEmr;
+  PU_EMRSETMAPMODE nEmr = (PU_EMRSETMAPMODE) (ptr + pEmr->emr.nSize);
+  char *string = NULL;
+  if(pEmr->nDescription)string = U_Utf16leToUtf8((uint16_t *)((char *) pEmr + pEmr->offDescription), pEmr->nDescription, NULL);
+  if(string){
+     if((pEmr->nDescription >= 13) && 
+        (0==strcmp("Adobe Systems",string)) &&
+        (nEmr->emr.iType == U_EMR_SETMAPMODE) && 
+        (nEmr->iMode == U_MM_ANISOTROPIC)){ ret=1; }
+     free(string);
+  }
+  return(ret);
+}
+
+/**
+  \fn create a UTF-32LE buffer and fill it with UNICODE unknown character
+  \param count number of copies of the Unicode unknown character to fill with
+*/
+uint32_t *unknown_chars(size_t count){
+   uint32_t *res = (uint32_t *) malloc(sizeof(uint32_t) * (count + 1));
+   if(!res)throw "Inkscape fatal memory allocation error - cannot continue";
+   for(uint32_t i=0; i<count; i++){ res[i] = 0xFFFD; }
+   res[count]=0;
+   return res;
+}
+
+/**
+  \fn store SVG for an image given the pixmap and various coordinate information
+  \param d
+  \param pEmr
+  \param dl       (double) destination left   in inkscape pixels
+  \param dt       (double) destination top    in inkscape pixels
+  \param dr       (double) destination right  in inkscape pixels
+  \param db       (double) destination bottom in inkscape pixels
+  \param sl       (int) source left in pixels in the src image
+  \param st       (int) source top  in pixels in the src image
+  \param iUsage
+  \param offBits
+  \param cbBits
+  \param offBmi
+  \param cbBmi
+*/
+void common_image_extraction(PEMF_CALLBACK_DATA d, void *pEmr,
+  double dl, double dt, double dr, double db, int sl, int st, int sw, int sh,  
+  uint32_t iUsage, uint32_t offBits, uint32_t cbBits, uint32_t offBmi, uint32_t cbBmi){
+            SVGOStringStream tmp_image;
+            tmp_image << " y=\"" << dt << "\"\n x=\"" << dl <<"\"\n ";
+
+            // The image ID is filled in much later when tmp_image is converted
+
+            tmp_image << " xlink:href=\"data:image/png;base64,";
+           
+            MEMPNG mempng; // PNG in memory comes back in this
+            mempng.buffer = NULL;
+           
+            char *rgba_px=NULL;     // RGBA pixels
+            char *sub_px=NULL;      // RGBA pixels, subarray
+            char *px=NULL;          // DIB pixels
+            uint32_t width, height, colortype, numCt, invert;
+            PU_RGBQUAD ct = NULL;
+            if(!cbBits || 
+               !cbBmi  || 
+               (iUsage != U_DIB_RGB_COLORS) || 
+               !get_DIB_params(  // this returns pointers and values, but allocates no memory
+                   pEmr,
+                   offBits,
+                   offBmi,
+                  &px,
+                  &ct,
+                  &numCt,
+                  &width,
+                  &height,
+                  &colortype,
+                  &invert
+               )){
+               if(sw == 0 || sl == 0){
+                  sw = width;
+                  sh = height;
+               }
+
+               if(!DIB_to_RGBA(
+                     px,         // DIB pixel array
+                     ct,         // DIB color table
+                     numCt,      // DIB color table number of entries
+                     &rgba_px,   // U_RGBA pixel array (32 bits), created by this routine, caller must free.
+                     width,      // Width of pixel array
+                     height,     // Height of pixel array
+                     colortype,  // DIB BitCount Enumeration
+                     numCt,      // Color table used if not 0
+                     invert      // If DIB rows are in opposite order from RGBA rows
+                     ) && 
+                  rgba_px)
+               {
+                  sub_px = RGBA_to_RGBA(
+                     rgba_px,    // full pixel array from DIB
+                     width,      // Width of pixel array
+                     height,     // Height of pixel array
+                     sl,st,      // starting point in pixel array
+                     &sw,&sh     // columns/rows to extract from the pixel array (output array size)
+                  );
+
+                  if(!sub_px)sub_px=rgba_px;
+                  toPNG(         // Get the image from the RGBA px into mempng
+                      &mempng,
+                      sw, sh,    // size of the extracted pixel array
+                      sub_px);
+                  free(sub_px);
+               }
+            }
+            if(mempng.buffer){
+                gchar *base64String = g_base64_encode((guchar*) mempng.buffer, mempng.size );
+                free(mempng.buffer);
+                tmp_image << base64String ;
+                g_free(base64String);
+            }
+            else {
+              // insert a random 3x4 blotch otherwise
+              tmp_image << "iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAIAAAA7ljmRAAAAA3NCSVQICAjb4U/gAAAALElEQVQImQXBQQ2AMAAAsUJQMSWI2H8qME1yMshojwrvGB8XcHKvR1XtOTc/8HENumHCsOMAAAAASUVORK5CYII=";
+            }
+               
+            tmp_image << "\"\n height=\"" << db-dt+1 << "\"\n width=\"" << dr-dl+1 << "\"\n";
+
+            *(d->outsvg) += "\n\t <image\n";
+            *(d->outsvg) += tmp_image.str().c_str();
+            *(d->outsvg) += "/> \n";
+            *(d->path) = "";
+}
+
 /**
   \fn myEnhMetaFileProc(char *contents, unsigned int length, PEMF_CALLBACK_DATA lpData)
   \param contents binary contents of an EMF file
@@ -1366,7 +1516,8 @@ int myEnhMetaFileProc(char *contents, unsigned int length, PEMF_CALLBACK_DATA d)
     if(off>=length)return(0);  //normally should exit from while after EMREOF sets OK to false.  
 
     lpEMFR = (PU_ENHMETARECORD)(contents + off);
-//  std::cout << "record type: " << lpEMFR->iType << " length: " << lpEMFR->nSize << "offset: " << off <<std::endl;
+//  Uncomment the following to track down toxic records
+//std::cout << "record type: " << lpEMFR->iType << " length: " << lpEMFR->nSize << " offset: " << off <<std::endl;
     off += lpEMFR->nSize;
  
     SVGOStringStream tmp_outsvg;
@@ -1374,7 +1525,8 @@ int myEnhMetaFileProc(char *contents, unsigned int length, PEMF_CALLBACK_DATA d)
     SVGOStringStream tmp_str;
     SVGOStringStream dbg_str;
     
-    emr_mask = emr_properties(lpEMFR->iType);
+    emr_mask = emr_properties(lpEMFR->iType); 
+    if(emr_mask == U_EMR_INVALID){ throw "Inkscape fatal memory allocation error - cannot continue"; }
 
 // std::cout << "BEFORE DRAW logic d->mask: " << std::hex << d->mask << " emr_mask: " << emr_mask << std::dec << std::endl;
 /*
@@ -1442,25 +1594,55 @@ std::cout << "BEFORE DRAW"
             tmp_outdef << "<svg\n";
             tmp_outdef << "  xmlns:svg=\"http://www.w3.org/2000/svg\"\n";
             tmp_outdef << "  xmlns=\"http://www.w3.org/2000/svg\"\n";
-            tmp_outdef << "  xmlns:xlink=\"http://www.w3.org/1999/xlink\"\n"; //mathog
+            tmp_outdef << "  xmlns:xlink=\"http://www.w3.org/1999/xlink\"\n";
+            tmp_outdef << "  xmlns:sodipodi=\"http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd\"\n"; // needed for sodipodi:role
             tmp_outdef << "  version=\"1.0\"\n";
 
-            d->xDPI = 2540;
-            d->yDPI = 2540;
 
-            d->dc[d->level].PixelsInX = pEmr->rclFrame.right;  // - pEmr->rclFrame.left;
-            d->dc[d->level].PixelsInY = pEmr->rclFrame.bottom; // - pEmr->rclFrame.top;
+            /* inclusive-inclusive, so the size is 1 more than the difference */
+            d->MM100InX  = pEmr->rclFrame.right    - pEmr->rclFrame.left + 1;
+            d->MM100InY  = pEmr->rclFrame.bottom   - pEmr->rclFrame.top  + 1;
+            d->PixelsInX = pEmr->rclBounds.right   - pEmr->rclBounds.left + 1;
+            d->PixelsInY = pEmr->rclBounds.bottom  - pEmr->rclBounds.top + 1;
 
-            d->MMX = d->dc[d->level].PixelsInX / 100.0;
-            d->MMY = d->dc[d->level].PixelsInY / 100.0;
+            /* 
+               calculate ratio of Inkscape dpi/EMF device dpi
+               This can cause problems later due to accuracy limits in the EMF.  A high resolution
+               EMF might have a final D2Pscale[XY] of 0.074998, and adjusting the (integer) device size
+               by 1 will still not get it exactly to 0.075.  Later when the font size is calculated it
+               can end up as 29.9992 or 22.4994 instead of the intended 30 or 22.5.  This is handled by
+               snapping font sizes to the nearest .01.  The best estimate is made by using both values.
+            */
+            if ((pEmr->szlMillimeters.cx + pEmr->szlMillimeters.cy) && ( pEmr->szlDevice.cx + pEmr->szlDevice.cy)){
+               d->E2IdirY = 1.0;  // assume MM_TEXT, if not, this will be changed later
+               d->D2PscaleX = d->D2PscaleY = PX_PER_MM *
+                   (double)(pEmr->szlMillimeters.cx + pEmr->szlMillimeters.cy)/
+                   (double)( pEmr->szlDevice.cx + pEmr->szlDevice.cy);
+            }
 
-            d->dc[d->level].PixelsOutX = d->MMX * PX_PER_MM;
-            d->dc[d->level].PixelsOutY = d->MMY * PX_PER_MM;
+            /*  Adobe Illustrator files set mapmode to MM_ANISOTROPIC and somehow or other this 
+                converts the rclFrame values from MM_HIMETRIC to MM_HIENGLISH, with another factor of 3 thrown
+                in for good measure.  Ours not to question why...
+            */
+            if(AI_hack(pEmr)){
+               d->MM100InX  *= 25.4/(10.0*3.0);
+               d->MM100InY  *= 25.4/(10.0*3.0);
+               d->D2PscaleX *= 25.4/(10.0*3.0);
+               d->D2PscaleY *= 25.4/(10.0*3.0);
+            }
 
-            // calculate ratio of Inkscape dpi/device dpi
-            if (pEmr->szlMillimeters.cx && pEmr->szlDevice.cx)
-                device_scale = PX_PER_MM*pEmr->szlMillimeters.cx/pEmr->szlDevice.cx;
-            
+            d->MMX = d->MM100InX / 100.0;
+            d->MMY = d->MM100InY / 100.0;
+
+            d->PixelsOutX = d->MMX * PX_PER_MM;
+            d->PixelsOutY = d->MMY * PX_PER_MM;
+
+            // Upper left corner, from header rclBounds, in device units, usually both 0, but not always
+            d->ulCornerInX = pEmr->rclBounds.left;
+            d->ulCornerInY = pEmr->rclBounds.top;
+            d->ulCornerOutX = d->ulCornerInX              * d->D2PscaleX;
+            d->ulCornerOutY = d->ulCornerInY * d->E2IdirY * d->D2PscaleY;  
+
             tmp_outdef <<
                 "  width=\"" << d->MMX << "mm\"\n" <<
                 "  height=\"" << d->MMY << "mm\">\n";
@@ -1666,8 +1848,8 @@ std::cout << "BEFORE DRAW"
             if (!d->dc[d->level].sizeWnd.cx || !d->dc[d->level].sizeWnd.cy) {
                 d->dc[d->level].sizeWnd = d->dc[d->level].sizeView;
                 if (!d->dc[d->level].sizeWnd.cx || !d->dc[d->level].sizeWnd.cy) {
-                    d->dc[d->level].sizeWnd.cx = d->dc[d->level].PixelsOutX;
-                    d->dc[d->level].sizeWnd.cy = d->dc[d->level].PixelsOutY;
+                    d->dc[d->level].sizeWnd.cx = d->PixelsOutX;
+                    d->dc[d->level].sizeWnd.cy = d->PixelsOutY;
                 }
             }
 
@@ -1675,18 +1857,19 @@ std::cout << "BEFORE DRAW"
                 d->dc[d->level].sizeView = d->dc[d->level].sizeWnd;
             }
 
-            d->dc[d->level].PixelsInX = d->dc[d->level].sizeWnd.cx;
-            d->dc[d->level].PixelsInY = d->dc[d->level].sizeWnd.cy;
-            
-            if (d->dc[d->level].PixelsInX && d->dc[d->level].PixelsInY) {
-                d->dc[d->level].ScaleInX = (double) d->dc[d->level].sizeView.cx / (double) d->dc[d->level].PixelsInX;
-                d->dc[d->level].ScaleInY = (double) d->dc[d->level].sizeView.cy / (double) d->dc[d->level].PixelsInY;
+            /* scales logical to EMF pixels, transfer a negative sign on Y, if any */
+            if (d->dc[d->level].sizeWnd.cx && d->dc[d->level].sizeWnd.cy) {
+                d->dc[d->level].ScaleInX = (double) d->dc[d->level].sizeView.cx / (double) d->dc[d->level].sizeWnd.cx;
+                d->dc[d->level].ScaleInY = (double) d->dc[d->level].sizeView.cy / (double) d->dc[d->level].sizeWnd.cy;
+                if(d->dc[d->level].ScaleInY < 0){
+                   d->dc[d->level].ScaleInY *= -1.0;
+                   d->E2IdirY = -1.0;
+                }
             }
             else {
                 d->dc[d->level].ScaleInX = 1;
                 d->dc[d->level].ScaleInY = 1;
             }
-
             break;
         }
         case U_EMR_SETWINDOWORGEX:
@@ -1708,27 +1891,28 @@ std::cout << "BEFORE DRAW"
             if (!d->dc[d->level].sizeView.cx || !d->dc[d->level].sizeView.cy) {
                 d->dc[d->level].sizeView = d->dc[d->level].sizeWnd;
                 if (!d->dc[d->level].sizeView.cx || !d->dc[d->level].sizeView.cy) {
-                    d->dc[d->level].sizeView.cx = d->dc[d->level].PixelsOutX;
-                    d->dc[d->level].sizeView.cy = d->dc[d->level].PixelsOutY;
+                    d->dc[d->level].sizeView.cx = d->PixelsOutX;
+                    d->dc[d->level].sizeView.cy = d->PixelsOutY;
                 }
             }
 
             if (!d->dc[d->level].sizeWnd.cx || !d->dc[d->level].sizeWnd.cy) {
                 d->dc[d->level].sizeWnd = d->dc[d->level].sizeView;
             }
-
-            d->dc[d->level].PixelsInX = d->dc[d->level].sizeWnd.cx;
-            d->dc[d->level].PixelsInY = d->dc[d->level].sizeWnd.cy;
             
-            if (d->dc[d->level].PixelsInX && d->dc[d->level].PixelsInY) {
-                d->dc[d->level].ScaleInX = (double) d->dc[d->level].sizeView.cx / (double) d->dc[d->level].PixelsInX;
-                d->dc[d->level].ScaleInY = (double) d->dc[d->level].sizeView.cy / (double) d->dc[d->level].PixelsInY;
+            /* scales logical to EMF pixels, transfer a negative sign on Y, if any */
+            if (d->dc[d->level].sizeWnd.cx && d->dc[d->level].sizeWnd.cy) {
+                d->dc[d->level].ScaleInX = (double) d->dc[d->level].sizeView.cx / (double) d->dc[d->level].sizeWnd.cx;
+                d->dc[d->level].ScaleInY = (double) d->dc[d->level].sizeView.cy / (double) d->dc[d->level].sizeWnd.cy;
+                if(d->dc[d->level].ScaleInY < 0){
+                   d->dc[d->level].ScaleInY *= -1.0;
+                   d->E2IdirY = -1.0;
+                }
             }
             else {
                 d->dc[d->level].ScaleInX = 1;
                 d->dc[d->level].ScaleInY = 1;
             }
-
             break;
         }
         case U_EMR_SETVIEWPORTORGEX:
@@ -1752,7 +1936,32 @@ std::cout << "BEFORE DRAW"
         }
         case U_EMR_SETPIXELV:            dbg_str << "<!-- U_EMR_SETPIXELV -->\n";          break;
         case U_EMR_SETMAPPERFLAGS:       dbg_str << "<!-- U_EMR_SETMAPPERFLAGS -->\n";     break;
-        case U_EMR_SETMAPMODE:           dbg_str << "<!-- U_EMR_SETMAPMODE -->\n";         break;
+        case U_EMR_SETMAPMODE:
+        {
+            dbg_str << "<!-- U_EMR_SETMAPMODE -->\n";
+            PU_EMRSETMAPMODE pEmr = (PU_EMRSETMAPMODE) lpEMFR;
+            switch (pEmr->iMode){
+               case U_MM_TEXT:
+               default:
+                  // Use all values from the header.
+                  break;
+               /* For all of the following the indicated scale this will be encoded in WindowExtEx/ViewportExtex
+                  and show up in ScaleIn[XY]
+               */
+               case U_MM_LOMETRIC:  // 1 LU = 0.1 mm,
+               case U_MM_HIMETRIC:  // 1 LU = 0.01 mm
+               case U_MM_LOENGLISH:  // 1 LU = 0.1 in
+               case U_MM_HIENGLISH:  // 1 LU = 0.01 in
+               case U_MM_TWIPS:  // 1 LU = 1/1440  in
+                  d->E2IdirY = -1.0;
+                  // Use d->D2Pscale[XY] values from the header.
+                  break;
+              case U_MM_ISOTROPIC: // ScaleIn[XY] should be set elsewhere by SETVIEWPORTEXTEX and SETWINDOWEXTEX
+              case U_MM_ANISOTROPIC:
+                  break;
+            }
+            break;
+        }
         case U_EMR_SETBKMODE:            dbg_str << "<!-- U_EMR_SETBKMODE -->\n";          break;
         case U_EMR_SETPOLYFILLMODE:
         {
@@ -1863,6 +2072,9 @@ std::cout << "BEFORE DRAW"
 
             if (d->level < EMF_MAX_DC) {
                 d->dc[d->level + 1] = d->dc[d->level];
+                if(d->dc[d->level].font_name){
+                  d->dc[d->level + 1].font_name = strdup(d->dc[d->level].font_name); // or memory access problems because font name pointer duplicated
+                }
                 d->level = d->level + 1;
             }
             break;
@@ -1881,8 +2093,13 @@ std::cout << "BEFORE DRAW"
                     d->level = d->level + pEmr->iRelative;
             }
             while (old_level > d->level) {
-                if (d->dc[old_level].style.stroke_dash.dash && (old_level==0 || (old_level>0 && d->dc[old_level].style.stroke_dash.dash!=d->dc[old_level-1].style.stroke_dash.dash)))
+                if (d->dc[old_level].style.stroke_dash.dash && (old_level==0 || (old_level>0 && d->dc[old_level].style.stroke_dash.dash!=d->dc[old_level-1].style.stroke_dash.dash))){
                     delete[] d->dc[old_level].style.stroke_dash.dash;
+                }
+                if(d->dc[old_level].font_name){
+                   free(d->dc[old_level].font_name); // else memory leak
+                   d->dc[old_level].font_name = NULL;
+                }
                 old_level--;
             }
             break;
@@ -2341,17 +2558,16 @@ std::cout << "BEFORE DRAW"
         case U_EMR_CLOSEFIGURE:
         {
             dbg_str << "<!-- U_EMR_CLOSEFIGURE -->\n";
-            if(!(d->mask & U_DRAW_CLOSED)){  // EMF could be malformed, with multiple closefigures on one path
-               tmp_path << "\n\tz";
-               d->mask |= U_DRAW_CLOSED;
-            }
+            // EMF may contain multiple closefigures on one path
+            tmp_path << "\n\tz";
+            d->mask |= U_DRAW_CLOSED;
             break;
         }
         case U_EMR_FILLPATH:
         {
             dbg_str << "<!-- U_EMR_FILLPATH -->\n";
             if(d->mask & U_DRAW_PATH){          // Operation only effects declared paths
-               if(!(d->mask & U_DRAW_CLOSED)){  // EMF could be malformed, with multiple closefigures on one path
+               if(!(d->mask & U_DRAW_CLOSED)){  // Close a path not explicitly closed by an EMRCLOSEFIGURE, otherwise fill makes no sense
                   tmp_path << "\n\tz";
                   d->mask |= U_DRAW_CLOSED;
                }
@@ -2364,7 +2580,7 @@ std::cout << "BEFORE DRAW"
         {
             dbg_str << "<!-- U_EMR_STROKEANDFILLPATH -->\n";
             if(d->mask & U_DRAW_PATH){          // Operation only effects declared paths
-               if(!(d->mask & U_DRAW_CLOSED)){  // EMF could be malformed, with multiple closefigures on one path
+               if(!(d->mask & U_DRAW_CLOSED)){  // Close a path not explicitly closed by an EMRCLOSEFIGURE, otherwise fill makes no sense
                   tmp_path << "\n\tz";
                   d->mask |= U_DRAW_CLOSED;
                }
@@ -2436,20 +2652,27 @@ std::cout << "BEFORE DRAW"
             dbg_str << "<!-- U_EMR_BITBLT -->\n";
 
             PU_EMRBITBLT pEmr = (PU_EMRBITBLT) lpEMFR;
+            double dl = pix_to_x_point( d, pEmr->Dest.x, pEmr->Dest.y);
+            double dt = pix_to_y_point( d, pEmr->Dest.x, pEmr->Dest.y);
+            double dr = pix_to_x_point( d, pEmr->Dest.x + pEmr->cDest.x, pEmr->Dest.y + pEmr->cDest.y);
+            double db = pix_to_y_point( d, pEmr->Dest.x + pEmr->cDest.x, pEmr->Dest.y + pEmr->cDest.y);
+            //source position within the bitmap, in pixels
+            int sl = pEmr->Src.x + pEmr->xformSrc.eDx;
+            int st = pEmr->Src.y + pEmr->xformSrc.eDy;
+            int sw = 0; // extract all of the image 
+            int sh = 0;
+            if(sl<0)sl=0;
+            if(st<0)st=0;
             // Treat all nonImage bitblts as a rectangular write.  Definitely not correct, but at
             // least it leaves objects where the operations should have been.
             if (!pEmr->cbBmiSrc) {
                 // should be an application of a DIBPATTERNBRUSHPT, use a solid color instead
-                double l = pix_to_x_point( d, pEmr->Dest.x, pEmr->Dest.y);
-                double t = pix_to_y_point( d, pEmr->Dest.x, pEmr->Dest.y);
-                double r = pix_to_x_point( d, pEmr->Dest.x + pEmr->cDest.x, pEmr->Dest.y + pEmr->cDest.y);
-                double b = pix_to_y_point( d, pEmr->Dest.x + pEmr->cDest.x, pEmr->Dest.y + pEmr->cDest.y);
 
                 SVGOStringStream tmp_rectangle;
-                tmp_rectangle << "\n\tM " << l << " " << t << " ";
-                tmp_rectangle << "\n\tL " << r << " " << t << " ";
-                tmp_rectangle << "\n\tL " << r << " " << b << " ";
-                tmp_rectangle << "\n\tL " << l << " " << b << " ";
+                tmp_rectangle << "\n\tM " << dl << " " << dt << " ";
+                tmp_rectangle << "\n\tL " << dr << " " << dt << " ";
+                tmp_rectangle << "\n\tL " << dr << " " << db << " ";
+                tmp_rectangle << "\n\tL " << dl << " " << db << " ";
                 tmp_rectangle << "\n\tz";
 
                 d->mask |= emr_mask;
@@ -2458,10 +2681,51 @@ std::cout << "BEFORE DRAW"
 
                 tmp_path <<   tmp_rectangle.str().c_str();
             }
+            else {
+                common_image_extraction(d,pEmr,dl,dt,dr,db,sl,st,sw,sh,
+                   pEmr->iUsageSrc, pEmr->offBitsSrc, pEmr->cbBitsSrc, pEmr->offBmiSrc, pEmr->cbBmiSrc);
+            }
             break;
         }
-        case U_EMR_STRETCHBLT:           dbg_str << "<!-- U_EMR_STRETCHBLT -->\n";           break;
-        case U_EMR_MASKBLT:              dbg_str << "<!-- U_EMR_MASKBLT -->\n";              break;
+        case U_EMR_STRETCHBLT:
+        {
+            dbg_str << "<!-- U_EMR_STRETCHBLT -->\n";
+            PU_EMRSTRETCHBLT pEmr = (PU_EMRSTRETCHBLT) lpEMFR;
+            // Always grab image, ignore modes.
+            if (pEmr->cbBmiSrc) {
+                double dl = pix_to_x_point( d, pEmr->Dest.x, pEmr->Dest.y);
+                double dt = pix_to_y_point( d, pEmr->Dest.x, pEmr->Dest.y);
+                double dr = pix_to_x_point( d, pEmr->Dest.x + pEmr->cDest.x, pEmr->Dest.y + pEmr->cDest.y);
+                double db = pix_to_y_point( d, pEmr->Dest.x + pEmr->cDest.x, pEmr->Dest.y + pEmr->cDest.y);
+                //source position within the bitmap, in pixels
+                int sl = pEmr->Src.x + pEmr->xformSrc.eDx;
+                int st = pEmr->Src.y + pEmr->xformSrc.eDy;
+                int sw = pEmr->cSrc.x; // extract the specified amount of the image 
+                int sh = pEmr->cSrc.y;
+                common_image_extraction(d,pEmr,dl,dt,dr,db,sl,st,sw,sh,
+                   pEmr->iUsageSrc, pEmr->offBitsSrc, pEmr->cbBitsSrc, pEmr->offBmiSrc, pEmr->cbBmiSrc);
+            }
+            break;
+        }
+        case U_EMR_MASKBLT:
+        {
+            dbg_str << "<!-- U_EMR_MASKBLT -->\n";
+            PU_EMRMASKBLT pEmr = (PU_EMRMASKBLT) lpEMFR;
+            // Always grab image, ignore masks and modes.
+            if (pEmr->cbBmiSrc) {
+                double dl = pix_to_x_point( d, pEmr->Dest.x, pEmr->Dest.y);
+                double dt = pix_to_y_point( d, pEmr->Dest.x, pEmr->Dest.y);
+                double dr = pix_to_x_point( d, pEmr->Dest.x + pEmr->cDest.x, pEmr->Dest.y + pEmr->cDest.y);
+                double db = pix_to_y_point( d, pEmr->Dest.x + pEmr->cDest.x, pEmr->Dest.y + pEmr->cDest.y);
+                int sl = pEmr->Src.x + pEmr->xformSrc.eDx;  //source position within the bitmap, in pixels
+                int st = pEmr->Src.y + pEmr->xformSrc.eDy;
+                int sw = 0; // extract all of the image
+                int sh = 0;
+                common_image_extraction(d,pEmr,dl,dt,dr,db,sl,st,sw,sh,
+                   pEmr->iUsageSrc, pEmr->offBitsSrc, pEmr->cbBitsSrc, pEmr->offBmiSrc, pEmr->cbBmiSrc);
+            }
+            break;
+        }
         case U_EMR_PLGBLT:               dbg_str << "<!-- U_EMR_PLGBLT -->\n";               break;
         case U_EMR_SETDIBITSTODEVICE:    dbg_str << "<!-- U_EMR_SETDIBITSTODEVICE -->\n";    break;
         case U_EMR_STRETCHDIBITS:
@@ -2473,78 +2737,16 @@ std::cout << "BEFORE DRAW"
             // user can sort out transparency later using Gimp, if need be.
 
             PU_EMRSTRETCHDIBITS pEmr = (PU_EMRSTRETCHDIBITS) lpEMFR;
-            double l = pix_to_x_point( d, pEmr->Dest.x,                 pEmr->Dest.y                 );
-            double t = pix_to_y_point( d, pEmr->Dest.x,                 pEmr->Dest.y                 );
-            double r = pix_to_x_point( d, pEmr->Dest.x + pEmr->cDest.x, pEmr->Dest.y + pEmr->cDest.y );
-            double b = pix_to_y_point( d, pEmr->Dest.x + pEmr->cDest.x, pEmr->Dest.y + pEmr->cDest.y );
-            SVGOStringStream tmp_image;
-            tmp_image << " y=\"" << t << "\"\n x=\"" << l <<"\"\n ";
-
-            // The image ID is filled in much later when tmp_image is converted
-
-            tmp_image << " xlink:href=\"data:image/png;base64,";
-           
-            MEMPNG mempng; // PNG in memory comes back in this
-            mempng.buffer = NULL;
-           
-            char *rgba_px=NULL;     // RGBA pixels
-            char *px=NULL;          // DIB pixels
-            uint32_t width, height, colortype, numCt, invert;
-            PU_RGBQUAD ct = NULL;
-            if(!pEmr->cbBitsSrc || 
-               !pEmr->cbBmiSrc  || 
-               (pEmr->iUsageSrc != U_DIB_RGB_COLORS) || 
-               !get_DIB_params(  // this returns pointers and values, but allocates no memory
-                   pEmr,
-                   pEmr->offBitsSrc,
-                   pEmr->offBmiSrc,
-                  &px,
-                  &ct,
-                  &numCt,
-                  &width,
-                  &height,
-                  &colortype,
-                  &invert
-               )){
-
-               if(!DIB_to_RGBA(
-                     px,         // DIB pixel array
-                     ct,         // DIB color table
-                     numCt,      // DIB color table number of entries
-                     &rgba_px,   // U_RGBA pixel array (32 bits), created by this routine, caller must free.
-                     width,      // Width of pixel array
-                     height,     // Height of pixel array
-                     colortype,  // DIB BitCount Enumeration
-                     numCt,      // Color table used if not 0
-                     invert      // If DIB rows are in opposite order from RGBA rows
-                     ) && 
-                  rgba_px)
-               {
-                  toPNG(         // Get the image from the RGBA px into mempng
-                      &mempng,
-                      width, height,
-                      rgba_px,
-                      4 * width * height);
-                  free(rgba_px);
-               }
-            }
-            if(mempng.buffer){
-                gchar *base64String = g_base64_encode((guchar*) mempng.buffer, mempng.size );
-                free(mempng.buffer);
-                tmp_image << base64String ;
-                g_free(base64String);
-            }
-            else {
-              // insert a random 3x4 blotch otherwise
-              tmp_image << "iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAIAAAA7ljmRAAAAA3NCSVQICAjb4U/gAAAALElEQVQImQXBQQ2AMAAAsUJQMSWI2H8qME1yMshojwrvGB8XcHKvR1XtOTc/8HENumHCsOMAAAAASUVORK5CYII=";
-            }
-               
-            tmp_image << "\"\n height=\"" << b-t+1 << "\"\n width=\"" << r-l+1 << "\"\n";
-
-            *(d->outsvg) += "\n\t <image\n";
-            *(d->outsvg) += tmp_image.str().c_str();
-            *(d->outsvg) += "/> \n";
-            *(d->path) = "";
+            double dl = pix_to_x_point( d, pEmr->Dest.x,                 pEmr->Dest.y                 );
+            double dt = pix_to_y_point( d, pEmr->Dest.x,                 pEmr->Dest.y                 );
+            double dr = pix_to_x_point( d, pEmr->Dest.x + pEmr->cDest.x, pEmr->Dest.y + pEmr->cDest.y );
+            double db = pix_to_y_point( d, pEmr->Dest.x + pEmr->cDest.x, pEmr->Dest.y + pEmr->cDest.y );
+            int sl = pEmr->Src.x;  //source position within the bitmap, in pixels
+            int st = pEmr->Src.y;
+            int sw = pEmr->cSrc.x; // extract the specified amount of the image 
+            int sh = pEmr->cSrc.y;
+            common_image_extraction(d,pEmr,dl,dt,dr,db,sl,st,sw,sh,
+               pEmr->iUsageSrc, pEmr->offBitsSrc, pEmr->cbBitsSrc, pEmr->offBmiSrc, pEmr->cbBmiSrc);
 
             dbg_str << "<!-- U_EMR_STRETCHDIBITS -->\n";
             break;
@@ -2603,32 +2805,45 @@ std::cout << "BEFORE DRAW"
 
             uint32_t *dup_wt = NULL;
 
-            if(       lpEMFR->iType==U_EMR_EXTTEXTOUTA){
+            if(       lpEMFR->iType==U_EMR_EXTTEXTOUTA){ 
+               /* These should be JUST ASCII, but they might not be...
+                  If it holds Utf-8 or plain ASCII the first call will succeed.
+                  If not, assume that it holds Latin1.
+                  If that fails then someting is really screwed up!
+               */
                dup_wt = U_Utf8ToUtf32le((char *) pEmr + pEmr->emrtext.offString, pEmr->emrtext.nChars, NULL);
+               if(!dup_wt)dup_wt = U_Latin1ToUtf32le((char *) pEmr + pEmr->emrtext.offString, pEmr->emrtext.nChars, NULL);
+               if(!dup_wt)dup_wt = unknown_chars(pEmr->emrtext.nChars);
             }
             else if(  lpEMFR->iType==U_EMR_EXTTEXTOUTW){
                dup_wt = U_Utf16leToUtf32le((uint16_t *)((char *) pEmr + pEmr->emrtext.offString), pEmr->emrtext.nChars, NULL);
+               if(!dup_wt)dup_wt = unknown_chars(pEmr->emrtext.nChars);
             }
-            else { // U_ERM_SMALLTEXTOUT
+            else { // U_EMR_SMALLTEXTOUT
                if(pEmrS->fuOptions & U_ETO_SMALL_CHARS){
                   dup_wt = U_Utf8ToUtf32le((char *) pEmrS + roff, cChars, NULL);
                }
                else {
                   dup_wt = U_Utf16leToUtf32le((uint16_t *)((char *) pEmrS + roff), cChars, NULL);
                }
+               if(!dup_wt)dup_wt = unknown_chars(cChars);
             }
-
 
             msdepua(dup_wt); //convert everything in Microsoft's private use area.  For Symbol, Wingdings, Dingbats
 
-            if(NonToUnicode(dup_wt, d->dc[d->level].tstyle.font_family.value)){
-               g_free(d->dc[d->level].tstyle.font_family.value);
-               d->dc[d->level].tstyle.font_family.value =  g_strdup("Times New Roman");
+            if(NonToUnicode(dup_wt, d->dc[d->level].font_name)){
+               g_free(d->dc[d->level].font_name);
+               d->dc[d->level].font_name =  g_strdup("Times New Roman");
             }
 
             char *ansi_text;
             ansi_text = (char *) U_Utf32leToUtf8((uint32_t *)dup_wt, 0, NULL);
             free(dup_wt);
+            // Empty string or starts with an invalid escape/control sequence, which is bogus text.  Throw it out before g_markup_escape_text can make things worse
+            if(*((uint8_t *)ansi_text) <= 0x1F){
+               free(ansi_text);
+               ansi_text=NULL;
+            }
 
             if (ansi_text) {
 //                gchar *p = ansi_text;
@@ -2668,28 +2883,31 @@ std::cout << "BEFORE DRAW"
                 // EMF textalignment is a bit strange: 0x6 is center, 0x2 is right, 0x0 is left, the value 0x4 is also drawn left
                 int lcr = ((d->dc[d->level].textAlign & U_TA_CENTER) == U_TA_CENTER) ? 2 : ((d->dc[d->level].textAlign & U_TA_CENTER) == U_TA_LEFT) ? 0 : 1;
 
-                ts << "    <text\n";
-//                ts << "        id=\"" << (d->id++) << "\"\n";
-                ts << "        xml:space=\"preserve\"\n";
-                ts << "        x=\"" << x << "\"\n";
-                ts << "        y=\"" << y << "\"\n";
+                ts << "<text\n";
+                ts << "  xml:space=\"preserve\"\n";
+                ts << "    x=\"" << x << "\"\n";
+                ts << "    y=\"" << y << "\"\n";
                 if (d->dc[d->level].style.baseline_shift.value) {
-                    ts << "        transform=\""
+                    ts << "    transform=\""
                        << "rotate(-" << d->dc[d->level].style.baseline_shift.value
                        << " " << x << " " << y << ")"
                        << "\"\n";
                 }
-                ts << "        style=\""
+                ts << "><tspan sodipodi:role=\"line\"";
+                ts << "    x=\"" << x << "\"\n";
+                ts << "    y=\"" << y << "\"\n";
+                ts << "    style=\""
                    << "font-size:" << fabs(d->dc[d->level].style.font_size.computed) << "px;"
                    << tmp
                    << "font-style:" << (i ? "italic" : "normal") << ";"
                    << "font-weight:" << (b ? "bold" : "normal") << ";"
                    << "text-align:" << (lcr==2 ? "center" : lcr==1 ? "end" : "start") << ";"
                    << "text-anchor:" << (lcr==2 ? "middle" : lcr==1 ? "end" : "start") << ";"
-                   << "font-family:" << d->dc[d->level].tstyle.font_family.value << ";"
+                   << "font-family:" << d->dc[d->level].font_name << ";"
                    << "\"\n";
                 ts << "    >";
                 ts << escaped_text;
+                ts << "</tspan>";
                 ts << "</text>\n";
                 
                 *(d->outsvg) += ts.str().c_str();
@@ -2900,10 +3118,8 @@ std::cout << "BEFORE DRAW"
         case U_EMR_SETICMMODE:
         {
             dbg_str << "<!-- U_EMR_SETICMMODE -->\n";
-#if 0
-            PU_EMRENABLEICM pEmr = (PU_EMRENABLEICM) lpEMFR;
+            PU_EMRSETICMMODE pEmr = (PU_EMRSETICMMODE) lpEMFR;
             ICMmode= pEmr->iMode;
-#endif //0
             break;
         }
         case U_EMR_CREATECOLORSPACE:     dbg_str << "<!-- U_EMR_CREATECOLORSPACE -->\n";     break;
@@ -2926,6 +3142,12 @@ std::cout << "BEFORE DRAW"
         case U_EMR_TRANSPARENTBLT:       dbg_str << "<!-- U_EMR_TRANSPARENTBLT -->\n";       break;
         case U_EMR_UNDEF117:             dbg_str << "<!-- U_EMR_UNDEF117 -->\n";             break;
         case U_EMR_GRADIENTFILL:         dbg_str << "<!-- U_EMR_GRADIENTFILL -->\n";         break;
+        /* Gradient fill is doable for rectangles because those correspond to linear gradients.  However,
+           the general case for the triangle fill, with a different color in each corner of the triangle,
+           has no SVG equivalent and cannot be easily emulated with SVG gradients. Except that so far
+           I (DM) have not been able to make an EMF with a rectangular gradientfill record which is not
+           completely toxic to other EMF readers.  So far now, do nothing.
+        */
         case U_EMR_SETLINKEDUFIS:        dbg_str << "<!-- U_EMR_SETLINKEDUFIS -->\n";        break;
         case U_EMR_SETTEXTJUSTIFICATION: dbg_str << "<!-- U_EMR_SETTEXTJUSTIFICATION -->\n"; break;
         case U_EMR_COLORMATCHTOTARGETW:  dbg_str << "<!-- U_EMR_COLORMATCHTOTARGETW -->\n";  break;
@@ -2941,7 +3163,8 @@ std::cout << "BEFORE DRAW"
 
     }  //end of while
 // When testing, uncomment the following to show the final SVG derived from the EMF
-// std::cout << *(d->outsvg) << std::endl; 
+//std::cout << *(d->outsvg) << std::endl; 
+    (void) emr_properties(U_EMR_INVALID);  // force the release of the lookup table memory, returned value is irrelevant
 
     return 1;
 }
@@ -2971,6 +3194,12 @@ typedef struct
 } APMHEADER, *PAPMHEADER;
 #pragma pack( pop )
 
+void free_emf_strings(EMF_STRINGS name){
+   if(name.count){
+      for(int i=0; i< name.count; i++){ free(name.strings[i]); }
+      free(name.strings);
+   }
+}
 
 SPDocument *
 Emf::open( Inkscape::Extension::Input * /*mod*/, const gchar *uri )
@@ -2979,13 +3208,18 @@ Emf::open( Inkscape::Extension::Input * /*mod*/, const gchar *uri )
 
     memset(&d, 0, sizeof(d));
 
+    for(int i = 0; i < EMF_MAX_DC+1; i++){  // be sure all values and pointers are empty to start with
+       memset(&(d.dc[i]),0,sizeof(EMF_DEVICE_CONTEXT));
+    }
+    
     d.dc[0].worldTransform.eM11 = 1.0;
     d.dc[0].worldTransform.eM12 = 0.0;
     d.dc[0].worldTransform.eM21 = 0.0;
     d.dc[0].worldTransform.eM22 = 1.0;
     d.dc[0].worldTransform.eDx  = 0.0;
     d.dc[0].worldTransform.eDy  = 0.0;
-    
+    d.dc[0].font_name = strdup("Arial");  // Default font, EMF spec says device can pick whatever it wants
+        
     if (uri == NULL) {
         return NULL;
     }
@@ -2999,6 +3233,9 @@ Emf::open( Inkscape::Extension::Input * /*mod*/, const gchar *uri )
     d.arcdir            = U_AD_COUNTERCLOCKWISE;
     d.dwRop2            = U_R2_COPYPEN;
     d.dwRop3            = 0;
+    d.E2IdirY           = 1.0;
+    d.D2PscaleX         = 1.0;
+    d.D2PscaleY         = 1.0;
     d.hatches.size      = 0;
     d.hatches.count     = 0;
     d.hatches.strings   = NULL;
@@ -3028,9 +3265,9 @@ Emf::open( Inkscape::Extension::Input * /*mod*/, const gchar *uri )
     delete d.path;
     delete d.outdef;
     delete d.defs;
-    if(d.hatches.count){ free(d.hatches.strings); }
-    if(d.images.count){  free(d.images.strings);  }
-
+    free_emf_strings(d.hatches);
+    free_emf_strings(d.images);
+    
     if (d.emf_obj) {
         int i;
         for (i=0; i<d.n_obj; i++)
@@ -3040,6 +3277,10 @@ Emf::open( Inkscape::Extension::Input * /*mod*/, const gchar *uri )
     
     if (d.dc[0].style.stroke_dash.dash)
         delete[] d.dc[0].style.stroke_dash.dash;
+     
+    for(int i=0; i<=d.level;i++){
+      if(d.dc[i].font_name)free(d.dc[i].font_name);
+    }
 
     return doc;
 }

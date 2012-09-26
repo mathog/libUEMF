@@ -10,12 +10,15 @@
   on the native byte order.
 
   The only function here which should be called directly is U_emf_endian(), and then,except for testing purposes, only on a BE machine.
+
+  Many variables are initialized to zero even though they will always be set because
+  some versions of gcc give spurious "may be used uninitialized" warnings otherwise.
 */
 
 /*
 File:      uemf_endian.h
-Version:   0.0.8
-Date:      17-SEP-2012
+Version:   0.0.9
+Date:      19-SEP-2012
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2012 David Mathog and California Institute of Technology (Caltech)
@@ -286,7 +289,7 @@ void extlogpen_swap(
       PU_EXTLOGPEN elp,
       int torev
    ){
-   int count;
+   int count=0;
    U_swap4(elp,3);                          // elpPenStyle elpWidth elpBrushStyle
    // ordered bytes:                           elpColor
    if(torev){
@@ -373,7 +376,7 @@ void pixelformatdescriptor_swap(
 /**
     \brief Convert a Pointer to a U_EMRTEXT record
     \param pemt      Pointer to a U_EMRTEXT record 
-    \param record    Pointer to the start of the record which contains this U_ERMTEXT
+    \param record    Pointer to the start of the record which contains this U_EMRTEXT
     \param torev     1 for native to reversed, 0 for reversed to native
 */
 void emrtext_swap(
@@ -382,9 +385,9 @@ void emrtext_swap(
       int        torev
    ){
    int        off;
-   uint32_t   count;
-   uint32_t   offDx;
-   uint32_t   fOptions;
+   uint32_t   count=0;
+   uint32_t   offDx=0;
+   uint32_t   fOptions=0;
    pointl_swap(&(pemt->ptlReference),1);    // ptlReference
    if(torev){
        count    = pemt->nChars;
@@ -438,7 +441,7 @@ void core5_swap(char *record, int torev){
 
 // Functions with the same form starting with U_EMRPOLYBEZIER_swap
 void core1_swap(char *record, int torev){
-   int count;
+   int count=0;
    PU_EMRPOLYLINETO pEmr = (PU_EMRPOLYLINETO) (record);
    if(torev){
       count = pEmr->cptl;
@@ -454,7 +457,8 @@ void core1_swap(char *record, int torev){
 
 // Functions with the same form starting with U_EMRPOLYPOLYLINE_swap
 void core2_swap(char *record, int torev){
-   int count, nPolys;
+   int count=0;
+   int nPolys=0;
    PU_EMRPOLYPOLYLINE pEmr = (PU_EMRPOLYPOLYLINE) (record);
    if(torev){
       count  = pEmr->cptl;
@@ -488,7 +492,7 @@ void core4_swap(char *record, int torev){
 
 // Functions with the same form starting with U_EMRPOLYBEZIER16_swap
 void core6_swap(char *record, int torev){
-   int count;
+   int count=0;
    PU_EMRPOLYBEZIER16 pEmr = (PU_EMRPOLYBEZIER16) (record);
    if(torev){
       count = pEmr->cpts;
@@ -530,7 +534,8 @@ void core9_swap(char *record, int torev){
 
 // Functions with the same form starting with U_EMRPOLYPOLYLINE16_swap
 void core10_swap(char *record, int torev){
-   int count, nPolys;
+   int count=0;
+   int nPolys=0;
    PU_EMRPOLYPOLYLINE16 pEmr = (PU_EMRPOLYPOLYLINE16) (record);
    if(torev){
       count  = pEmr->cpts;
@@ -549,7 +554,9 @@ void core10_swap(char *record, int torev){
 
 // Functions with the same form starting with  U_EMRINVERTRGN_swap and U_EMRPAINTRGN_swap,
 void core11_swap(char *record, int torev){
-   int roff,nextroff, limit;
+   int roff=0;
+   int nextroff=0;
+   int limit=0;
    PU_EMRINVERTRGN pEmr = (PU_EMRINVERTRGN) (record);
    roff = 0;
    if(torev){
@@ -635,24 +642,52 @@ void U_EMRNOTIMPLEMENTED_swap(char *record, int torev){
 
 // U_EMRHEADER                1
 void U_EMRHEADER_swap(char *record, int torev){
-   core5_swap(record, torev);
-
+   int nDesc,offDesc,nSize,cbPix,offPix;
    PU_EMRHEADER pEmr = (PU_EMRHEADER)(record);
+   if(torev){
+     nSize = pEmr->emr.nSize;
+   }
+   core5_swap(record, torev);
+   if(!torev){
+     nSize = pEmr->emr.nSize;
+   }
+
    rectl_swap(&(pEmr->rclBounds),2);        // rclBounds rclFrame
    U_swap4(&(pEmr->dSignature), 4);         // dSignature nVersion nBytes nRecords
    U_swap2(&(pEmr->nHandles), 2);           // nHandlessReserved
+   if(torev){
+      nDesc = pEmr->nDescription;
+      offDesc = pEmr->offDescription;
+   } 
    U_swap4(&(pEmr->nDescription), 3);       // nDescription offDescription nPalEntries 
+   if(!torev){
+      nDesc = pEmr->nDescription;
+      offDesc = pEmr->offDescription;
+   } 
    // UTF16-LE                                 Description
    sizel_swap(&(pEmr->szlDevice), 2);       // szlDevice szlMillimeters
-   if(torev && pEmr->cbPixelFormat){
-      pixelformatdescriptor_swap( (PU_PIXELFORMATDESCRIPTOR) (record + pEmr->offPixelFormat));
+   if((nDesc && (offDesc >= 100)) || 
+      (!offDesc && nSize >= 100)
+     ){
+     if(torev){
+        cbPix = pEmr->cbPixelFormat;
+        offPix = pEmr->offPixelFormat;
+        if(cbPix)pixelformatdescriptor_swap( (PU_PIXELFORMATDESCRIPTOR) (record + pEmr->offPixelFormat));
+     }
+     U_swap4(&(pEmr->cbPixelFormat), 2);      // cbPixelFormat offPixelFormat 
+     if(!torev){
+        cbPix = pEmr->cbPixelFormat;
+        offPix = pEmr->offPixelFormat;
+        if(cbPix)pixelformatdescriptor_swap( (PU_PIXELFORMATDESCRIPTOR) (record + pEmr->offPixelFormat));
+     }
+     U_swap4(&(pEmr->bOpenGL), 1);            // bOpenGL
+     if((nDesc && (offDesc >= 108)) || 
+        (cbPix && (offPix >=108)) ||
+        (!offDesc && !cbPix && nSize >= 108)
+       ){
+         sizel_swap(&(pEmr->szlMicrometers), 1);  // szlMicrometers
+       }
    }
-   U_swap4(&(pEmr->cbPixelFormat), 2);      // cbPixelFormat offPixelFormat 
-   if(!torev && pEmr->cbPixelFormat){
-      pixelformatdescriptor_swap( (PU_PIXELFORMATDESCRIPTOR) (record + pEmr->offPixelFormat));
-   }
-   U_swap4(&(pEmr->bOpenGL), 1);            // bOpenGL
-   sizel_swap(&(pEmr->szlMicrometers), 1);  // szlMicrometers
 }
 
 // U_EMRPOLYBEZIER                       2
@@ -718,7 +753,8 @@ void U_EMRSETBRUSHORGEX_swap(char *record, int torev){
 
 // U_EMREOF                  14
 void U_EMREOF_swap(char *record, int torev){
-   int off,cbPalEntries;
+   int off=0;
+   int cbPalEntries=0;
    core5_swap(record, torev);
    PU_EMREOF pEmr = (PU_EMREOF)(record);
    if(torev){
@@ -989,7 +1025,7 @@ void U_EMRARCTO_swap(char *record, int torev){
 
 // U_EMRPOLYDRAW             56
 void U_EMRPOLYDRAW_swap(char *record, int torev){
-   int count;
+   int count=0;
    core5_swap(record, torev);
    PU_EMRPOLYDRAW pEmr = (PU_EMRPOLYDRAW)(record);
    
@@ -1079,7 +1115,9 @@ void U_EMRCOMMENT_swap(char *record, int torev){
 
 // U_EMRFILLRGN              71
 void U_EMRFILLRGN_swap(char *record, int torev){
-   int roff, nextroff, limit;
+   int roff=0;
+   int nextroff=0;
+   int limit=0;
    roff=0;
    PU_EMRFILLRGN pEmr = (PU_EMRFILLRGN)(record);
    if(torev){
@@ -1109,7 +1147,9 @@ void U_EMRFILLRGN_swap(char *record, int torev){
 
 // U_EMRFRAMERGN             72
 void U_EMRFRAMERGN_swap(char *record, int torev){
-   int roff, nextroff, limit;
+   int roff=0;
+   int nextroff=0;
+   int limit=0;
    PU_EMRFRAMERGN pEmr = (PU_EMRFRAMERGN)(record);
    roff = 0;
    if(torev){
@@ -1150,7 +1190,9 @@ void U_EMRPAINTRGN_swap(char *record, int torev){
 
 // U_EMREXTSELECTCLIPRGN     75
 void U_EMREXTSELECTCLIPRGN_swap(char *record, int torev){
-   int roff, nextroff, limit;
+   int roff=0;
+   int nextroff=0;
+   int limit=0;
    PU_EMREXTSELECTCLIPRGN pEmr = (PU_EMREXTSELECTCLIPRGN) (record);
    roff = 0;
    if(torev){
@@ -1383,7 +1425,7 @@ void U_EMRPOLYPOLYGON16_swap(char *record, int torev){
 
 // U_EMRPOLYDRAW16           92
 void U_EMRPOLYDRAW16_swap(char *record, int torev){
-   int count;
+   int count=0;
    core5_swap(record, torev);
    PU_EMRPOLYDRAW16 pEmr = (PU_EMRPOLYDRAW16)(record);
    if(torev){
@@ -1472,7 +1514,8 @@ void U_EMRPIXELFORMAT_swap(char *record, int torev){
 
 // U_EMRSMALLTEXTOUT        108
 void U_EMRSMALLTEXTOUT_swap(char *record, int torev){
-   int roff,fuOptions;
+   int roff=0;
+   int fuOptions=0;
    core5_swap(record, torev);
    PU_EMRSMALLTEXTOUT pEmr = (PU_EMRSMALLTEXTOUT)(record);
    if(torev){
@@ -1521,7 +1564,9 @@ void U_EMRTRANSPARENTBLT_swap(char *record, int torev){
 #define U_EMRUNDEF117_swap U_EMRNOTIMPLEMENTED_swap
 // U_EMRGRADIENTFILL        118
 void U_EMRGRADIENTFILL_swap(char *record, int torev){
-   int nTriVert,nGradObj,ulMode;
+   int nTriVert=0;
+   int nGradObj=0;
+   int ulMode=0;
    core5_swap(record, torev);
    PU_EMRGRADIENTFILL pEmr = (PU_EMRGRADIENTFILL)(record);
    if(torev){

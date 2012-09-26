@@ -13,8 +13,8 @@
 
 /*
 File:      uemf.h
-Version:   0.0.8
-Date:      14-SEP-2012
+Version:   0.0.9
+Date:      26-OCT-2012
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2012 David Mathog and California Institute of Technology (Caltech)
@@ -188,6 +188,8 @@ extern "C" {
 
 #define U_EMR_MIN 1                      //!< Minimum U_EMR_ value.
 #define U_EMR_MAX 122                    //!< Maximum U_EMR_ value.  Not much beyond 104 is implemented
+
+#define U_EMR_INVALID         0xFFFFFFFF //!< Not any valid U_EMF_ value
 /** @} */
 
 /** \defgroup U_DRAW_PROPERTIES
@@ -307,11 +309,20 @@ extern "C" {
 #define U_DIB_PAL_COLORS   1
 /** @} */
 
-/** \defgroup U_EMR_COMMENT_PublicCommentIdentifier_Qualifiers EmrComment Enumeration
-  For U_EMR_COMMENT_* PublicCommentIdentifier fields
+/** \defgroup U_EMRCOMMENT_* cIdent Qualifiers
+  For U_EMRCOMMENT_* cIdent fields
   @{
 */
-#define U_EMR_COMMENT_IDENTIFIER        0x43494447
+#define U_EMR_COMMENT_PUBLIC            0x43494447
+#define U_EMR_COMMENT_SPOOL             0x00000000
+#define U_EMR_COMMENT_SPOOLFONTDEF      0x544F4E46
+#define U_EMR_COMMENT_EMFPLUSRECORD     0x2B464D45
+/** @} */
+
+/** \defgroup U_EMR_COMMENT_PUBLIC, AKA  EMRComment Enumeration
+  For U_EMRCOMMENT_PUBLI pcIdent fields
+  @{
+*/
 #define U_EMR_COMMENT_WINDOWS_METAFILE  0x80000001
 #define U_EMR_COMMENT_BEGINGROUP        0x00000002
 #define U_EMR_COMMENT_ENDGROUP          0x00000003
@@ -1940,7 +1951,7 @@ typedef struct {
   U_EMRSETSTRETCHBLTMODE, *PU_EMRSETSTRETCHBLTMODE,  //!< StretchMode Enumeration
   U_EMRSETTEXTALIGN,      *PU_EMRSETTEXTALIGN,       //!< TextAlignment enumeration
   U_EMRSELECTCLIPPATH,    *PU_EMRSELECTCLIPPATH,     //!< RegionMode Enumeration
-  U_EMRSETICMMODE,        *PU_ERMSETICMMODE,         //!< ICMMode Enumeration
+  U_EMRSETICMMODE,        *PU_EMRSETICMMODE,         //!< ICMMode Enumeration
   U_EMRSETLAYOUT,         *PU_EMRSETLAYOUT;          //!< Mirroring Enumeration
 
 /* Index  23 */
@@ -2166,6 +2177,30 @@ typedef struct {
     U_CBDATA            cbData;             //!< Number of bytes in comment
     uint8_t             Data[1];            //!< Comment (any binary data, interpretation is program specific)
 } U_EMRCOMMENT, *PU_EMRCOMMENT;             //!< AKA GDICOMMENT
+
+/* variant comment types */
+typedef struct {
+    U_EMR               emr;                //!< U_EMR
+    U_CBDATA            cbData;             //!< Number of bytes in comment
+    uint32_t            cIdent;             //!< Comment identifier, must be U_EMR_COMMENT_EMFPLUSRECORD
+    uint8_t             Data[1];            //!< EMF Plus record
+} U_EMRCOMMENT_EMFPLUS, *PU_EMRCOMMENT_EMFPLUS;    //!< EMF Plus comment
+
+typedef struct {
+    U_EMR               emr;                //!< U_EMR
+    U_CBDATA            cbData;             //!< Number of bytes in comment
+    uint32_t            cIdent;             //!< Comment identifier, must be U_EMR_COMMENT_SPOOL
+    uint32_t            esrIdent;           //!< EMFSpoolRecordIdentifier, may be  U_EMR_COMMENT_SPOOLFONTDEF
+    uint8_t             Data[1];            //!< EMF Spool records
+} U_EMRCOMMENT_SPOOL, *PU_EMRCOMMENT_SPOOL;    //!< EMF Spool comment
+
+typedef struct {
+    U_EMR               emr;                //!< U_EMR
+    U_CBDATA            cbData;             //!< Number of bytes in comment
+    uint32_t            cIdent;             //!< Comment identifier, must be U_EMR_COMMENT_PUBLIC
+    uint32_t            pcIdent;            //!< Public Comment Identifier, from EMRComment Enumeration
+    uint8_t             Data[1];            //!< Public comment data
+} U_EMRCOMMENT_PUBLIC, *PU_EMRCOMMENT_PUBLIC;    //!< EMF Public comment
 
 /* Index  71 */
 typedef struct {
@@ -2667,6 +2702,7 @@ int       get_DIB_params( void *pEmr, uint32_t offBitsSrc, uint32_t offBmiSrc,
                uint32_t *width, uint32_t *height, uint32_t *colortype, uint32_t *invert );
 int       DIB_to_RGBA(char *px, PU_RGBQUAD ct, int numCt,
                char **rgba_px, int w, int h, uint32_t colortype, int use_ct, int invert);
+char     *RGBA_to_RGBA(char *rgba_px, int w, int h, int sl, int st, int *ew, int *eh);
 
 int   device_size(const int xmm, const int ymm, const float dpmm, U_SIZEL *szlDev, U_SIZEL *szlMm);
 int   drawing_size(const int xmm, const int yum, const float dpmm, U_RECTL *rclBounds, U_RECTL *rclFrame);
