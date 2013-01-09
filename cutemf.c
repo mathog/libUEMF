@@ -1,6 +1,4 @@
-/** @file
- @brief Enhanced Metafile cutter
- 
+/**  
  Utility program which may be used to delete specific records from an EMF file.  This is probably
  not very userful for most people, but is handy when debugging problem EMF files sent in from other
  people, which otherwise could not be easily modified.  The first record cannot be removed.  The last

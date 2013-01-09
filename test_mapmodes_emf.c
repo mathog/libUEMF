@@ -5,13 +5,13 @@
  
  Compile with 
  
-    gcc -g -Wall -O0 -o test_mapmodes -Wall -I. test_mapmodes.c uemf.c uemf_endian.c -lm 
+    gcc -g -Wall -O0 -o test_mapmodes_emf -Wall -I. test_mapmodes_emf.c uemf.c uemf_endian.c -lm 
 
  
 
-File:      test_mapmodes.c
-Version:   0.0.9
-Date:      07-NOV-2012
+File:      test_mapmodes_emf.c
+Version:   0.0.10
+Date:      20-DEC-2012
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2012 David Mathog and California Institute of Technology (Caltech)
@@ -138,22 +138,22 @@ void setinumeric(int *val,int *numarg,int argc,char **argv,char * label){
 }
 
 void emit_help(void){
-   printf("test_mapmodes\n");
+   printf("test_mapmodes_emf\n");
    printf("  Purpose:  generates test files in all EMF map modes.\n");
-   printf("  Usage:    test_mapmodes -oX N1 -oY N2\n");
+   printf("  Usage:    test_mapmodes_emf -oX N1 -oY N2\n");
    printf("     -h, --h, -?, --?, -help, --help\n");
    printf("                Prints this message\n");
    printf("     -oX,-oY    EMR HEADER Bounds fields offsets in device units. Default 0.\n");
    printf("     -VX,-VY    Viewport offsets in device units.  Default 0.\n");
    printf("                (Window offsets are calculated from oX,VX and oY,VY)\n");
    printf("  Examples:\n");
-   printf("      test_mapmodes\n");
+   printf("      test_mapmodes_emf\n");
    printf("         Generate a set of test files with no offset to the header boundary\n");
    printf("         and both Viewport and Window origins at (0,0).\n");
-   printf("      test_mapmodes -oX 2000 -oY 1000\n");
+   printf("      test_mapmodes_emf -oX 2000 -oY 1000\n");
    printf("         Generate a set of test files with the header boundary offset by (2000,1000)\n");
    printf("         and both Viewport and Window origins at (0,0).\n");
-   printf("      test_mapmodes -oX 2000 -vX 1000\n");
+   printf("      test_mapmodes_emf -oX 2000 -vX 1000\n");
    printf("         Generate a set of test files with the header boundary offset by (2000,0),\n");
    printf("         the Viewport origin at (1000,0), and Window origins at (set to match,0).\n");
    printf("  Creates:\n");
@@ -318,7 +318,7 @@ int main(int argc, char *argv[]){
       rclFrame.right    += outX * 0.05;
       rclFrame.bottom   += outY * 0.05;
 
-      Description = U_Utf8ToUtf16le("Test EMF\1produced by libUEMF test_mapmodes program\1",0, NULL); 
+      Description = U_Utf8ToUtf16le("Test EMF\1produced by libUEMF test_mapmodes_emf program\1",0, NULL); 
       cbDesc = 2 + wchar16len(Description);  // also count the final terminator
       (void) U_Utf16leEdit(Description, U_Utf16le(1), 0);
       rec = U_EMRHEADER_set( rclBounds,  rclFrame,  NULL, cbDesc, Description, szlDev, szlMm, 0);

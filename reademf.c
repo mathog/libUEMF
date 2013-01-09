@@ -1,6 +1,4 @@
-/** @file
- @brief Enhanced Metafile reader
- 
+/** 
  Example program demonstrating how to code a program to read an EMF file.  This example just examines the contents
  of one EMF file and prints the contents record by record, showing all fields (except for bitmaps).  
 
@@ -9,16 +7,16 @@
  
  Writes description of the EMF file to stdout.
 
- Build with:  gcc -Wall -o reademf reademf.c uemf.c uemf_print.c uemf_endian.c -lm
+ Build with:  gcc -Wall -o reademf reademf.c uemf.c uemf_print.c uemf_endian.c uemf_utf.c -lm
 */
 
 /*
 File:      reademf.c
-Version:   0.0.3
-Date:      24-JUL-2012
+Version:   0.0.4
+Date:      11-JAN-2013
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
-Copyright: 2012 David Mathog and California Institute of Technology (Caltech)
+Copyright: 2013 David Mathog and California Institute of Technology (Caltech)
 */
 
 #include <stdlib.h>
@@ -34,9 +32,13 @@ Copyright: 2012 David Mathog and California Institute of Technology (Caltech)
 int myEnhMetaFileProc(char *contents, size_t length)
 {
     size_t   off=0;
+    size_t   result;
     int      OK =1;
     int      recnum=0;
     PU_ENHMETARECORD pEmr;
+    char     *blimit;
+    
+    blimit = contents + length;
 
     while(OK){
        if(off>=length){ //normally should exit from while after EMREOF sets OK to false, this is most likely a corrupt EMF
@@ -50,10 +52,18 @@ int myEnhMetaFileProc(char *contents, size_t length)
           printf("WARNING: EMF file does not begin with an EMR_HEADER record\n");
        }
        
-       OK = U_emf_onerec_print(contents, recnum, off);
-       off += pEmr->nSize;
-       recnum++;
-
+       result = U_emf_onerec_print(contents, blimit, recnum, off);
+       if(result == (size_t) -1){
+          printf("ABORTING on invalid record - corrupt file?\n");
+          OK=0;
+       }
+       else if(!result){
+          OK=0;
+       }
+       else {
+          off += result;
+          recnum++;
+       }
     }  //end of while
 
     return 1;

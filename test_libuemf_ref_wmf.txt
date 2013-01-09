@@ -1,0 +1,2409 @@
+WMF, Placeable: HWmf:0 Box:LTRB{0,0,14031,9921} Inch:1200 Checksum:17327 Calculated_Checksum:17327
+   RecType:1
+   16bit words in record:9
+   Version:768
+   16bit words in file:13307
+   Objects:80
+   Largest Record:372
+   nMembers:0
+U_WMR_SETWINDOWEXT            record:    0 type: 12 offset:      40 size:      10
+   W,H             {14031,9921}
+U_WMR_SETWINDOWORG            record:    1 type: 11 offset:      50 size:      10
+   X,Y             {0,0}
+U_WMR_SETMAPMODE              record:    2 type:  3 offset:      60 size:       8
+   iMode:          0x0008
+U_WMR_SETBKMODE               record:    3 type:  2 offset:      68 size:      10
+   iMode:          0x0001
+U_WMR_SETPOLYFILLMODE         record:    4 type:  6 offset:      78 size:      10
+   iMode:          0x0002
+U_WMR_SETROP2                 record:    5 type:  4 offset:      88 size:      10
+   iMode:          0x000D
+U_WMR_ESCAPE                  record:    6 type: 38 offset:      98 size:      14
+   EscType:SETLINECAP
+   nBytes:4
+   Data:2
+U_WMR_ESCAPE                  record:    7 type: 38 offset:     112 size:      14
+   EscType:SETLINEJOIN
+   nBytes:4
+   Data:0
+U_WMR_ESCAPE                  record:    8 type: 38 offset:     126 size:      14
+   EscType:SETMITERLIMIT
+   nBytes:4
+   Data:5
+U_WMR_CREATEBRUSHINDIRECT     record:    9 type:252 offset:     140 size:      14
+   Brush:Style:0x0000 Color:{255,255,173} 
+U_WMR_CREATEBRUSHINDIRECT     record:   10 type:252 offset:     154 size:      14
+   Brush:Style:0x0000 Color:{196,127,255} 
+U_WMR_CREATEBRUSHINDIRECT     record:   11 type:252 offset:     168 size:      14
+   Brush:Style:0x0000 Color:{128,128,128} 
+U_WMR_CREATEBRUSHINDIRECT     record:   12 type:252 offset:     182 size:      14
+   Brush:Style:0x0000 Color:{139,0,0} 
+U_WMR_CREATEBRUSHINDIRECT     record:   13 type:252 offset:     196 size:      14
+   Brush:Style:0x0001 Null
+U_WMR_CREATEPENINDIRECT       record:   14 type:250 offset:     210 size:      16
+   Pen:Style:0x00000000 Width:1 Color{0,0,0} 
+U_WMR_CREATEPENINDIRECT       record:   15 type:250 offset:     226 size:      16
+   Pen:Style:0x00000000 Width:1 Color{255,255,255} 
+U_WMR_CREATEPENINDIRECT       record:   16 type:250 offset:     242 size:      16
+   Pen:Style:0x00000000 Width:50 Color{127,255,196} 
+U_WMR_CREATEPENINDIRECT       record:   17 type:250 offset:     258 size:      16
+   Pen:Style:0x00000000 Width:10 Color{255,0,0} 
+U_WMR_CREATEPENINDIRECT       record:   18 type:250 offset:     274 size:      16
+   Pen:Style:0x00000000 Width:10 Color{139,0,0} 
+U_WMR_CREATEPENINDIRECT       record:   19 type:250 offset:     290 size:      16
+   Pen:Style:0x00000000 Width:200 Color{139,0,0} 
+U_WMR_CREATEPENINDIRECT       record:   20 type:250 offset:     306 size:      16
+   Pen:Style:0x00000005 Width:0 Color{0,0,0} 
+U_WMR_CREATEFONTINDIRECT      record:   21 type:251 offset:     322 size:      36
+   Font:Height:-400 Width:0 Escapement:0 Orientation:0 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_CREATEFONTINDIRECT      record:   22 type:251 offset:     358 size:      36
+   Font:Height:-30 Width:0 Escapement:0 Orientation:0 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_CREATEFONTINDIRECT      record:   23 type:251 offset:     394 size:      30
+   Font:Height:-300 Width:0 Escapement:0 Orientation:0 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Arial 
+U_WMR_SELECTOBJECT            record:   24 type: 45 offset:     424 size:       8
+   Object:         5
+U_WMR_SELECTOBJECT            record:   25 type: 45 offset:     432 size:       8
+   Object:         0
+U_WMR_RECTANGLE               record:   26 type: 27 offset:     440 size:      14
+   Rect:LTRB{14031,9921,0,0} 
+U_WMR_SETTEXTALIGN            record:   27 type: 46 offset:     454 size:      10
+   iMode:          0x0000
+U_WMR_SELECTOBJECT            record:   28 type: 45 offset:     464 size:       8
+   Object:         12
+U_WMR_EXTTEXTOUT              record:   29 type: 50 offset:     472 size:      56
+   X,Y:{9700,200}
+   Length:14
+   Opts:0000
+   String:<libUEMF v0.1.0>
+   Dx:240:240:240:240:240:240:240:240:240:240:240:240:240:240:
+U_WMR_SETTEXTALIGN            record:   30 type: 46 offset:     528 size:      10
+   iMode:          0x0000
+U_WMR_SELECTOBJECT            record:   31 type: 45 offset:     538 size:       8
+   Object:         12
+U_WMR_EXTTEXTOUT              record:   32 type: 50 offset:     546 size:      62
+   X,Y:{9700,500}
+   Length:16
+   Opts:0000
+   String:<January 23, 2013>
+   Dx:240:240:240:240:240:240:240:240:240:240:240:240:240:240:240:240:
+U_WMR_SETTEXTALIGN            record:   33 type: 46 offset:     608 size:      10
+   iMode:          0x0000
+U_WMR_SELECTOBJECT            record:   34 type: 45 offset:     618 size:       8
+   Object:         12
+U_WMR_EXTTEXTOUT              record:   35 type: 50 offset:     626 size:      38
+   X,Y:{9700,800}
+   Length:8
+   Opts:0000
+   String:<WMF test>
+   Dx:240:240:240:240:240:240:240:240:
+U_WMR_SELECTOBJECT            record:   36 type: 45 offset:     664 size:       8
+   Object:         1
+U_WMR_SELECTOBJECT            record:   37 type: 45 offset:     672 size:       8
+   Object:         7
+U_WMR_ELLIPSE                 record:   38 type: 24 offset:     680 size:      14
+   Rect:LTRB{100,1300,400,1600} 
+U_WMR_RECTANGLE               record:   39 type: 27 offset:     694 size:      14
+   Rect:LTRB{500,1300,800,1600} 
+U_WMR_ESCAPE                  record:   40 type: 38 offset:     708 size:      10
+   EscType:BEGIN_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_MOVETO                  record:   41 type: 20 offset:     718 size:      10
+   X,Y             {900,1300}
+U_WMR_LINETO                  record:   42 type: 19 offset:     728 size:      10
+   X,Y             {1200,1500}
+U_WMR_LINETO                  record:   43 type: 19 offset:     738 size:      10
+   X,Y             {1200,1700}
+U_WMR_LINETO                  record:   44 type: 19 offset:     748 size:      10
+   X,Y             {900,1500}
+U_WMR_LINETO                  record:   45 type: 19 offset:     758 size:      10
+   X,Y             {900,1300}
+U_WMR_ESCAPE                  record:   46 type: 38 offset:     768 size:      10
+   EscType:END_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_ARC                     record:   47 type: 23 offset:     778 size:      22
+   yRadial2:1600
+   xRadial2:1300
+   yRadial1:1300
+   xRadial1:1450
+   Rect:LTRB{1300,1300,1600,1600} 
+U_WMR_SELECTOBJECT            record:   48 type: 45 offset:     800 size:       8
+   Object:         8
+U_WMR_SELECTOBJECT            record:   49 type: 45 offset:     808 size:       8
+   Object:         3
+U_WMR_RECTANGLE               record:   50 type: 27 offset:     816 size:      14
+   Rect:LTRB{1500,1300,1800,1600} 
+U_WMR_SELECTOBJECT            record:   51 type: 45 offset:     830 size:       8
+   Object:         1
+U_WMR_SELECTOBJECT            record:   52 type: 45 offset:     838 size:       8
+   Object:         7
+U_WMR_CHORD                   record:   53 type: 48 offset:     846 size:      22
+   yRadial2:1600
+   xRadial2:2050
+   yRadial1:1300
+   xRadial1:1900
+   Rect:LTRB{1900,1300,2200,1600} 
+U_WMR_PIE                     record:   54 type: 26 offset:     868 size:      22
+   yRadial2:1300
+   xRadial2:2200
+   yRadial1:1600
+   xRadial1:2350
+   Rect:LTRB{2200,1300,2500,1600} 
+U_WMR_PATBLT                  record:   55 type: 29 offset:     890 size:      18
+    Rop3:00F00021
+    W,H:300,300
+    dst X,Y:{2600,1300}
+U_WMR_SELECTOBJECT            record:   56 type: 45 offset:     908 size:       8
+   Object:         5
+U_WMR_SELECTOBJECT            record:   57 type: 45 offset:     916 size:       8
+   Object:         2
+U_WMR_SETPOLYFILLMODE         record:   58 type:  6 offset:     924 size:      10
+   iMode:          0x0002
+U_WMR_ESCAPE                  record:   59 type: 38 offset:     934 size:      10
+   EscType:BEGIN_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_POLYGON                 record:   60 type: 36 offset:     944 size:      28
+  Points: [0]:{3100,1300} [1]:{3200,1600} [2]:{3000,1400} [3]:{3200,1400} [4]:{3000,1600} 
+U_WMR_ESCAPE                  record:   61 type: 38 offset:     972 size:      10
+   EscType:END_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_SETPOLYFILLMODE         record:   62 type:  6 offset:     982 size:      10
+   iMode:          0x0001
+U_WMR_ESCAPE                  record:   63 type: 38 offset:     992 size:      10
+   EscType:BEGIN_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_POLYGON                 record:   64 type: 36 offset:    1002 size:      28
+  Points: [0]:{3400,1300} [1]:{3500,1600} [2]:{3300,1400} [3]:{3500,1400} [4]:{3300,1600} 
+U_WMR_ESCAPE                  record:   65 type: 38 offset:    1030 size:      10
+   EscType:END_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_SELECTOBJECT            record:   66 type: 45 offset:    1040 size:       8
+   Object:         8
+U_WMR_SELECTOBJECT            record:   67 type: 45 offset:    1048 size:       8
+   Object:         3
+U_WMR_RECTANGLE               record:   68 type: 27 offset:    1056 size:      14
+   Rect:LTRB{100,1800,400,2100} 
+U_WMR_SELECTOBJECT            record:   69 type: 45 offset:    1070 size:       8
+   Object:         8
+U_WMR_SELECTOBJECT            record:   70 type: 45 offset:    1078 size:       8
+   Object:         2
+U_WMR_ESCAPE                  record:   71 type: 38 offset:    1086 size:      10
+   EscType:BEGIN_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_POLYGON                 record:   72 type: 36 offset:    1096 size:      32
+  Points: [0]:{700,1800} [1]:{800,1900} [2]:{800,2000} [3]:{700,2100} [4]:{600,2000} [5]:{600,1900} 
+U_WMR_ESCAPE                  record:   73 type: 38 offset:    1128 size:      10
+   EscType:END_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_ESCAPE                  record:   74 type: 38 offset:    1138 size:      10
+   EscType:BEGIN_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_POLYLINE                record:   75 type: 37 offset:    1148 size:      32
+  Points: [0]:{1200,1800} [1]:{1300,1900} [2]:{1300,2000} [3]:{1200,2100} [4]:{1100,2000} [5]:{1100,1900} 
+U_WMR_ESCAPE                  record:   76 type: 38 offset:    1180 size:      10
+   EscType:END_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_SELECTOBJECT            record:   77 type: 45 offset:    1190 size:       8
+   Object:         8
+U_WMR_SELECTOBJECT            record:   78 type: 45 offset:    1198 size:       8
+   Object:         3
+U_WMR_RECTANGLE               record:   79 type: 27 offset:    1206 size:      14
+   Rect:LTRB{1600,1800,1900,2100} 
+U_WMR_SELECTOBJECT            record:   80 type: 45 offset:    1220 size:       8
+   Object:         8
+U_WMR_SELECTOBJECT            record:   81 type: 45 offset:    1228 size:       8
+   Object:         3
+U_WMR_RECTANGLE               record:   82 type: 27 offset:    1236 size:      14
+   Rect:LTRB{2100,1800,2400,2100} 
+U_WMR_SELECTOBJECT            record:   83 type: 45 offset:    1250 size:       8
+   Object:         8
+U_WMR_SELECTOBJECT            record:   84 type: 45 offset:    1258 size:       8
+   Object:         3
+U_WMR_RECTANGLE               record:   85 type: 27 offset:    1266 size:      14
+   Rect:LTRB{2600,1800,2900,2100} 
+U_WMR_SELECTOBJECT            record:   86 type: 45 offset:    1280 size:       8
+   Object:         8
+U_WMR_SELECTOBJECT            record:   87 type: 45 offset:    1288 size:       8
+   Object:         3
+U_WMR_RECTANGLE               record:   88 type: 27 offset:    1296 size:      14
+   Rect:LTRB{3100,1800,3400,2100} 
+U_WMR_SELECTOBJECT            record:   89 type: 45 offset:    1310 size:       8
+   Object:         8
+U_WMR_SELECTOBJECT            record:   90 type: 45 offset:    1318 size:       8
+   Object:         2
+U_WMR_POLYGON                 record:   91 type: 36 offset:    1326 size:      32
+  Points: [0]:{3700,1800} [1]:{3800,1900} [2]:{3800,2000} [3]:{3700,2100} [4]:{3600,2000} [5]:{3600,1900} 
+U_WMR_POLYLINE                record:   92 type: 37 offset:    1358 size:      32
+  Points: [0]:{4200,1800} [1]:{4300,1900} [2]:{4300,2000} [3]:{4200,2100} [4]:{4100,2000} [5]:{4100,1900} 
+U_WMR_SELECTOBJECT            record:   93 type: 45 offset:    1390 size:       8
+   Object:         8
+U_WMR_SELECTOBJECT            record:   94 type: 45 offset:    1398 size:       8
+   Object:         3
+U_WMR_RECTANGLE               record:   95 type: 27 offset:    1406 size:      14
+   Rect:LTRB{4600,1800,4900,2100} 
+U_WMR_SELECTOBJECT            record:   96 type: 45 offset:    1420 size:       8
+   Object:         8
+U_WMR_SELECTOBJECT            record:   97 type: 45 offset:    1428 size:       8
+   Object:         3
+U_WMR_RECTANGLE               record:   98 type: 27 offset:    1436 size:      14
+   Rect:LTRB{5100,1800,5400,2100} 
+U_WMR_SELECTOBJECT            record:   99 type: 45 offset:    1450 size:       8
+   Object:         8
+U_WMR_SELECTOBJECT            record:  100 type: 45 offset:    1458 size:       8
+   Object:         2
+U_WMR_ESCAPE                  record:  101 type: 38 offset:    1466 size:      10
+   EscType:BEGIN_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_POLYGON                 record:  102 type: 36 offset:    1476 size:      56
+  Points: [0]:{350,2800} [1]:{287,2750} [2]:{250,2713} [3]:{200,2700} [4]:{150,2713} [5]:{113,2750} [6]:{100,2800} [7]:{113,2850} [8]:{150,2887} [9]:{200,2900} [10]:{250,2887} [11]:{287,2850} 
+U_WMR_ESCAPE                  record:  103 type: 38 offset:    1532 size:      10
+   EscType:END_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_ESCAPE                  record:  104 type: 38 offset:    1542 size:      10
+   EscType:BEGIN_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_POLYGON                 record:  105 type: 36 offset:    1552 size:      56
+  Points: [0]:{660,2794} [1]:{595,2745} [2]:{557,2709} [3]:{504,2698} [4]:{450,2714} [5]:{409,2753} [6]:{393,2804} [7]:{405,2855} [8]:{443,2891} [9]:{496,2902} [10]:{550,2886} [11]:{591,2847} 
+U_WMR_ESCAPE                  record:  106 type: 38 offset:    1608 size:      10
+   EscType:END_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_ESCAPE                  record:  107 type: 38 offset:    1618 size:      10
+   EscType:BEGIN_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_POLYGON                 record:  108 type: 36 offset:    1628 size:      56
+  Points: [0]:{953,2786} [1]:{893,2736} [2]:{859,2697} [3]:{809,2687} [4]:{757,2707} [5]:{716,2752} [6]:{698,2809} [7]:{707,2864} [8]:{741,2903} [9]:{791,2913} [10]:{843,2893} [11]:{884,2848} 
+U_WMR_ESCAPE                  record:  109 type: 38 offset:    1684 size:      10
+   EscType:END_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_ESCAPE                  record:  110 type: 38 offset:    1694 size:      10
+   EscType:BEGIN_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_POLYGON                 record:  111 type: 36 offset:    1704 size:      56
+  Points: [0]:{1239,2800} [1]:{1181,2736} [2]:{1146,2689} [3]:{1100,2673} [4]:{1054,2689} [5]:{1019,2736} [6]:{1007,2800} [7]:{1019,2864} [8]:{1054,2911} [9]:{1100,2927} [10]:{1146,2911} [11]:{1181,2864} 
+U_WMR_ESCAPE                  record:  112 type: 38 offset:    1760 size:      10
+   EscType:END_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_ESCAPE                  record:  113 type: 38 offset:    1770 size:      10
+   EscType:BEGIN_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_POLYGON                 record:  114 type: 36 offset:    1780 size:      56
+  Points: [0]:{1549,2832} [1]:{1476,2757} [2]:{1431,2703} [3]:{1379,2676} [4]:{1332,2681} [5]:{1303,2719} [6]:{1301,2779} [7]:{1324,2843} [8]:{1369,2897} [9]:{1421,2924} [10]:{1468,2919} [11]:{1497,2881} 
+U_WMR_ESCAPE                  record:  115 type: 38 offset:    1836 size:      10
+   EscType:END_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_ESCAPE                  record:  116 type: 38 offset:    1846 size:      10
+   EscType:BEGIN_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_POLYGON                 record:  117 type: 36 offset:    1856 size:      56
+  Points: [0]:{1893,2843} [1]:{1798,2777} [2]:{1740,2731} [3]:{1671,2704} [4]:{1611,2702} [5]:{1574,2727} [6]:{1571,2771} [7]:{1602,2823} [8]:{1660,2869} [9]:{1729,2896} [10]:{1789,2898} [11]:{1826,2873} 
+U_WMR_ESCAPE                  record:  118 type: 38 offset:    1912 size:      10
+   EscType:END_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_ESCAPE                  record:  119 type: 38 offset:    1922 size:      10
+   EscType:BEGIN_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_POLYGON                 record:  120 type: 36 offset:    1932 size:      56
+  Points: [0]:{2232,2800} [1]:{2134,2765} [2]:{2077,2739} [3]:{2000,2730} [4]:{1923,2739} [5]:{1866,2765} [6]:{1845,2800} [7]:{1866,2835} [8]:{1923,2861} [9]:{2000,2870} [10]:{2077,2861} [11]:{2134,2835} 
+U_WMR_ESCAPE                  record:  121 type: 38 offset:    1988 size:      10
+   EscType:END_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_ESCAPE                  record:  122 type: 38 offset:    1998 size:      10
+   EscType:BEGIN_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_POLYGON                 record:  123 type: 36 offset:    2008 size:      56
+  Points: [0]:{2506,2732} [1]:{2442,2718} [2]:{2408,2703} [3]:{2345,2714} [4]:{2270,2748} [5]:{2203,2796} [6]:{2162,2845} [7]:{2158,2882} [8]:{2192,2897} [9]:{2255,2886} [10]:{2330,2852} [11]:{2397,2804} 
+U_WMR_ESCAPE                  record:  124 type: 38 offset:    2064 size:      10
+   EscType:END_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_ESCAPE                  record:  125 type: 38 offset:    2074 size:      10
+   EscType:BEGIN_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_POLYGON                 record:  126 type: 36 offset:    2084 size:      56
+  Points: [0]:{2718,2718} [1]:{2696,2682} [2]:{2687,2650} [3]:{2654,2659} [4]:{2608,2704} [5]:{2559,2777} [6]:{2521,2854} [7]:{2504,2918} [8]:{2513,2950} [9]:{2546,2941} [10]:{2592,2896} [11]:{2641,2823} 
+U_WMR_ESCAPE                  record:  127 type: 38 offset:    2140 size:      10
+   EscType:END_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_ESCAPE                  record:  128 type: 38 offset:    2150 size:      10
+   EscType:BEGIN_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_POLYGON                 record:  129 type: 36 offset:    2160 size:      56
+  Points: [0]:{2950,2800} [1]:{2929,2709} [2]:{2917,2642} [3]:{2900,2618} [4]:{2883,2642} [5]:{2871,2709} [6]:{2867,2800} [7]:{2871,2891} [8]:{2883,2958} [9]:{2900,2982} [10]:{2917,2958} [11]:{2929,2891} 
+U_WMR_ESCAPE                  record:  130 type: 38 offset:    2216 size:      10
+   EscType:END_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_ESCAPE                  record:  131 type: 38 offset:    2226 size:      10
+   EscType:BEGIN_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_POLYGON                 record:  132 type: 36 offset:    2236 size:      56
+  Points: [0]:{3291,2913} [1]:{3215,2792} [2]:{3165,2709} [3]:{3125,2652} [4]:{3104,2634} [5]:{3110,2661} [6]:{3139,2725} [7]:{3185,2808} [8]:{3235,2891} [9]:{3275,2948} [10]:{3296,2966} [11]:{3290,2939} 
+U_WMR_ESCAPE                  record:  133 type: 38 offset:    2292 size:      10
+   EscType:END_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_ESCAPE                  record:  134 type: 38 offset:    2302 size:      10
+   EscType:BEGIN_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_POLYGON                 record:  135 type: 36 offset:    2312 size:      56
+  Points: [0]:{3725,2930} [1]:{3587,2850} [2]:{3500,2800} [3]:{3413,2750} [4]:{3350,2713} [5]:{3326,2700} [6]:{3350,2713} [7]:{3413,2750} [8]:{3500,2800} [9]:{3587,2850} [10]:{3650,2887} [11]:{3674,2900} 
+U_WMR_ESCAPE                  record:  136 type: 38 offset:    2368 size:      10
+   EscType:END_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_ESCAPE                  record:  137 type: 38 offset:    2378 size:      10
+   EscType:BEGIN_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_POLYGON                 record:  138 type: 36 offset:    2388 size:      56
+  Points: [0]:{200,3150} [1]:{150,3213} [2]:{113,3250} [3]:{100,3300} [4]:{113,3350} [5]:{150,3387} [6]:{200,3400} [7]:{250,3387} [8]:{287,3350} [9]:{300,3300} [10]:{287,3250} [11]:{250,3213} 
+U_WMR_ESCAPE                  record:  139 type: 38 offset:    2444 size:      10
+   EscType:END_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_ESCAPE                  record:  140 type: 38 offset:    2454 size:      10
+   EscType:BEGIN_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_POLYGON                 record:  141 type: 36 offset:    2464 size:      56
+  Points: [0]:{494,3140} [1]:{445,3205} [2]:{409,3243} [3]:{398,3296} [4]:{414,3350} [5]:{453,3391} [6]:{504,3407} [7]:{555,3395} [8]:{591,3357} [9]:{602,3304} [10]:{586,3250} [11]:{547,3209} 
+U_WMR_ESCAPE                  record:  142 type: 38 offset:    2520 size:      10
+   EscType:END_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_ESCAPE                  record:  143 type: 38 offset:    2530 size:      10
+   EscType:BEGIN_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_POLYGON                 record:  144 type: 36 offset:    2540 size:      56
+  Points: [0]:{786,3147} [1]:{736,3207} [2]:{697,3241} [3]:{687,3291} [4]:{707,3343} [5]:{752,3384} [6]:{809,3402} [7]:{864,3393} [8]:{903,3359} [9]:{913,3309} [10]:{893,3257} [11]:{848,3216} 
+U_WMR_ESCAPE                  record:  145 type: 38 offset:    2596 size:      10
+   EscType:END_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_ESCAPE                  record:  146 type: 38 offset:    2606 size:      10
+   EscType:BEGIN_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_POLYGON                 record:  147 type: 36 offset:    2616 size:      56
+  Points: [0]:{1100,3161} [1]:{1036,3219} [2]:{989,3254} [3]:{973,3300} [4]:{989,3346} [5]:{1036,3381} [6]:{1100,3393} [7]:{1164,3381} [8]:{1211,3346} [9]:{1227,3300} [10]:{1211,3254} [11]:{1164,3219} 
+U_WMR_ESCAPE                  record:  148 type: 38 offset:    2672 size:      10
+   EscType:END_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_ESCAPE                  record:  149 type: 38 offset:    2682 size:      10
+   EscType:BEGIN_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_POLYGON                 record:  150 type: 36 offset:    2692 size:      56
+  Points: [0]:{1432,3151} [1]:{1357,3224} [2]:{1303,3269} [3]:{1276,3321} [4]:{1281,3368} [5]:{1319,3397} [6]:{1379,3399} [7]:{1443,3376} [8]:{1497,3331} [9]:{1524,3279} [10]:{1519,3232} [11]:{1481,3203} 
+U_WMR_ESCAPE                  record:  151 type: 38 offset:    2748 size:      10
+   EscType:END_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_ESCAPE                  record:  152 type: 38 offset:    2758 size:      10
+   EscType:BEGIN_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_POLYGON                 record:  153 type: 36 offset:    2768 size:      56
+  Points: [0]:{1743,3107} [1]:{1677,3202} [2]:{1631,3260} [3]:{1604,3329} [4]:{1602,3389} [5]:{1627,3426} [6]:{1671,3429} [7]:{1723,3398} [8]:{1769,3340} [9]:{1796,3271} [10]:{1798,3211} [11]:{1773,3174} 
+U_WMR_ESCAPE                  record:  154 type: 38 offset:    2824 size:      10
+   EscType:END_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_ESCAPE                  record:  155 type: 38 offset:    2834 size:      10
+   EscType:BEGIN_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_POLYGON                 record:  156 type: 36 offset:    2844 size:      56
+  Points: [0]:{2000,3068} [1]:{1965,3166} [2]:{1939,3223} [3]:{1930,3300} [4]:{1939,3377} [5]:{1965,3434} [6]:{2000,3455} [7]:{2035,3434} [8]:{2061,3377} [9]:{2070,3300} [10]:{2061,3223} [11]:{2035,3166} 
+U_WMR_ESCAPE                  record:  157 type: 38 offset:    2900 size:      10
+   EscType:END_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_ESCAPE                  record:  158 type: 38 offset:    2910 size:      10
+   EscType:BEGIN_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_POLYGON                 record:  159 type: 36 offset:    2920 size:      56
+  Points: [0]:{2232,3094} [1]:{2218,3158} [2]:{2203,3192} [3]:{2214,3255} [4]:{2248,3330} [5]:{2296,3397} [6]:{2345,3438} [7]:{2382,3442} [8]:{2397,3408} [9]:{2386,3345} [10]:{2352,3270} [11]:{2304,3203} 
+U_WMR_ESCAPE                  record:  160 type: 38 offset:    2976 size:      10
+   EscType:END_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_ESCAPE                  record:  161 type: 38 offset:    2986 size:      10
+   EscType:BEGIN_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_POLYGON                 record:  162 type: 36 offset:    2996 size:      56
+  Points: [0]:{2518,3182} [1]:{2482,3204} [2]:{2450,3213} [3]:{2459,3246} [4]:{2504,3292} [5]:{2577,3341} [6]:{2654,3379} [7]:{2718,3396} [8]:{2750,3387} [9]:{2741,3354} [10]:{2696,3308} [11]:{2623,3259} 
+U_WMR_ESCAPE                  record:  163 type: 38 offset:    3052 size:      10
+   EscType:END_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_ESCAPE                  record:  164 type: 38 offset:    3062 size:      10
+   EscType:BEGIN_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_POLYGON                 record:  165 type: 36 offset:    3072 size:      56
+  Points: [0]:{2900,3250} [1]:{2809,3271} [2]:{2742,3283} [3]:{2718,3300} [4]:{2742,3317} [5]:{2809,3329} [6]:{2900,3333} [7]:{2991,3329} [8]:{3058,3317} [9]:{3082,3300} [10]:{3058,3283} [11]:{2991,3271} 
+U_WMR_ESCAPE                  record:  166 type: 38 offset:    3128 size:      10
+   EscType:END_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_ESCAPE                  record:  167 type: 38 offset:    3138 size:      10
+   EscType:BEGIN_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_POLYGON                 record:  168 type: 36 offset:    3148 size:      56
+  Points: [0]:{3313,3209} [1]:{3192,3285} [2]:{3109,3335} [3]:{3052,3375} [4]:{3034,3396} [5]:{3061,3390} [6]:{3125,3361} [7]:{3208,3315} [8]:{3291,3265} [9]:{3348,3225} [10]:{3366,3204} [11]:{3339,3210} 
+U_WMR_ESCAPE                  record:  169 type: 38 offset:    3204 size:      10
+   EscType:END_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_ESCAPE                  record:  170 type: 38 offset:    3214 size:      10
+   EscType:BEGIN_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_POLYGON                 record:  171 type: 36 offset:    3224 size:      56
+  Points: [0]:{3630,3075} [1]:{3550,3213} [2]:{3500,3300} [3]:{3450,3387} [4]:{3413,3450} [5]:{3400,3474} [6]:{3413,3450} [7]:{3450,3387} [8]:{3500,3300} [9]:{3550,3213} [10]:{3587,3150} [11]:{3600,3126} 
+U_WMR_ESCAPE                  record:  172 type: 38 offset:    3280 size:      10
+   EscType:END_PATH
+   nBytes:0
+   Data: (not shown)
+U_WMR_SELECTOBJECT            record:  173 type: 45 offset:    3290 size:       8
+   Object:         8
+U_WMR_SELECTOBJECT            record:  174 type: 45 offset:    3298 size:       8
+   Object:         3
+U_WMR_RECTANGLE               record:  175 type: 27 offset:    3306 size:      14
+   Rect:LTRB{3900,2700,4100,2900} 
+U_WMR_SELECTOBJECT            record:  176 type: 45 offset:    3320 size:       8
+   Object:         8
+U_WMR_SELECTOBJECT            record:  177 type: 45 offset:    3328 size:       8
+   Object:         3
+U_WMR_RECTANGLE               record:  178 type: 27 offset:    3336 size:      14
+   Rect:LTRB{3900,3200,4100,3400} 
+U_WMR_SELECTOBJECT            record:  179 type: 45 offset:    3350 size:       8
+   Object:         8
+U_WMR_SELECTOBJECT            record:  180 type: 45 offset:    3358 size:       8
+   Object:         2
+U_WMR_POLYPOLYGON             record:  181 type: 56 offset:    3366 size:      62
+   Polygons:  Polygon[0]: {4450,2800} {4387,2750} {4350,2713}   Polygon[1]: {4300,2700} {4250,2713} {4213,2750} {4200,2800}   Polygon[2]: {4213,2850} {4250,2887} {4300,2900} {4350,2887} {4387,2850} 
+U_WMR_SELECTOBJECT            record:  182 type: 45 offset:    3428 size:       8
+   Object:         8
+U_WMR_SELECTOBJECT            record:  183 type: 45 offset:    3436 size:       8
+   Object:         3
+U_WMR_RECTANGLE               record:  184 type: 27 offset:    3444 size:      14
+   Rect:LTRB{4200,3200,4400,3400} 
+U_WMR_SELECTOBJECT            record:  185 type: 45 offset:    3458 size:       8
+   Object:         8
+U_WMR_SELECTOBJECT            record:  186 type: 45 offset:    3466 size:       8
+   Object:         3
+U_WMR_RECTANGLE               record:  187 type: 27 offset:    3474 size:      14
+   Rect:LTRB{4500,2700,4700,2900} 
+U_WMR_SELECTOBJECT            record:  188 type: 45 offset:    3488 size:       8
+   Object:         8
+U_WMR_SELECTOBJECT            record:  189 type: 45 offset:    3496 size:       8
+   Object:         3
+U_WMR_RECTANGLE               record:  190 type: 27 offset:    3504 size:      14
+   Rect:LTRB{4500,3200,4700,3400} 
+U_WMR_SELECTOBJECT            record:  191 type: 45 offset:    3518 size:       8
+   Object:         8
+U_WMR_SELECTOBJECT            record:  192 type: 45 offset:    3526 size:       8
+   Object:         2
+U_WMR_POLYPOLYGON             record:  193 type: 56 offset:    3534 size:      64
+   Polygons:  Polygon[0]: {5050,2800} {4987,2750} {4950,2713}   Polygon[1]: {4900,2700} {4850,2713} {4813,2750}   Polygon[2]: {4800,2800} {4813,2850} {4850,2887}   Polygon[3]: {4900,2900} {4950,2887} {4987,2850} 
+U_WMR_SELECTOBJECT            record:  194 type: 45 offset:    3598 size:       8
+   Object:         8
+U_WMR_SELECTOBJECT            record:  195 type: 45 offset:    3606 size:       8
+   Object:         3
+U_WMR_RECTANGLE               record:  196 type: 27 offset:    3614 size:      14
+   Rect:LTRB{4800,3200,5000,3400} 
+U_WMR_CREATEPENINDIRECT       record:  197 type:250 offset:    3628 size:      16
+   Pen:Style:0x00000000 Width:1 Color{255,0,255} 
+U_WMR_SELECTOBJECT            record:  198 type: 45 offset:    3644 size:       8
+   Object:         15
+U_WMR_POLYLINE                record:  199 type: 37 offset:    3652 size:      20
+  Points: [0]:{200,3700} [1]:{400,3900} [2]:{200,4100} 
+U_WMR_DELETEOBJECT            record:  200 type:240 offset:    3672 size:       8
+   Object:         15
+U_WMR_CREATEPENINDIRECT       record:  201 type:250 offset:    3680 size:      16
+   Pen:Style:0x00000001 Width:1 Color{255,0,255} 
+U_WMR_SELECTOBJECT            record:  202 type: 45 offset:    3696 size:       8
+   Object:         15
+U_WMR_POLYLINE                record:  203 type: 37 offset:    3704 size:      20
+  Points: [0]:{300,3700} [1]:{500,3900} [2]:{300,4100} 
+U_WMR_DELETEOBJECT            record:  204 type:240 offset:    3724 size:       8
+   Object:         15
+U_WMR_CREATEPENINDIRECT       record:  205 type:250 offset:    3732 size:      16
+   Pen:Style:0x00000002 Width:1 Color{255,0,255} 
+U_WMR_SELECTOBJECT            record:  206 type: 45 offset:    3748 size:       8
+   Object:         15
+U_WMR_POLYLINE                record:  207 type: 37 offset:    3756 size:      20
+  Points: [0]:{400,3700} [1]:{600,3900} [2]:{400,4100} 
+U_WMR_DELETEOBJECT            record:  208 type:240 offset:    3776 size:       8
+   Object:         15
+U_WMR_CREATEPENINDIRECT       record:  209 type:250 offset:    3784 size:      16
+   Pen:Style:0x00000003 Width:1 Color{255,0,255} 
+U_WMR_SELECTOBJECT            record:  210 type: 45 offset:    3800 size:       8
+   Object:         15
+U_WMR_POLYLINE                record:  211 type: 37 offset:    3808 size:      20
+  Points: [0]:{500,3700} [1]:{700,3900} [2]:{500,4100} 
+U_WMR_DELETEOBJECT            record:  212 type:240 offset:    3828 size:       8
+   Object:         15
+U_WMR_CREATEPENINDIRECT       record:  213 type:250 offset:    3836 size:      16
+   Pen:Style:0x00000004 Width:1 Color{255,0,255} 
+U_WMR_SELECTOBJECT            record:  214 type: 45 offset:    3852 size:       8
+   Object:         15
+U_WMR_POLYLINE                record:  215 type: 37 offset:    3860 size:      20
+  Points: [0]:{600,3700} [1]:{800,3900} [2]:{600,4100} 
+U_WMR_DELETEOBJECT            record:  216 type:240 offset:    3880 size:       8
+   Object:         15
+U_WMR_SELECTOBJECT            record:  217 type: 45 offset:    3888 size:       8
+   Object:         9
+U_WMR_POLYLINE                record:  218 type: 37 offset:    3896 size:      20
+  Points: [0]:{700,3700} [1]:{900,3900} [2]:{700,4100} 
+U_WMR_POLYLINE                record:  219 type: 37 offset:    3916 size:      20
+  Points: [0]:{800,3700} [1]:{1000,3900} [2]:{800,4100} 
+U_WMR_SELECTOBJECT            record:  220 type: 45 offset:    3936 size:       8
+   Object:         5
+U_WMR_SETSTRETCHBLTMODE       record:  221 type:  7 offset:    3944 size:      10
+   iMode:          0x0003
+U_WMR_STRETCHDIB              record:  222 type: 67 offset:    3954 size:     468
+    Rop3:00CC0020
+    cUsage:0
+    src W,H:10,10
+    src X,Y:{0,0}
+    dst W,H:200,200
+    dst X,Y:{5000,5000}
+    DIB: (BitmapInfoHeader) BmiHeader: biSize:40 biWidth:10 biHeight:10 biPlanes:1 biBitCount:32 biCompression:0 biSizeImage:0 biXPelsPerMeter:47244 biYPelsPerMeter:47244 biClrUsed:0 biClrImportant:0 
+U_WMR_BITBLT                  record:  223 type: 34 offset:    4422 size:     434
+    Rop3:00CC0020
+    src X,Y:{0,0}
+    W,H:10,10
+    dst X,Y:{5000,5220}
+    Bitmap16:Type:32 Width:10 Height:10 WidthBytes:40 Planes:1 BitsPixel:32 BitsBytes:400 
+U_WMR_STRETCHBLT              record:  224 type: 35 offset:    4856 size:     438
+    Rop3:00CC0020
+    src W,H:10,10
+    src X,Y:{0,0}
+    dst W,H:200,200
+    dst X,Y:{5000,5440}
+    Bitmap16:Type:32 Width:10 Height:10 WidthBytes:40 Planes:1 BitsPixel:32 BitsBytes:400 
+U_WMR_DIBBITBLT               record:  225 type: 64 offset:    5294 size:     462
+    Rop3:00CC0020
+    src X,Y:{0,0}
+    W,H:200,200
+    dst X,Y:{5000,5680}
+    DIB: (BitmapInfoHeader) BmiHeader: biSize:40 biWidth:10 biHeight:10 biPlanes:1 biBitCount:32 biCompression:0 biSizeImage:0 biXPelsPerMeter:47244 biYPelsPerMeter:47244 biClrUsed:0 biClrImportant:0 
+U_WMR_DIBSTRETCHBLT           record:  226 type: 65 offset:    5756 size:     466
+    Rop3:00CC0020
+    src W,H:10,10
+    src X,Y:{0,0}
+    dst W,H:200,200
+    dst X,Y:{5000,5900}
+    DIB: (BitmapInfoHeader) BmiHeader: biSize:40 biWidth:10 biHeight:10 biPlanes:1 biBitCount:32 biCompression:0 biSizeImage:0 biXPelsPerMeter:47244 biYPelsPerMeter:47244 biClrUsed:0 biClrImportant:0 
+U_WMR_STRETCHDIB              record:  227 type: 67 offset:    6222 size:     468
+    Rop3:00CC0020
+    cUsage:0
+    src W,H:10,10
+    src X,Y:{0,0}
+    dst W,H:2000,2000
+    dst X,Y:{2900,5000}
+    DIB: (BitmapInfoHeader) BmiHeader: biSize:40 biWidth:10 biHeight:10 biPlanes:1 biBitCount:32 biCompression:0 biSizeImage:0 biXPelsPerMeter:47244 biYPelsPerMeter:47244 biClrUsed:0 biClrImportant:0 
+U_WMR_STRETCHDIB              record:  228 type: 67 offset:    6690 size:     388
+    Rop3:00CC0020
+    cUsage:0
+    src W,H:10,10
+    src X,Y:{0,0}
+    dst W,H:200,200
+    dst X,Y:{5220,5000}
+    DIB: (BitmapInfoHeader) BmiHeader: biSize:40 biWidth:10 biHeight:10 biPlanes:1 biBitCount:24 biCompression:0 biSizeImage:0 biXPelsPerMeter:47244 biYPelsPerMeter:47244 biClrUsed:0 biClrImportant:0 
+U_WMR_BITBLT                  record:  229 type: 34 offset:    7078 size:     334
+    Rop3:00CC0020
+    src X,Y:{0,0}
+    W,H:10,10
+    dst X,Y:{5220,5220}
+    Bitmap16:Type:24 Width:10 Height:10 WidthBytes:32 Planes:1 BitsPixel:24 BitsBytes:300 
+U_WMR_STRETCHBLT              record:  230 type: 35 offset:    7412 size:     338
+    Rop3:00CC0020
+    src W,H:10,10
+    src X,Y:{0,0}
+    dst W,H:200,200
+    dst X,Y:{5220,5440}
+    Bitmap16:Type:24 Width:10 Height:10 WidthBytes:32 Planes:1 BitsPixel:24 BitsBytes:300 
+U_WMR_DIBBITBLT               record:  231 type: 64 offset:    7750 size:     382
+    Rop3:00CC0020
+    src X,Y:{0,0}
+    W,H:200,200
+    dst X,Y:{5220,5680}
+    DIB: (BitmapInfoHeader) BmiHeader: biSize:40 biWidth:10 biHeight:10 biPlanes:1 biBitCount:24 biCompression:0 biSizeImage:0 biXPelsPerMeter:47244 biYPelsPerMeter:47244 biClrUsed:0 biClrImportant:0 
+U_WMR_DIBSTRETCHBLT           record:  232 type: 65 offset:    8132 size:     386
+    Rop3:00CC0020
+    src W,H:10,10
+    src X,Y:{0,0}
+    dst W,H:200,200
+    dst X,Y:{5220,5900}
+    DIB: (BitmapInfoHeader) BmiHeader: biSize:40 biWidth:10 biHeight:10 biPlanes:1 biBitCount:24 biCompression:0 biSizeImage:0 biXPelsPerMeter:47244 biYPelsPerMeter:47244 biClrUsed:0 biClrImportant:0 
+U_WMR_STRETCHDIB              record:  233 type: 67 offset:    8518 size:     268
+    Rop3:00CC0020
+    cUsage:0
+    src W,H:10,10
+    src X,Y:{0,0}
+    dst W,H:200,200
+    dst X,Y:{5440,5000}
+    DIB: (BitmapInfoHeader) BmiHeader: biSize:40 biWidth:10 biHeight:10 biPlanes:1 biBitCount:16 biCompression:0 biSizeImage:0 biXPelsPerMeter:47244 biYPelsPerMeter:47244 biClrUsed:0 biClrImportant:0 
+U_WMR_BITBLT                  record:  234 type: 34 offset:    8786 size:     234
+    Rop3:00CC0020
+    src X,Y:{0,0}
+    W,H:10,10
+    dst X,Y:{5440,5220}
+    Bitmap16:Type:16 Width:10 Height:10 WidthBytes:20 Planes:1 BitsPixel:16 BitsBytes:200 
+U_WMR_STRETCHBLT              record:  235 type: 35 offset:    9020 size:     238
+    Rop3:00CC0020
+    src W,H:10,10
+    src X,Y:{0,0}
+    dst W,H:200,200
+    dst X,Y:{5440,5440}
+    Bitmap16:Type:16 Width:10 Height:10 WidthBytes:20 Planes:1 BitsPixel:16 BitsBytes:200 
+U_WMR_DIBBITBLT               record:  236 type: 64 offset:    9258 size:     262
+    Rop3:00CC0020
+    src X,Y:{0,0}
+    W,H:200,200
+    dst X,Y:{5440,5680}
+    DIB: (BitmapInfoHeader) BmiHeader: biSize:40 biWidth:10 biHeight:10 biPlanes:1 biBitCount:16 biCompression:0 biSizeImage:0 biXPelsPerMeter:47244 biYPelsPerMeter:47244 biClrUsed:0 biClrImportant:0 
+U_WMR_DIBSTRETCHBLT           record:  237 type: 65 offset:    9520 size:     266
+    Rop3:00CC0020
+    src W,H:10,10
+    src X,Y:{0,0}
+    dst W,H:200,200
+    dst X,Y:{5440,5900}
+    DIB: (BitmapInfoHeader) BmiHeader: biSize:40 biWidth:10 biHeight:10 biPlanes:1 biBitCount:16 biCompression:0 biSizeImage:0 biXPelsPerMeter:47244 biYPelsPerMeter:47244 biClrUsed:0 biClrImportant:0 
+U_WMR_STRETCHDIB              record:  238 type: 67 offset:    9786 size:     268
+    Rop3:00CC0020
+    cUsage:0
+    src W,H:10,10
+    src X,Y:{0,0}
+    dst W,H:200,200
+    dst X,Y:{5660,5000}
+    DIB: (BitmapInfoHeader) BmiHeader: biSize:40 biWidth:10 biHeight:-10 biPlanes:1 biBitCount:16 biCompression:0 biSizeImage:0 biXPelsPerMeter:47244 biYPelsPerMeter:47244 biClrUsed:0 biClrImportant:0 
+U_WMR_BITBLT                  record:  239 type: 34 offset:   10054 size:     234
+    Rop3:00CC0020
+    src X,Y:{0,0}
+    W,H:10,10
+    dst X,Y:{5660,5220}
+    Bitmap16:Type:16 Width:10 Height:10 WidthBytes:20 Planes:1 BitsPixel:16 BitsBytes:200 
+U_WMR_STRETCHBLT              record:  240 type: 35 offset:   10288 size:     238
+    Rop3:00CC0020
+    src W,H:10,10
+    src X,Y:{0,0}
+    dst W,H:200,200
+    dst X,Y:{5660,5440}
+    Bitmap16:Type:16 Width:10 Height:10 WidthBytes:20 Planes:1 BitsPixel:16 BitsBytes:200 
+U_WMR_DIBBITBLT               record:  241 type: 64 offset:   10526 size:     262
+    Rop3:00CC0020
+    src X,Y:{0,0}
+    W,H:200,200
+    dst X,Y:{5660,5680}
+    DIB: (BitmapInfoHeader) BmiHeader: biSize:40 biWidth:10 biHeight:-10 biPlanes:1 biBitCount:16 biCompression:0 biSizeImage:0 biXPelsPerMeter:47244 biYPelsPerMeter:47244 biClrUsed:0 biClrImportant:0 
+U_WMR_DIBSTRETCHBLT           record:  242 type: 65 offset:   10788 size:     266
+    Rop3:00CC0020
+    src W,H:10,10
+    src X,Y:{0,0}
+    dst W,H:200,200
+    dst X,Y:{5660,5900}
+    DIB: (BitmapInfoHeader) BmiHeader: biSize:40 biWidth:10 biHeight:-10 biPlanes:1 biBitCount:16 biCompression:0 biSizeImage:0 biXPelsPerMeter:47244 biYPelsPerMeter:47244 biClrUsed:0 biClrImportant:0 
+U_WMR_STRETCHDIB              record:  243 type: 67 offset:   11054 size:     588
+    Rop3:00CC0020
+    cUsage:0
+    src W,H:10,10
+    src X,Y:{0,0}
+    dst W,H:200,200
+    dst X,Y:{5880,5000}
+    DIB: (BitmapInfoHeader) BmiHeader: biSize:40 biWidth:10 biHeight:10 biPlanes:1 biBitCount:8 biCompression:0 biSizeImage:0 biXPelsPerMeter:47244 biYPelsPerMeter:47244 biClrUsed:100 biClrImportant:0 0:{0,0,255,0} 1:{0,28,227,0} 2:{0,56,199,0} 3:{0,85,170,0} 4:{0,113,142,0} 5:{0,141,114,0} 6:{0,170,85,0} 7:{0,198,57,0} 8:{0,226,29,0} 9:{0,255,0,0} 10:{0,0,227,28} 11:{28,28,227,28} 12:{28,56,199,28} 13:{28,85,170,28} 14:{28,113,142,28} 15:{28,141,114,28} 16:{28,170,85,28} 17:{28,198,57,28} 18:{28,226,29,28} 19:{28,227,0,0} 20:{0,0,199,56} 21:{28,28,199,56} 22:{56,56,199,56} 23:{56,85,170,56} 24:{56,113,142,56} 25:{56,141,114,56} 26:{56,170,85,56} 27:{56,198,57,56} 28:{56,199,29,29} 29:{56,199,0,0} 30:{0,0,170,85} 31:{28,28,170,85} 32:{56,56,170,85} 33:{85,85,170,85} 34:{85,113,142,85} 35:{85,141,114,85} 36:{85,170,85,85} 37:{85,170,57,57} 38:{85,170,29,29} 39:{85,170,0,0} 40:{0,0,142,113} 41:{28,28,142,113} 42:{56,56,142,113} 43:{85,85,142,113} 44:{113,113,142,113} 45:{113,141,114,113} 46:{113,142,85,85} 47:{113,142,57,57} 48:{113,142,29,29} 49:{113,142,0,0} 50:{0,0,114,141} 51:{28,28,114,141} 52:{56,56,114,141} 53:{85,85,114,141} 54:{113,113,114,141} 55:{141,114,114,114} 56:{141,114,85,85} 57:{141,114,57,57} 58:{141,114,29,29} 59:{141,114,0,0} 60:{0,0,85,170} 61:{28,28,85,170} 62:{56,56,85,170} 63:{85,85,85,170} 64:{113,85,85,142} 65:{141,85,85,114} 66:{170,85,85,85} 67:{170,85,57,57} 68:{170,85,29,29} 69:{170,85,0,0} 70:{0,0,57,198} 71:{28,28,57,198} 72:{56,56,57,198} 73:{85,57,57,170} 74:{113,57,57,142} 75:{141,57,57,114} 76:{170,57,57,85} 77:{198,57,57,57} 78:{198,57,29,29} 79:{198,57,0,0} 80:{0,0,29,226} 81:{28,28,29,226} 82:{56,29,29,199} 83:{85,29,29,170} 84:{113,29,29,142} 85:{141,29,29,114} 86:{170,29,29,85} 87:{198,29,29,57} 88:{226,29,29,29} 89:{226,29,0,0} 90:{0,0,0,255} 91:{28,0,0,227} 92:{56,0,0,199} 93:{85,0,0,170} 94:{113,0,0,142} 95:{141,0,0,114} 96:{170,0,0,85} 97:{198,0,0,57} 98:{226,0,0,29} 99:{255,0,0,0} 
+U_WMR_BITBLT                  record:  244 type: 34 offset:   11642 size:     134
+    Rop3:00CC0020
+    src X,Y:{0,0}
+    W,H:10,10
+    dst X,Y:{5880,5220}
+    Bitmap16:Type:8 Width:10 Height:10 WidthBytes:12 Planes:1 BitsPixel:8 BitsBytes:100 
+U_WMR_STRETCHBLT              record:  245 type: 35 offset:   11776 size:     138
+    Rop3:00CC0020
+    src W,H:10,10
+    src X,Y:{0,0}
+    dst W,H:200,200
+    dst X,Y:{5880,5440}
+    Bitmap16:Type:8 Width:10 Height:10 WidthBytes:12 Planes:1 BitsPixel:8 BitsBytes:100 
+U_WMR_DIBBITBLT               record:  246 type: 64 offset:   11914 size:     582
+    Rop3:00CC0020
+    src X,Y:{0,0}
+    W,H:200,200
+    dst X,Y:{5880,5680}
+    DIB: (BitmapInfoHeader) BmiHeader: biSize:40 biWidth:10 biHeight:10 biPlanes:1 biBitCount:8 biCompression:0 biSizeImage:0 biXPelsPerMeter:47244 biYPelsPerMeter:47244 biClrUsed:100 biClrImportant:0 0:{0,0,255,0} 1:{0,28,227,0} 2:{0,56,199,0} 3:{0,85,170,0} 4:{0,113,142,0} 5:{0,141,114,0} 6:{0,170,85,0} 7:{0,198,57,0} 8:{0,226,29,0} 9:{0,255,0,0} 10:{0,0,227,28} 11:{28,28,227,28} 12:{28,56,199,28} 13:{28,85,170,28} 14:{28,113,142,28} 15:{28,141,114,28} 16:{28,170,85,28} 17:{28,198,57,28} 18:{28,226,29,28} 19:{28,227,0,0} 20:{0,0,199,56} 21:{28,28,199,56} 22:{56,56,199,56} 23:{56,85,170,56} 24:{56,113,142,56} 25:{56,141,114,56} 26:{56,170,85,56} 27:{56,198,57,56} 28:{56,199,29,29} 29:{56,199,0,0} 30:{0,0,170,85} 31:{28,28,170,85} 32:{56,56,170,85} 33:{85,85,170,85} 34:{85,113,142,85} 35:{85,141,114,85} 36:{85,170,85,85} 37:{85,170,57,57} 38:{85,170,29,29} 39:{85,170,0,0} 40:{0,0,142,113} 41:{28,28,142,113} 42:{56,56,142,113} 43:{85,85,142,113} 44:{113,113,142,113} 45:{113,141,114,113} 46:{113,142,85,85} 47:{113,142,57,57} 48:{113,142,29,29} 49:{113,142,0,0} 50:{0,0,114,141} 51:{28,28,114,141} 52:{56,56,114,141} 53:{85,85,114,141} 54:{113,113,114,141} 55:{141,114,114,114} 56:{141,114,85,85} 57:{141,114,57,57} 58:{141,114,29,29} 59:{141,114,0,0} 60:{0,0,85,170} 61:{28,28,85,170} 62:{56,56,85,170} 63:{85,85,85,170} 64:{113,85,85,142} 65:{141,85,85,114} 66:{170,85,85,85} 67:{170,85,57,57} 68:{170,85,29,29} 69:{170,85,0,0} 70:{0,0,57,198} 71:{28,28,57,198} 72:{56,56,57,198} 73:{85,57,57,170} 74:{113,57,57,142} 75:{141,57,57,114} 76:{170,57,57,85} 77:{198,57,57,57} 78:{198,57,29,29} 79:{198,57,0,0} 80:{0,0,29,226} 81:{28,28,29,226} 82:{56,29,29,199} 83:{85,29,29,170} 84:{113,29,29,142} 85:{141,29,29,114} 86:{170,29,29,85} 87:{198,29,29,57} 88:{226,29,29,29} 89:{226,29,0,0} 90:{0,0,0,255} 91:{28,0,0,227} 92:{56,0,0,199} 93:{85,0,0,170} 94:{113,0,0,142} 95:{141,0,0,114} 96:{170,0,0,85} 97:{198,0,0,57} 98:{226,0,0,29} 99:{255,0,0,0} 
+U_WMR_DIBSTRETCHBLT           record:  247 type: 65 offset:   12496 size:     586
+    Rop3:00CC0020
+    src W,H:10,10
+    src X,Y:{0,0}
+    dst W,H:200,200
+    dst X,Y:{5880,5900}
+    DIB: (BitmapInfoHeader) BmiHeader: biSize:40 biWidth:10 biHeight:10 biPlanes:1 biBitCount:8 biCompression:0 biSizeImage:0 biXPelsPerMeter:47244 biYPelsPerMeter:47244 biClrUsed:100 biClrImportant:0 0:{0,0,255,0} 1:{0,28,227,0} 2:{0,56,199,0} 3:{0,85,170,0} 4:{0,113,142,0} 5:{0,141,114,0} 6:{0,170,85,0} 7:{0,198,57,0} 8:{0,226,29,0} 9:{0,255,0,0} 10:{0,0,227,28} 11:{28,28,227,28} 12:{28,56,199,28} 13:{28,85,170,28} 14:{28,113,142,28} 15:{28,141,114,28} 16:{28,170,85,28} 17:{28,198,57,28} 18:{28,226,29,28} 19:{28,227,0,0} 20:{0,0,199,56} 21:{28,28,199,56} 22:{56,56,199,56} 23:{56,85,170,56} 24:{56,113,142,56} 25:{56,141,114,56} 26:{56,170,85,56} 27:{56,198,57,56} 28:{56,199,29,29} 29:{56,199,0,0} 30:{0,0,170,85} 31:{28,28,170,85} 32:{56,56,170,85} 33:{85,85,170,85} 34:{85,113,142,85} 35:{85,141,114,85} 36:{85,170,85,85} 37:{85,170,57,57} 38:{85,170,29,29} 39:{85,170,0,0} 40:{0,0,142,113} 41:{28,28,142,113} 42:{56,56,142,113} 43:{85,85,142,113} 44:{113,113,142,113} 45:{113,141,114,113} 46:{113,142,85,85} 47:{113,142,57,57} 48:{113,142,29,29} 49:{113,142,0,0} 50:{0,0,114,141} 51:{28,28,114,141} 52:{56,56,114,141} 53:{85,85,114,141} 54:{113,113,114,141} 55:{141,114,114,114} 56:{141,114,85,85} 57:{141,114,57,57} 58:{141,114,29,29} 59:{141,114,0,0} 60:{0,0,85,170} 61:{28,28,85,170} 62:{56,56,85,170} 63:{85,85,85,170} 64:{113,85,85,142} 65:{141,85,85,114} 66:{170,85,85,85} 67:{170,85,57,57} 68:{170,85,29,29} 69:{170,85,0,0} 70:{0,0,57,198} 71:{28,28,57,198} 72:{56,56,57,198} 73:{85,57,57,170} 74:{113,57,57,142} 75:{141,57,57,114} 76:{170,57,57,85} 77:{198,57,57,57} 78:{198,57,29,29} 79:{198,57,0,0} 80:{0,0,29,226} 81:{28,28,29,226} 82:{56,29,29,199} 83:{85,29,29,170} 84:{113,29,29,142} 85:{141,29,29,114} 86:{170,29,29,85} 87:{198,29,29,57} 88:{226,29,29,29} 89:{226,29,0,0} 90:{0,0,0,255} 91:{28,0,0,227} 92:{56,0,0,199} 93:{85,0,0,170} 94:{113,0,0,142} 95:{141,0,0,114} 96:{170,0,0,85} 97:{198,0,0,57} 98:{226,0,0,29} 99:{255,0,0,0} 
+U_WMR_STRETCHDIB              record:  248 type: 67 offset:   13082 size:     148
+    Rop3:00CC0020
+    cUsage:0
+    src W,H:4,4
+    src X,Y:{0,0}
+    dst W,H:200,200
+    dst X,Y:{6100,5000}
+    DIB: (BitmapInfoHeader) BmiHeader: biSize:40 biWidth:4 biHeight:4 biPlanes:1 biBitCount:4 biCompression:0 biSizeImage:0 biXPelsPerMeter:47244 biYPelsPerMeter:47244 biClrUsed:16 biClrImportant:0 0:{0,0,255,0} 1:{0,85,170,0} 2:{0,170,85,0} 3:{0,255,0,0} 4:{0,0,170,85} 5:{85,85,170,85} 6:{85,170,85,85} 7:{85,170,0,0} 8:{0,0,85,170} 9:{85,85,85,170} 10:{170,85,85,85} 11:{170,85,0,0} 12:{0,0,0,255} 13:{85,0,0,170} 14:{170,0,0,85} 15:{255,0,0,0} 
+U_WMR_BITBLT                  record:  249 type: 34 offset:   13230 size:      42
+    Rop3:00CC0020
+    src X,Y:{0,0}
+    W,H:4,4
+    dst X,Y:{6100,5220}
+    Bitmap16:Type:4 Width:4 Height:4 WidthBytes:4 Planes:1 BitsPixel:4 BitsBytes:8 
+U_WMR_STRETCHBLT              record:  250 type: 35 offset:   13272 size:      46
+    Rop3:00CC0020
+    src W,H:4,4
+    src X,Y:{0,0}
+    dst W,H:200,200
+    dst X,Y:{6100,5440}
+    Bitmap16:Type:4 Width:4 Height:4 WidthBytes:4 Planes:1 BitsPixel:4 BitsBytes:8 
+U_WMR_DIBBITBLT               record:  251 type: 64 offset:   13318 size:     142
+    Rop3:00CC0020
+    src X,Y:{0,0}
+    W,H:200,200
+    dst X,Y:{6100,5680}
+    DIB: (BitmapInfoHeader) BmiHeader: biSize:40 biWidth:4 biHeight:4 biPlanes:1 biBitCount:4 biCompression:0 biSizeImage:0 biXPelsPerMeter:47244 biYPelsPerMeter:47244 biClrUsed:16 biClrImportant:0 0:{0,0,255,0} 1:{0,85,170,0} 2:{0,170,85,0} 3:{0,255,0,0} 4:{0,0,170,85} 5:{85,85,170,85} 6:{85,170,85,85} 7:{85,170,0,0} 8:{0,0,85,170} 9:{85,85,85,170} 10:{170,85,85,85} 11:{170,85,0,0} 12:{0,0,0,255} 13:{85,0,0,170} 14:{170,0,0,85} 15:{255,0,0,0} 
+U_WMR_DIBSTRETCHBLT           record:  252 type: 65 offset:   13460 size:     146
+    Rop3:00CC0020
+    src W,H:4,4
+    src X,Y:{0,0}
+    dst W,H:200,200
+    dst X,Y:{6100,5900}
+    DIB: (BitmapInfoHeader) BmiHeader: biSize:40 biWidth:4 biHeight:4 biPlanes:1 biBitCount:4 biCompression:0 biSizeImage:0 biXPelsPerMeter:47244 biYPelsPerMeter:47244 biClrUsed:16 biClrImportant:0 0:{0,0,255,0} 1:{0,85,170,0} 2:{0,170,85,0} 3:{0,255,0,0} 4:{0,0,170,85} 5:{85,85,170,85} 6:{85,170,85,85} 7:{85,170,0,0} 8:{0,0,85,170} 9:{85,85,85,170} 10:{170,85,85,85} 11:{170,85,0,0} 12:{0,0,0,255} 13:{85,0,0,170} 14:{170,0,0,85} 15:{255,0,0,0} 
+U_WMR_STRETCHDIB              record:  253 type: 67 offset:   13606 size:      92
+    Rop3:00CC0020
+    cUsage:0
+    src W,H:10,10
+    src X,Y:{0,0}
+    dst W,H:200,200
+    dst X,Y:{6320,5000}
+    DIB: (BitmapInfoHeader) BmiHeader: biSize:40 biWidth:4 biHeight:4 biPlanes:1 biBitCount:1 biCompression:0 biSizeImage:0 biXPelsPerMeter:47244 biYPelsPerMeter:47244 biClrUsed:2 biClrImportant:0 0:{170,170,170,170} 1:{85,85,85,85} 
+U_WMR_BITBLT                  record:  254 type: 34 offset:   13698 size:      42
+    Rop3:00CC0020
+    src X,Y:{0,0}
+    W,H:10,10
+    dst X,Y:{6320,5220}
+    Bitmap16:Type:1 Width:4 Height:4 WidthBytes:4 Planes:1 BitsPixel:1 BitsBytes:8 
+U_WMR_STRETCHBLT              record:  255 type: 35 offset:   13740 size:      46
+    Rop3:00CC0020
+    src W,H:10,10
+    src X,Y:{0,0}
+    dst W,H:200,200
+    dst X,Y:{6320,5440}
+    Bitmap16:Type:1 Width:4 Height:4 WidthBytes:4 Planes:1 BitsPixel:1 BitsBytes:8 
+U_WMR_DIBBITBLT               record:  256 type: 64 offset:   13786 size:      86
+    Rop3:00CC0020
+    src X,Y:{0,0}
+    W,H:200,200
+    dst X,Y:{6320,5680}
+    DIB: (BitmapInfoHeader) BmiHeader: biSize:40 biWidth:4 biHeight:4 biPlanes:1 biBitCount:1 biCompression:0 biSizeImage:0 biXPelsPerMeter:47244 biYPelsPerMeter:47244 biClrUsed:2 biClrImportant:0 0:{170,170,170,170} 1:{85,85,85,85} 
+U_WMR_DIBSTRETCHBLT           record:  257 type: 65 offset:   13872 size:      90
+    Rop3:00CC0020
+    src W,H:10,10
+    src X,Y:{0,0}
+    dst W,H:200,200
+    dst X,Y:{6320,5900}
+    DIB: (BitmapInfoHeader) BmiHeader: biSize:40 biWidth:4 biHeight:4 biPlanes:1 biBitCount:1 biCompression:0 biSizeImage:0 biXPelsPerMeter:47244 biYPelsPerMeter:47244 biClrUsed:2 biClrImportant:0 0:{170,170,170,170} 1:{85,85,85,85} 
+U_WMR_STRETCHDIB              record:  258 type: 67 offset:   13962 size:      92
+    Rop3:00CC0020
+    cUsage:0
+    src W,H:10,10
+    src X,Y:{0,0}
+    dst W,H:200,200
+    dst X,Y:{6540,5000}
+    DIB: (BitmapInfoHeader) BmiHeader: biSize:40 biWidth:4 biHeight:-4 biPlanes:1 biBitCount:1 biCompression:0 biSizeImage:0 biXPelsPerMeter:47244 biYPelsPerMeter:47244 biClrUsed:2 biClrImportant:0 0:{170,170,170,170} 1:{85,85,85,85} 
+U_WMR_BITBLT                  record:  259 type: 34 offset:   14054 size:      42
+    Rop3:00CC0020
+    src X,Y:{0,0}
+    W,H:10,10
+    dst X,Y:{6540,5220}
+    Bitmap16:Type:1 Width:4 Height:4 WidthBytes:4 Planes:1 BitsPixel:1 BitsBytes:8 
+U_WMR_STRETCHBLT              record:  260 type: 35 offset:   14096 size:      46
+    Rop3:00CC0020
+    src W,H:10,10
+    src X,Y:{0,0}
+    dst W,H:200,200
+    dst X,Y:{6540,5440}
+    Bitmap16:Type:1 Width:4 Height:4 WidthBytes:4 Planes:1 BitsPixel:1 BitsBytes:8 
+U_WMR_DIBBITBLT               record:  261 type: 64 offset:   14142 size:      86
+    Rop3:00CC0020
+    src X,Y:{0,0}
+    W,H:200,200
+    dst X,Y:{6540,5680}
+    DIB: (BitmapInfoHeader) BmiHeader: biSize:40 biWidth:4 biHeight:-4 biPlanes:1 biBitCount:1 biCompression:0 biSizeImage:0 biXPelsPerMeter:47244 biYPelsPerMeter:47244 biClrUsed:2 biClrImportant:0 0:{170,170,170,170} 1:{85,85,85,85} 
+U_WMR_DIBSTRETCHBLT           record:  262 type: 65 offset:   14228 size:      90
+    Rop3:00CC0020
+    src W,H:10,10
+    src X,Y:{0,0}
+    dst W,H:200,200
+    dst X,Y:{6540,5900}
+    DIB: (BitmapInfoHeader) BmiHeader: biSize:40 biWidth:4 biHeight:-4 biPlanes:1 biBitCount:1 biCompression:0 biSizeImage:0 biXPelsPerMeter:47244 biYPelsPerMeter:47244 biClrUsed:2 biClrImportant:0 0:{170,170,170,170} 1:{85,85,85,85} 
+U_WMR_BITBLT                  record:  263 type: 34 offset:   14318 size:      24
+    Rop3:00550009
+    src X,Y:{0,0}
+    W,H:2000,2000
+    dst X,Y:{2900,7020}
+    Bitmap16: none
+U_WMR_STRETCHDIB              record:  264 type: 67 offset:   14342 size:     208
+    Rop3:00CC0020
+    cUsage:0
+    src W,H:10,10
+    src X,Y:{0,0}
+    dst W,H:200,200
+    dst X,Y:{6860,5000}
+    DIB: (BitmapInfoHeader) BmiHeader: biSize:40 biWidth:10 biHeight:-10 biPlanes:1 biBitCount:0 biCompression:5 biSizeImage:138 biXPelsPerMeter:0 biYPelsPerMeter:0 biClrUsed:0 biClrImportant:0 
+U_WMR_STRETCHDIB              record:  265 type: 67 offset:   14550 size:     744
+    Rop3:00CC0020
+    cUsage:0
+    src W,H:10,10
+    src X,Y:{0,0}
+    dst W,H:200,200
+    dst X,Y:{7180,5000}
+    DIB: (BitmapInfoHeader) BmiHeader: biSize:40 biWidth:10 biHeight:-10 biPlanes:1 biBitCount:0 biCompression:4 biSizeImage:676 biXPelsPerMeter:0 biYPelsPerMeter:0 biClrUsed:0 biClrImportant:0 
+U_WMR_SETROP2                 record:  266 type:  4 offset:   15294 size:      10
+   iMode:          0x0001
+U_WMR_RECTANGLE               record:  267 type: 27 offset:   15304 size:      14
+   Rect:LTRB{2900,5000,2990,9019} 
+U_WMR_SETROP2                 record:  268 type:  4 offset:   15318 size:      10
+   iMode:          0x0002
+U_WMR_RECTANGLE               record:  269 type: 27 offset:   15328 size:      14
+   Rect:LTRB{3000,5000,3090,9019} 
+U_WMR_SETROP2                 record:  270 type:  4 offset:   15342 size:      10
+   iMode:          0x0003
+U_WMR_RECTANGLE               record:  271 type: 27 offset:   15352 size:      14
+   Rect:LTRB{3100,5000,3190,9019} 
+U_WMR_SETROP2                 record:  272 type:  4 offset:   15366 size:      10
+   iMode:          0x0004
+U_WMR_RECTANGLE               record:  273 type: 27 offset:   15376 size:      14
+   Rect:LTRB{3200,5000,3290,9019} 
+U_WMR_SETROP2                 record:  274 type:  4 offset:   15390 size:      10
+   iMode:          0x0005
+U_WMR_RECTANGLE               record:  275 type: 27 offset:   15400 size:      14
+   Rect:LTRB{3300,5000,3390,9019} 
+U_WMR_SETROP2                 record:  276 type:  4 offset:   15414 size:      10
+   iMode:          0x0006
+U_WMR_RECTANGLE               record:  277 type: 27 offset:   15424 size:      14
+   Rect:LTRB{3400,5000,3490,9019} 
+U_WMR_SETROP2                 record:  278 type:  4 offset:   15438 size:      10
+   iMode:          0x0007
+U_WMR_RECTANGLE               record:  279 type: 27 offset:   15448 size:      14
+   Rect:LTRB{3500,5000,3590,9019} 
+U_WMR_SETROP2                 record:  280 type:  4 offset:   15462 size:      10
+   iMode:          0x0008
+U_WMR_RECTANGLE               record:  281 type: 27 offset:   15472 size:      14
+   Rect:LTRB{3600,5000,3690,9019} 
+U_WMR_SETROP2                 record:  282 type:  4 offset:   15486 size:      10
+   iMode:          0x0009
+U_WMR_RECTANGLE               record:  283 type: 27 offset:   15496 size:      14
+   Rect:LTRB{3700,5000,3790,9019} 
+U_WMR_SETROP2                 record:  284 type:  4 offset:   15510 size:      10
+   iMode:          0x000A
+U_WMR_RECTANGLE               record:  285 type: 27 offset:   15520 size:      14
+   Rect:LTRB{3800,5000,3890,9019} 
+U_WMR_SETROP2                 record:  286 type:  4 offset:   15534 size:      10
+   iMode:          0x000B
+U_WMR_RECTANGLE               record:  287 type: 27 offset:   15544 size:      14
+   Rect:LTRB{3900,5000,3990,9019} 
+U_WMR_SETROP2                 record:  288 type:  4 offset:   15558 size:      10
+   iMode:          0x000C
+U_WMR_RECTANGLE               record:  289 type: 27 offset:   15568 size:      14
+   Rect:LTRB{4000,5000,4090,9019} 
+U_WMR_SETROP2                 record:  290 type:  4 offset:   15582 size:      10
+   iMode:          0x000D
+U_WMR_RECTANGLE               record:  291 type: 27 offset:   15592 size:      14
+   Rect:LTRB{4100,5000,4190,9019} 
+U_WMR_SETROP2                 record:  292 type:  4 offset:   15606 size:      10
+   iMode:          0x000E
+U_WMR_RECTANGLE               record:  293 type: 27 offset:   15616 size:      14
+   Rect:LTRB{4200,5000,4290,9019} 
+U_WMR_SETROP2                 record:  294 type:  4 offset:   15630 size:      10
+   iMode:          0x000F
+U_WMR_RECTANGLE               record:  295 type: 27 offset:   15640 size:      14
+   Rect:LTRB{4300,5000,4390,9019} 
+U_WMR_SETROP2                 record:  296 type:  4 offset:   15654 size:      10
+   iMode:          0x0010
+U_WMR_RECTANGLE               record:  297 type: 27 offset:   15664 size:      14
+   Rect:LTRB{4400,5000,4490,9019} 
+U_WMR_SELECTOBJECT            record:  298 type: 45 offset:   15678 size:       8
+   Object:         6
+U_WMR_SETROP2                 record:  299 type:  4 offset:   15686 size:      10
+   iMode:          0x0001
+U_WMR_MOVETO                  record:  300 type: 20 offset:   15696 size:      10
+   X,Y             {4530,4950}
+U_WMR_LINETO                  record:  301 type: 19 offset:   15706 size:      10
+   X,Y             {4530,9069}
+U_WMR_SETROP2                 record:  302 type:  4 offset:   15716 size:      10
+   iMode:          0x0002
+U_WMR_MOVETO                  record:  303 type: 20 offset:   15726 size:      10
+   X,Y             {4540,4950}
+U_WMR_LINETO                  record:  304 type: 19 offset:   15736 size:      10
+   X,Y             {4540,9069}
+U_WMR_SETROP2                 record:  305 type:  4 offset:   15746 size:      10
+   iMode:          0x0003
+U_WMR_MOVETO                  record:  306 type: 20 offset:   15756 size:      10
+   X,Y             {4550,4950}
+U_WMR_LINETO                  record:  307 type: 19 offset:   15766 size:      10
+   X,Y             {4550,9069}
+U_WMR_SETROP2                 record:  308 type:  4 offset:   15776 size:      10
+   iMode:          0x0004
+U_WMR_MOVETO                  record:  309 type: 20 offset:   15786 size:      10
+   X,Y             {4560,4950}
+U_WMR_LINETO                  record:  310 type: 19 offset:   15796 size:      10
+   X,Y             {4560,9069}
+U_WMR_SETROP2                 record:  311 type:  4 offset:   15806 size:      10
+   iMode:          0x0005
+U_WMR_MOVETO                  record:  312 type: 20 offset:   15816 size:      10
+   X,Y             {4570,4950}
+U_WMR_LINETO                  record:  313 type: 19 offset:   15826 size:      10
+   X,Y             {4570,9069}
+U_WMR_SETROP2                 record:  314 type:  4 offset:   15836 size:      10
+   iMode:          0x0006
+U_WMR_MOVETO                  record:  315 type: 20 offset:   15846 size:      10
+   X,Y             {4580,4950}
+U_WMR_LINETO                  record:  316 type: 19 offset:   15856 size:      10
+   X,Y             {4580,9069}
+U_WMR_SETROP2                 record:  317 type:  4 offset:   15866 size:      10
+   iMode:          0x0007
+U_WMR_MOVETO                  record:  318 type: 20 offset:   15876 size:      10
+   X,Y             {4590,4950}
+U_WMR_LINETO                  record:  319 type: 19 offset:   15886 size:      10
+   X,Y             {4590,9069}
+U_WMR_SETROP2                 record:  320 type:  4 offset:   15896 size:      10
+   iMode:          0x0008
+U_WMR_MOVETO                  record:  321 type: 20 offset:   15906 size:      10
+   X,Y             {4600,4950}
+U_WMR_LINETO                  record:  322 type: 19 offset:   15916 size:      10
+   X,Y             {4600,9069}
+U_WMR_SETROP2                 record:  323 type:  4 offset:   15926 size:      10
+   iMode:          0x0009
+U_WMR_MOVETO                  record:  324 type: 20 offset:   15936 size:      10
+   X,Y             {4610,4950}
+U_WMR_LINETO                  record:  325 type: 19 offset:   15946 size:      10
+   X,Y             {4610,9069}
+U_WMR_SETROP2                 record:  326 type:  4 offset:   15956 size:      10
+   iMode:          0x000A
+U_WMR_MOVETO                  record:  327 type: 20 offset:   15966 size:      10
+   X,Y             {4620,4950}
+U_WMR_LINETO                  record:  328 type: 19 offset:   15976 size:      10
+   X,Y             {4620,9069}
+U_WMR_SETROP2                 record:  329 type:  4 offset:   15986 size:      10
+   iMode:          0x000B
+U_WMR_MOVETO                  record:  330 type: 20 offset:   15996 size:      10
+   X,Y             {4630,4950}
+U_WMR_LINETO                  record:  331 type: 19 offset:   16006 size:      10
+   X,Y             {4630,9069}
+U_WMR_SETROP2                 record:  332 type:  4 offset:   16016 size:      10
+   iMode:          0x000C
+U_WMR_MOVETO                  record:  333 type: 20 offset:   16026 size:      10
+   X,Y             {4640,4950}
+U_WMR_LINETO                  record:  334 type: 19 offset:   16036 size:      10
+   X,Y             {4640,9069}
+U_WMR_SETROP2                 record:  335 type:  4 offset:   16046 size:      10
+   iMode:          0x000D
+U_WMR_MOVETO                  record:  336 type: 20 offset:   16056 size:      10
+   X,Y             {4650,4950}
+U_WMR_LINETO                  record:  337 type: 19 offset:   16066 size:      10
+   X,Y             {4650,9069}
+U_WMR_SETROP2                 record:  338 type:  4 offset:   16076 size:      10
+   iMode:          0x000E
+U_WMR_MOVETO                  record:  339 type: 20 offset:   16086 size:      10
+   X,Y             {4660,4950}
+U_WMR_LINETO                  record:  340 type: 19 offset:   16096 size:      10
+   X,Y             {4660,9069}
+U_WMR_SETROP2                 record:  341 type:  4 offset:   16106 size:      10
+   iMode:          0x000F
+U_WMR_MOVETO                  record:  342 type: 20 offset:   16116 size:      10
+   X,Y             {4670,4950}
+U_WMR_LINETO                  record:  343 type: 19 offset:   16126 size:      10
+   X,Y             {4670,9069}
+U_WMR_SETROP2                 record:  344 type:  4 offset:   16136 size:      10
+   iMode:          0x0010
+U_WMR_MOVETO                  record:  345 type: 20 offset:   16146 size:      10
+   X,Y             {4680,4950}
+U_WMR_LINETO                  record:  346 type: 19 offset:   16156 size:      10
+   X,Y             {4680,9069}
+U_WMR_SELECTOBJECT            record:  347 type: 45 offset:   16166 size:       8
+   Object:         5
+U_WMR_SETROP2                 record:  348 type:  4 offset:   16174 size:      10
+   iMode:          0x0001
+U_WMR_MOVETO                  record:  349 type: 20 offset:   16184 size:      10
+   X,Y             {4730,4950}
+U_WMR_LINETO                  record:  350 type: 19 offset:   16194 size:      10
+   X,Y             {4730,9069}
+U_WMR_SETROP2                 record:  351 type:  4 offset:   16204 size:      10
+   iMode:          0x0002
+U_WMR_MOVETO                  record:  352 type: 20 offset:   16214 size:      10
+   X,Y             {4740,4950}
+U_WMR_LINETO                  record:  353 type: 19 offset:   16224 size:      10
+   X,Y             {4740,9069}
+U_WMR_SETROP2                 record:  354 type:  4 offset:   16234 size:      10
+   iMode:          0x0003
+U_WMR_MOVETO                  record:  355 type: 20 offset:   16244 size:      10
+   X,Y             {4750,4950}
+U_WMR_LINETO                  record:  356 type: 19 offset:   16254 size:      10
+   X,Y             {4750,9069}
+U_WMR_SETROP2                 record:  357 type:  4 offset:   16264 size:      10
+   iMode:          0x0004
+U_WMR_MOVETO                  record:  358 type: 20 offset:   16274 size:      10
+   X,Y             {4760,4950}
+U_WMR_LINETO                  record:  359 type: 19 offset:   16284 size:      10
+   X,Y             {4760,9069}
+U_WMR_SETROP2                 record:  360 type:  4 offset:   16294 size:      10
+   iMode:          0x0005
+U_WMR_MOVETO                  record:  361 type: 20 offset:   16304 size:      10
+   X,Y             {4770,4950}
+U_WMR_LINETO                  record:  362 type: 19 offset:   16314 size:      10
+   X,Y             {4770,9069}
+U_WMR_SETROP2                 record:  363 type:  4 offset:   16324 size:      10
+   iMode:          0x0006
+U_WMR_MOVETO                  record:  364 type: 20 offset:   16334 size:      10
+   X,Y             {4780,4950}
+U_WMR_LINETO                  record:  365 type: 19 offset:   16344 size:      10
+   X,Y             {4780,9069}
+U_WMR_SETROP2                 record:  366 type:  4 offset:   16354 size:      10
+   iMode:          0x0007
+U_WMR_MOVETO                  record:  367 type: 20 offset:   16364 size:      10
+   X,Y             {4790,4950}
+U_WMR_LINETO                  record:  368 type: 19 offset:   16374 size:      10
+   X,Y             {4790,9069}
+U_WMR_SETROP2                 record:  369 type:  4 offset:   16384 size:      10
+   iMode:          0x0008
+U_WMR_MOVETO                  record:  370 type: 20 offset:   16394 size:      10
+   X,Y             {4800,4950}
+U_WMR_LINETO                  record:  371 type: 19 offset:   16404 size:      10
+   X,Y             {4800,9069}
+U_WMR_SETROP2                 record:  372 type:  4 offset:   16414 size:      10
+   iMode:          0x0009
+U_WMR_MOVETO                  record:  373 type: 20 offset:   16424 size:      10
+   X,Y             {4810,4950}
+U_WMR_LINETO                  record:  374 type: 19 offset:   16434 size:      10
+   X,Y             {4810,9069}
+U_WMR_SETROP2                 record:  375 type:  4 offset:   16444 size:      10
+   iMode:          0x000A
+U_WMR_MOVETO                  record:  376 type: 20 offset:   16454 size:      10
+   X,Y             {4820,4950}
+U_WMR_LINETO                  record:  377 type: 19 offset:   16464 size:      10
+   X,Y             {4820,9069}
+U_WMR_SETROP2                 record:  378 type:  4 offset:   16474 size:      10
+   iMode:          0x000B
+U_WMR_MOVETO                  record:  379 type: 20 offset:   16484 size:      10
+   X,Y             {4830,4950}
+U_WMR_LINETO                  record:  380 type: 19 offset:   16494 size:      10
+   X,Y             {4830,9069}
+U_WMR_SETROP2                 record:  381 type:  4 offset:   16504 size:      10
+   iMode:          0x000C
+U_WMR_MOVETO                  record:  382 type: 20 offset:   16514 size:      10
+   X,Y             {4840,4950}
+U_WMR_LINETO                  record:  383 type: 19 offset:   16524 size:      10
+   X,Y             {4840,9069}
+U_WMR_SETROP2                 record:  384 type:  4 offset:   16534 size:      10
+   iMode:          0x000D
+U_WMR_MOVETO                  record:  385 type: 20 offset:   16544 size:      10
+   X,Y             {4850,4950}
+U_WMR_LINETO                  record:  386 type: 19 offset:   16554 size:      10
+   X,Y             {4850,9069}
+U_WMR_SETROP2                 record:  387 type:  4 offset:   16564 size:      10
+   iMode:          0x000E
+U_WMR_MOVETO                  record:  388 type: 20 offset:   16574 size:      10
+   X,Y             {4860,4950}
+U_WMR_LINETO                  record:  389 type: 19 offset:   16584 size:      10
+   X,Y             {4860,9069}
+U_WMR_SETROP2                 record:  390 type:  4 offset:   16594 size:      10
+   iMode:          0x000F
+U_WMR_MOVETO                  record:  391 type: 20 offset:   16604 size:      10
+   X,Y             {4870,4950}
+U_WMR_LINETO                  record:  392 type: 19 offset:   16614 size:      10
+   X,Y             {4870,9069}
+U_WMR_SETROP2                 record:  393 type:  4 offset:   16624 size:      10
+   iMode:          0x0010
+U_WMR_MOVETO                  record:  394 type: 20 offset:   16634 size:      10
+   X,Y             {4880,4950}
+U_WMR_LINETO                  record:  395 type: 19 offset:   16644 size:      10
+   X,Y             {4880,9069}
+U_WMR_SETROP2                 record:  396 type:  4 offset:   16654 size:      10
+   iMode:          0x000D
+U_WMR_SELECTOBJECT            record:  397 type: 45 offset:   16664 size:       8
+   Object:         14
+U_WMR_SETTEXTCOLOR            record:  398 type:  9 offset:   16672 size:      10
+   Color:          {255,0,0} 
+U_WMR_SETBKCOLOR              record:  399 type:  1 offset:   16682 size:      10
+   Color:          {0,255,0} 
+U_WMR_EXTTEXTOUT              record:  400 type: 50 offset:   16692 size:      90
+   X,Y:{100,50}
+   Length:25
+   Opts:0000
+   String:<Text from U_WMREXTTEXTOUT>
+   Dx:180:180:180:180:180:180:180:180:180:180:180:180:180:180:180:180:180:180:180:180:180:180:180:180:180:
+U_WMR_TEXTOUT                 record:  401 type: 33 offset:   16782 size:      34
+   X,Y:{100,350}
+   Length:22
+   String:<Text from U_WMRTEXTOUT>
+U_WMR_SELECTOBJECT            record:  402 type: 45 offset:   16816 size:       8
+   Object:         8
+U_WMR_SELECTOBJECT            record:  403 type: 45 offset:   16824 size:       8
+   Object:         3
+U_WMR_RECTANGLE               record:  404 type: 27 offset:   16832 size:      14
+   Rect:LTRB{100,650,300,850} 
+U_WMR_SELECTOBJECT            record:  405 type: 45 offset:   16846 size:       8
+   Object:         14
+U_WMR_SETTEXTCOLOR            record:  406 type:  9 offset:   16854 size:      10
+   Color:          {255,0,255} 
+U_WMR_SETBKCOLOR              record:  407 type:  1 offset:   16864 size:      10
+   Color:          {0,255,255} 
+U_WMR_EXTTEXTOUT              record:  408 type: 50 offset:   16874 size:      90
+   X,Y:{100,950}
+   Length:25
+   Opts:0000
+   String:<Text from U_WMREXTTEXTOUT>
+   Dx:180:180:180:180:180:180:180:180:180:180:180:180:180:180:180:180:180:180:180:180:180:180:180:180:180:
+U_WMR_SELECTOBJECT            record:  409 type: 45 offset:   16964 size:       8
+   Object:         13
+U_WMR_SELECTOBJECT            record:  410 type: 45 offset:   16972 size:       8
+   Object:         11
+U_WMR_SELECTOBJECT            record:  411 type: 45 offset:   16980 size:       8
+   Object:         2
+U_WMR_RECTANGLE               record:  412 type: 27 offset:   16988 size:      14
+   Rect:LTRB{5480,80,5520,120} 
+U_WMR_EXTTEXTOUT              record:  413 type: 50 offset:   17002 size:      78
+   X,Y:{5500,100}
+   Length:21
+   Opts:0000
+   String:<textalignment:default>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_SETTEXTALIGN            record:  414 type: 46 offset:   17080 size:      10
+   iMode:          0x0000
+U_WMR_RECTANGLE               record:  415 type: 27 offset:   17090 size:      14
+   Rect:LTRB{5980,80,6020,120} 
+U_WMR_EXTTEXTOUT              record:  416 type: 50 offset:   17104 size:      68
+   X,Y:{6000,100}
+   Length:18
+   Opts:0000
+   String:<textalignment:0x00>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_SETTEXTALIGN            record:  417 type: 46 offset:   17172 size:      10
+   iMode:          0x0002
+U_WMR_RECTANGLE               record:  418 type: 27 offset:   17182 size:      14
+   Rect:LTRB{5980,180,6020,220} 
+U_WMR_EXTTEXTOUT              record:  419 type: 50 offset:   17196 size:      68
+   X,Y:{6000,200}
+   Length:18
+   Opts:0000
+   String:<textalignment:0x02>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_SETTEXTALIGN            record:  420 type: 46 offset:   17264 size:      10
+   iMode:          0x0004
+U_WMR_RECTANGLE               record:  421 type: 27 offset:   17274 size:      14
+   Rect:LTRB{5980,280,6020,320} 
+U_WMR_EXTTEXTOUT              record:  422 type: 50 offset:   17288 size:      68
+   X,Y:{6000,300}
+   Length:18
+   Opts:0000
+   String:<textalignment:0x04>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_SETTEXTALIGN            record:  423 type: 46 offset:   17356 size:      10
+   iMode:          0x0006
+U_WMR_RECTANGLE               record:  424 type: 27 offset:   17366 size:      14
+   Rect:LTRB{5980,380,6020,420} 
+U_WMR_EXTTEXTOUT              record:  425 type: 50 offset:   17380 size:      68
+   X,Y:{6000,400}
+   Length:18
+   Opts:0000
+   String:<textalignment:0x06>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_SETTEXTALIGN            record:  426 type: 46 offset:   17448 size:      10
+   iMode:          0x0008
+U_WMR_RECTANGLE               record:  427 type: 27 offset:   17458 size:      14
+   Rect:LTRB{5980,480,6020,520} 
+U_WMR_EXTTEXTOUT              record:  428 type: 50 offset:   17472 size:      68
+   X,Y:{6000,500}
+   Length:18
+   Opts:0000
+   String:<textalignment:0x08>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_SETTEXTALIGN            record:  429 type: 46 offset:   17540 size:      10
+   iMode:          0x000A
+U_WMR_RECTANGLE               record:  430 type: 27 offset:   17550 size:      14
+   Rect:LTRB{5980,580,6020,620} 
+U_WMR_EXTTEXTOUT              record:  431 type: 50 offset:   17564 size:      68
+   X,Y:{6000,600}
+   Length:18
+   Opts:0000
+   String:<textalignment:0x0A>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_SETTEXTALIGN            record:  432 type: 46 offset:   17632 size:      10
+   iMode:          0x000C
+U_WMR_RECTANGLE               record:  433 type: 27 offset:   17642 size:      14
+   Rect:LTRB{5980,680,6020,720} 
+U_WMR_EXTTEXTOUT              record:  434 type: 50 offset:   17656 size:      68
+   X,Y:{6000,700}
+   Length:18
+   Opts:0000
+   String:<textalignment:0x0C>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_SETTEXTALIGN            record:  435 type: 46 offset:   17724 size:      10
+   iMode:          0x000E
+U_WMR_RECTANGLE               record:  436 type: 27 offset:   17734 size:      14
+   Rect:LTRB{5980,780,6020,820} 
+U_WMR_EXTTEXTOUT              record:  437 type: 50 offset:   17748 size:      68
+   X,Y:{6000,800}
+   Length:18
+   Opts:0000
+   String:<textalignment:0x0E>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_SETTEXTALIGN            record:  438 type: 46 offset:   17816 size:      10
+   iMode:          0x0010
+U_WMR_RECTANGLE               record:  439 type: 27 offset:   17826 size:      14
+   Rect:LTRB{5980,880,6020,920} 
+U_WMR_EXTTEXTOUT              record:  440 type: 50 offset:   17840 size:      68
+   X,Y:{6000,900}
+   Length:18
+   Opts:0000
+   String:<textalignment:0x10>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_SETTEXTALIGN            record:  441 type: 46 offset:   17908 size:      10
+   iMode:          0x0012
+U_WMR_RECTANGLE               record:  442 type: 27 offset:   17918 size:      14
+   Rect:LTRB{5980,980,6020,1020} 
+U_WMR_EXTTEXTOUT              record:  443 type: 50 offset:   17932 size:      68
+   X,Y:{6000,1000}
+   Length:18
+   Opts:0000
+   String:<textalignment:0x12>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_SETTEXTALIGN            record:  444 type: 46 offset:   18000 size:      10
+   iMode:          0x0014
+U_WMR_RECTANGLE               record:  445 type: 27 offset:   18010 size:      14
+   Rect:LTRB{5980,1080,6020,1120} 
+U_WMR_EXTTEXTOUT              record:  446 type: 50 offset:   18024 size:      68
+   X,Y:{6000,1100}
+   Length:18
+   Opts:0000
+   String:<textalignment:0x14>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_SETTEXTALIGN            record:  447 type: 46 offset:   18092 size:      10
+   iMode:          0x0016
+U_WMR_RECTANGLE               record:  448 type: 27 offset:   18102 size:      14
+   Rect:LTRB{5980,1180,6020,1220} 
+U_WMR_EXTTEXTOUT              record:  449 type: 50 offset:   18116 size:      68
+   X,Y:{6000,1200}
+   Length:18
+   Opts:0000
+   String:<textalignment:0x16>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_SETTEXTALIGN            record:  450 type: 46 offset:   18184 size:      10
+   iMode:          0x0018
+U_WMR_RECTANGLE               record:  451 type: 27 offset:   18194 size:      14
+   Rect:LTRB{5980,1280,6020,1320} 
+U_WMR_EXTTEXTOUT              record:  452 type: 50 offset:   18208 size:      68
+   X,Y:{6000,1300}
+   Length:18
+   Opts:0000
+   String:<textalignment:0x18>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_SETTEXTALIGN            record:  453 type: 46 offset:   18276 size:      10
+   iMode:          0x0000
+U_WMR_RECTANGLE               record:  454 type: 27 offset:   18286 size:      14
+   Rect:LTRB{6960,60,7040,140} 
+U_WMR_EXTTEXTOUT              record:  455 type: 50 offset:   18300 size:      68
+   X,Y:{6960,100}
+   Length:18
+   Opts:0000
+   String:<textalignment:0x00>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_SETTEXTALIGN            record:  456 type: 46 offset:   18368 size:      10
+   iMode:          0x0002
+U_WMR_RECTANGLE               record:  457 type: 27 offset:   18378 size:      14
+   Rect:LTRB{6960,160,7040,240} 
+U_WMR_EXTTEXTOUT              record:  458 type: 50 offset:   18392 size:      68
+   X,Y:{6960,200}
+   Length:18
+   Opts:0000
+   String:<textalignment:0x02>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_SETTEXTALIGN            record:  459 type: 46 offset:   18460 size:      10
+   iMode:          0x0004
+U_WMR_RECTANGLE               record:  460 type: 27 offset:   18470 size:      14
+   Rect:LTRB{6960,260,7040,340} 
+U_WMR_EXTTEXTOUT              record:  461 type: 50 offset:   18484 size:      68
+   X,Y:{6960,300}
+   Length:18
+   Opts:0000
+   String:<textalignment:0x04>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_SETTEXTALIGN            record:  462 type: 46 offset:   18552 size:      10
+   iMode:          0x0006
+U_WMR_RECTANGLE               record:  463 type: 27 offset:   18562 size:      14
+   Rect:LTRB{6960,360,7040,440} 
+U_WMR_EXTTEXTOUT              record:  464 type: 50 offset:   18576 size:      68
+   X,Y:{6960,400}
+   Length:18
+   Opts:0000
+   String:<textalignment:0x06>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_SETTEXTALIGN            record:  465 type: 46 offset:   18644 size:      10
+   iMode:          0x0008
+U_WMR_RECTANGLE               record:  466 type: 27 offset:   18654 size:      14
+   Rect:LTRB{6960,460,7040,540} 
+U_WMR_EXTTEXTOUT              record:  467 type: 50 offset:   18668 size:      68
+   X,Y:{6960,500}
+   Length:18
+   Opts:0000
+   String:<textalignment:0x08>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_SETTEXTALIGN            record:  468 type: 46 offset:   18736 size:      10
+   iMode:          0x000A
+U_WMR_RECTANGLE               record:  469 type: 27 offset:   18746 size:      14
+   Rect:LTRB{6960,560,7040,640} 
+U_WMR_EXTTEXTOUT              record:  470 type: 50 offset:   18760 size:      68
+   X,Y:{6960,600}
+   Length:18
+   Opts:0000
+   String:<textalignment:0x0A>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_SETTEXTALIGN            record:  471 type: 46 offset:   18828 size:      10
+   iMode:          0x000C
+U_WMR_RECTANGLE               record:  472 type: 27 offset:   18838 size:      14
+   Rect:LTRB{6960,660,7040,740} 
+U_WMR_EXTTEXTOUT              record:  473 type: 50 offset:   18852 size:      68
+   X,Y:{6960,700}
+   Length:18
+   Opts:0000
+   String:<textalignment:0x0C>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_SETTEXTALIGN            record:  474 type: 46 offset:   18920 size:      10
+   iMode:          0x000E
+U_WMR_RECTANGLE               record:  475 type: 27 offset:   18930 size:      14
+   Rect:LTRB{6960,760,7040,840} 
+U_WMR_EXTTEXTOUT              record:  476 type: 50 offset:   18944 size:      68
+   X,Y:{6960,800}
+   Length:18
+   Opts:0000
+   String:<textalignment:0x0E>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_SETTEXTALIGN            record:  477 type: 46 offset:   19012 size:      10
+   iMode:          0x0010
+U_WMR_RECTANGLE               record:  478 type: 27 offset:   19022 size:      14
+   Rect:LTRB{6960,860,7040,940} 
+U_WMR_EXTTEXTOUT              record:  479 type: 50 offset:   19036 size:      68
+   X,Y:{6960,900}
+   Length:18
+   Opts:0000
+   String:<textalignment:0x10>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_SETTEXTALIGN            record:  480 type: 46 offset:   19104 size:      10
+   iMode:          0x0012
+U_WMR_RECTANGLE               record:  481 type: 27 offset:   19114 size:      14
+   Rect:LTRB{6960,960,7040,1040} 
+U_WMR_EXTTEXTOUT              record:  482 type: 50 offset:   19128 size:      68
+   X,Y:{6960,1000}
+   Length:18
+   Opts:0000
+   String:<textalignment:0x12>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_SETTEXTALIGN            record:  483 type: 46 offset:   19196 size:      10
+   iMode:          0x0014
+U_WMR_RECTANGLE               record:  484 type: 27 offset:   19206 size:      14
+   Rect:LTRB{6960,1060,7040,1140} 
+U_WMR_EXTTEXTOUT              record:  485 type: 50 offset:   19220 size:      68
+   X,Y:{6960,1100}
+   Length:18
+   Opts:0000
+   String:<textalignment:0x14>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_SETTEXTALIGN            record:  486 type: 46 offset:   19288 size:      10
+   iMode:          0x0016
+U_WMR_RECTANGLE               record:  487 type: 27 offset:   19298 size:      14
+   Rect:LTRB{6960,1160,7040,1240} 
+U_WMR_EXTTEXTOUT              record:  488 type: 50 offset:   19312 size:      68
+   X,Y:{6960,1200}
+   Length:18
+   Opts:0000
+   String:<textalignment:0x16>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_SETTEXTALIGN            record:  489 type: 46 offset:   19380 size:      10
+   iMode:          0x0018
+U_WMR_RECTANGLE               record:  490 type: 27 offset:   19390 size:      14
+   Rect:LTRB{6960,1260,7040,1340} 
+U_WMR_EXTTEXTOUT              record:  491 type: 50 offset:   19404 size:      68
+   X,Y:{6960,1300}
+   Length:18
+   Opts:0000
+   String:<textalignment:0x18>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_SETTEXTALIGN            record:  492 type: 46 offset:   19472 size:      10
+   iMode:          0x0000
+U_WMR_SETTEXTALIGN            record:  493 type: 46 offset:   19482 size:      10
+   iMode:          0x0018
+U_WMR_CREATEFONTINDIRECT      record:  494 type:251 offset:   19492 size:      36
+   Font:Height:-30 Width:0 Escapement:0 Orientation:0 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_SELECTOBJECT            record:  495 type: 45 offset:   19528 size:       8
+   Object:         15
+U_WMR_EXTTEXTOUT              record:  496 type: 50 offset:   19536 size:      54
+   X,Y:{8000,300}
+   Length:13
+   Opts:0000
+   String:<....Degrees:0>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_DELETEOBJECT            record:  497 type:240 offset:   19590 size:       8
+   Object:         15
+U_WMR_CREATEFONTINDIRECT      record:  498 type:251 offset:   19598 size:      36
+   Font:Height:-30 Width:0 Escapement:300 Orientation:300 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_SELECTOBJECT            record:  499 type: 45 offset:   19634 size:       8
+   Object:         15
+U_WMR_EXTTEXTOUT              record:  500 type: 50 offset:   19642 size:      56
+   X,Y:{8000,300}
+   Length:14
+   Opts:0000
+   String:<....Degrees:30>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_DELETEOBJECT            record:  501 type:240 offset:   19698 size:       8
+   Object:         15
+U_WMR_CREATEFONTINDIRECT      record:  502 type:251 offset:   19706 size:      36
+   Font:Height:-30 Width:0 Escapement:600 Orientation:600 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_SELECTOBJECT            record:  503 type: 45 offset:   19742 size:       8
+   Object:         15
+U_WMR_EXTTEXTOUT              record:  504 type: 50 offset:   19750 size:      56
+   X,Y:{8000,300}
+   Length:14
+   Opts:0000
+   String:<....Degrees:60>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_DELETEOBJECT            record:  505 type:240 offset:   19806 size:       8
+   Object:         15
+U_WMR_CREATEFONTINDIRECT      record:  506 type:251 offset:   19814 size:      36
+   Font:Height:-30 Width:0 Escapement:900 Orientation:900 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_SELECTOBJECT            record:  507 type: 45 offset:   19850 size:       8
+   Object:         15
+U_WMR_EXTTEXTOUT              record:  508 type: 50 offset:   19858 size:      56
+   X,Y:{8000,300}
+   Length:14
+   Opts:0000
+   String:<....Degrees:90>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_DELETEOBJECT            record:  509 type:240 offset:   19914 size:       8
+   Object:         15
+U_WMR_CREATEFONTINDIRECT      record:  510 type:251 offset:   19922 size:      36
+   Font:Height:-30 Width:0 Escapement:1200 Orientation:1200 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_SELECTOBJECT            record:  511 type: 45 offset:   19958 size:       8
+   Object:         15
+U_WMR_EXTTEXTOUT              record:  512 type: 50 offset:   19966 size:      60
+   X,Y:{8000,300}
+   Length:15
+   Opts:0000
+   String:<....Degrees:120>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_DELETEOBJECT            record:  513 type:240 offset:   20026 size:       8
+   Object:         15
+U_WMR_CREATEFONTINDIRECT      record:  514 type:251 offset:   20034 size:      36
+   Font:Height:-30 Width:0 Escapement:1500 Orientation:1500 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_SELECTOBJECT            record:  515 type: 45 offset:   20070 size:       8
+   Object:         15
+U_WMR_EXTTEXTOUT              record:  516 type: 50 offset:   20078 size:      60
+   X,Y:{8000,300}
+   Length:15
+   Opts:0000
+   String:<....Degrees:150>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_DELETEOBJECT            record:  517 type:240 offset:   20138 size:       8
+   Object:         15
+U_WMR_CREATEFONTINDIRECT      record:  518 type:251 offset:   20146 size:      36
+   Font:Height:-30 Width:0 Escapement:1800 Orientation:1800 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_SELECTOBJECT            record:  519 type: 45 offset:   20182 size:       8
+   Object:         15
+U_WMR_EXTTEXTOUT              record:  520 type: 50 offset:   20190 size:      60
+   X,Y:{8000,300}
+   Length:15
+   Opts:0000
+   String:<....Degrees:180>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_DELETEOBJECT            record:  521 type:240 offset:   20250 size:       8
+   Object:         15
+U_WMR_CREATEFONTINDIRECT      record:  522 type:251 offset:   20258 size:      36
+   Font:Height:-30 Width:0 Escapement:2100 Orientation:2100 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_SELECTOBJECT            record:  523 type: 45 offset:   20294 size:       8
+   Object:         15
+U_WMR_EXTTEXTOUT              record:  524 type: 50 offset:   20302 size:      60
+   X,Y:{8000,300}
+   Length:15
+   Opts:0000
+   String:<....Degrees:210>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_DELETEOBJECT            record:  525 type:240 offset:   20362 size:       8
+   Object:         15
+U_WMR_CREATEFONTINDIRECT      record:  526 type:251 offset:   20370 size:      36
+   Font:Height:-30 Width:0 Escapement:2400 Orientation:2400 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_SELECTOBJECT            record:  527 type: 45 offset:   20406 size:       8
+   Object:         15
+U_WMR_EXTTEXTOUT              record:  528 type: 50 offset:   20414 size:      60
+   X,Y:{8000,300}
+   Length:15
+   Opts:0000
+   String:<....Degrees:240>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_DELETEOBJECT            record:  529 type:240 offset:   20474 size:       8
+   Object:         15
+U_WMR_CREATEFONTINDIRECT      record:  530 type:251 offset:   20482 size:      36
+   Font:Height:-30 Width:0 Escapement:2700 Orientation:2700 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_SELECTOBJECT            record:  531 type: 45 offset:   20518 size:       8
+   Object:         15
+U_WMR_EXTTEXTOUT              record:  532 type: 50 offset:   20526 size:      60
+   X,Y:{8000,300}
+   Length:15
+   Opts:0000
+   String:<....Degrees:270>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_DELETEOBJECT            record:  533 type:240 offset:   20586 size:       8
+   Object:         15
+U_WMR_CREATEFONTINDIRECT      record:  534 type:251 offset:   20594 size:      36
+   Font:Height:-30 Width:0 Escapement:3000 Orientation:3000 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_SELECTOBJECT            record:  535 type: 45 offset:   20630 size:       8
+   Object:         15
+U_WMR_EXTTEXTOUT              record:  536 type: 50 offset:   20638 size:      60
+   X,Y:{8000,300}
+   Length:15
+   Opts:0000
+   String:<....Degrees:300>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_DELETEOBJECT            record:  537 type:240 offset:   20698 size:       8
+   Object:         15
+U_WMR_CREATEFONTINDIRECT      record:  538 type:251 offset:   20706 size:      36
+   Font:Height:-30 Width:0 Escapement:3300 Orientation:3300 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_SELECTOBJECT            record:  539 type: 45 offset:   20742 size:       8
+   Object:         15
+U_WMR_EXTTEXTOUT              record:  540 type: 50 offset:   20750 size:      60
+   X,Y:{8000,300}
+   Length:15
+   Opts:0000
+   String:<....Degrees:330>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_DELETEOBJECT            record:  541 type:240 offset:   20810 size:       8
+   Object:         15
+U_WMR_SETTEXTALIGN            record:  542 type: 46 offset:   20818 size:      10
+   iMode:          0x0000
+U_WMR_CREATEFONTINDIRECT      record:  543 type:251 offset:   20828 size:      36
+   Font:Height:-30 Width:0 Escapement:0 Orientation:0 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_SELECTOBJECT            record:  544 type: 45 offset:   20864 size:       8
+   Object:         15
+U_WMR_EXTTEXTOUT              record:  545 type: 50 offset:   20872 size:      54
+   X,Y:{8600,300}
+   Length:13
+   Opts:0000
+   String:<....Degrees:0>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_DELETEOBJECT            record:  546 type:240 offset:   20926 size:       8
+   Object:         15
+U_WMR_CREATEFONTINDIRECT      record:  547 type:251 offset:   20934 size:      36
+   Font:Height:-30 Width:0 Escapement:300 Orientation:300 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_SELECTOBJECT            record:  548 type: 45 offset:   20970 size:       8
+   Object:         15
+U_WMR_EXTTEXTOUT              record:  549 type: 50 offset:   20978 size:      56
+   X,Y:{8600,300}
+   Length:14
+   Opts:0000
+   String:<....Degrees:30>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_DELETEOBJECT            record:  550 type:240 offset:   21034 size:       8
+   Object:         15
+U_WMR_CREATEFONTINDIRECT      record:  551 type:251 offset:   21042 size:      36
+   Font:Height:-30 Width:0 Escapement:600 Orientation:600 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_SELECTOBJECT            record:  552 type: 45 offset:   21078 size:       8
+   Object:         15
+U_WMR_EXTTEXTOUT              record:  553 type: 50 offset:   21086 size:      56
+   X,Y:{8600,300}
+   Length:14
+   Opts:0000
+   String:<....Degrees:60>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_DELETEOBJECT            record:  554 type:240 offset:   21142 size:       8
+   Object:         15
+U_WMR_CREATEFONTINDIRECT      record:  555 type:251 offset:   21150 size:      36
+   Font:Height:-30 Width:0 Escapement:900 Orientation:900 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_SELECTOBJECT            record:  556 type: 45 offset:   21186 size:       8
+   Object:         15
+U_WMR_EXTTEXTOUT              record:  557 type: 50 offset:   21194 size:      56
+   X,Y:{8600,300}
+   Length:14
+   Opts:0000
+   String:<....Degrees:90>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_DELETEOBJECT            record:  558 type:240 offset:   21250 size:       8
+   Object:         15
+U_WMR_CREATEFONTINDIRECT      record:  559 type:251 offset:   21258 size:      36
+   Font:Height:-30 Width:0 Escapement:1200 Orientation:1200 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_SELECTOBJECT            record:  560 type: 45 offset:   21294 size:       8
+   Object:         15
+U_WMR_EXTTEXTOUT              record:  561 type: 50 offset:   21302 size:      60
+   X,Y:{8600,300}
+   Length:15
+   Opts:0000
+   String:<....Degrees:120>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_DELETEOBJECT            record:  562 type:240 offset:   21362 size:       8
+   Object:         15
+U_WMR_CREATEFONTINDIRECT      record:  563 type:251 offset:   21370 size:      36
+   Font:Height:-30 Width:0 Escapement:1500 Orientation:1500 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_SELECTOBJECT            record:  564 type: 45 offset:   21406 size:       8
+   Object:         15
+U_WMR_EXTTEXTOUT              record:  565 type: 50 offset:   21414 size:      60
+   X,Y:{8600,300}
+   Length:15
+   Opts:0000
+   String:<....Degrees:150>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_DELETEOBJECT            record:  566 type:240 offset:   21474 size:       8
+   Object:         15
+U_WMR_CREATEFONTINDIRECT      record:  567 type:251 offset:   21482 size:      36
+   Font:Height:-30 Width:0 Escapement:1800 Orientation:1800 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_SELECTOBJECT            record:  568 type: 45 offset:   21518 size:       8
+   Object:         15
+U_WMR_EXTTEXTOUT              record:  569 type: 50 offset:   21526 size:      60
+   X,Y:{8600,300}
+   Length:15
+   Opts:0000
+   String:<....Degrees:180>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_DELETEOBJECT            record:  570 type:240 offset:   21586 size:       8
+   Object:         15
+U_WMR_CREATEFONTINDIRECT      record:  571 type:251 offset:   21594 size:      36
+   Font:Height:-30 Width:0 Escapement:2100 Orientation:2100 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_SELECTOBJECT            record:  572 type: 45 offset:   21630 size:       8
+   Object:         15
+U_WMR_EXTTEXTOUT              record:  573 type: 50 offset:   21638 size:      60
+   X,Y:{8600,300}
+   Length:15
+   Opts:0000
+   String:<....Degrees:210>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_DELETEOBJECT            record:  574 type:240 offset:   21698 size:       8
+   Object:         15
+U_WMR_CREATEFONTINDIRECT      record:  575 type:251 offset:   21706 size:      36
+   Font:Height:-30 Width:0 Escapement:2400 Orientation:2400 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_SELECTOBJECT            record:  576 type: 45 offset:   21742 size:       8
+   Object:         15
+U_WMR_EXTTEXTOUT              record:  577 type: 50 offset:   21750 size:      60
+   X,Y:{8600,300}
+   Length:15
+   Opts:0000
+   String:<....Degrees:240>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_DELETEOBJECT            record:  578 type:240 offset:   21810 size:       8
+   Object:         15
+U_WMR_CREATEFONTINDIRECT      record:  579 type:251 offset:   21818 size:      36
+   Font:Height:-30 Width:0 Escapement:2700 Orientation:2700 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_SELECTOBJECT            record:  580 type: 45 offset:   21854 size:       8
+   Object:         15
+U_WMR_EXTTEXTOUT              record:  581 type: 50 offset:   21862 size:      60
+   X,Y:{8600,300}
+   Length:15
+   Opts:0000
+   String:<....Degrees:270>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_DELETEOBJECT            record:  582 type:240 offset:   21922 size:       8
+   Object:         15
+U_WMR_CREATEFONTINDIRECT      record:  583 type:251 offset:   21930 size:      36
+   Font:Height:-30 Width:0 Escapement:3000 Orientation:3000 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_SELECTOBJECT            record:  584 type: 45 offset:   21966 size:       8
+   Object:         15
+U_WMR_EXTTEXTOUT              record:  585 type: 50 offset:   21974 size:      60
+   X,Y:{8600,300}
+   Length:15
+   Opts:0000
+   String:<....Degrees:300>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_DELETEOBJECT            record:  586 type:240 offset:   22034 size:       8
+   Object:         15
+U_WMR_CREATEFONTINDIRECT      record:  587 type:251 offset:   22042 size:      36
+   Font:Height:-30 Width:0 Escapement:3300 Orientation:3300 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_SELECTOBJECT            record:  588 type: 45 offset:   22078 size:       8
+   Object:         15
+U_WMR_EXTTEXTOUT              record:  589 type: 50 offset:   22086 size:      60
+   X,Y:{8600,300}
+   Length:15
+   Opts:0000
+   String:<....Degrees:330>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_DELETEOBJECT            record:  590 type:240 offset:   22146 size:       8
+   Object:         15
+U_WMR_SETTEXTALIGN            record:  591 type: 46 offset:   22154 size:      10
+   iMode:          0x0008
+U_WMR_CREATEFONTINDIRECT      record:  592 type:251 offset:   22164 size:      36
+   Font:Height:-30 Width:0 Escapement:0 Orientation:0 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_SELECTOBJECT            record:  593 type: 45 offset:   22200 size:       8
+   Object:         15
+U_WMR_EXTTEXTOUT              record:  594 type: 50 offset:   22208 size:      54
+   X,Y:{9200,300}
+   Length:13
+   Opts:0000
+   String:<....Degrees:0>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_DELETEOBJECT            record:  595 type:240 offset:   22262 size:       8
+   Object:         15
+U_WMR_CREATEFONTINDIRECT      record:  596 type:251 offset:   22270 size:      36
+   Font:Height:-30 Width:0 Escapement:300 Orientation:300 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_SELECTOBJECT            record:  597 type: 45 offset:   22306 size:       8
+   Object:         15
+U_WMR_EXTTEXTOUT              record:  598 type: 50 offset:   22314 size:      56
+   X,Y:{9200,300}
+   Length:14
+   Opts:0000
+   String:<....Degrees:30>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_DELETEOBJECT            record:  599 type:240 offset:   22370 size:       8
+   Object:         15
+U_WMR_CREATEFONTINDIRECT      record:  600 type:251 offset:   22378 size:      36
+   Font:Height:-30 Width:0 Escapement:600 Orientation:600 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_SELECTOBJECT            record:  601 type: 45 offset:   22414 size:       8
+   Object:         15
+U_WMR_EXTTEXTOUT              record:  602 type: 50 offset:   22422 size:      56
+   X,Y:{9200,300}
+   Length:14
+   Opts:0000
+   String:<....Degrees:60>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_DELETEOBJECT            record:  603 type:240 offset:   22478 size:       8
+   Object:         15
+U_WMR_CREATEFONTINDIRECT      record:  604 type:251 offset:   22486 size:      36
+   Font:Height:-30 Width:0 Escapement:900 Orientation:900 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_SELECTOBJECT            record:  605 type: 45 offset:   22522 size:       8
+   Object:         15
+U_WMR_EXTTEXTOUT              record:  606 type: 50 offset:   22530 size:      56
+   X,Y:{9200,300}
+   Length:14
+   Opts:0000
+   String:<....Degrees:90>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_DELETEOBJECT            record:  607 type:240 offset:   22586 size:       8
+   Object:         15
+U_WMR_CREATEFONTINDIRECT      record:  608 type:251 offset:   22594 size:      36
+   Font:Height:-30 Width:0 Escapement:1200 Orientation:1200 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_SELECTOBJECT            record:  609 type: 45 offset:   22630 size:       8
+   Object:         15
+U_WMR_EXTTEXTOUT              record:  610 type: 50 offset:   22638 size:      60
+   X,Y:{9200,300}
+   Length:15
+   Opts:0000
+   String:<....Degrees:120>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_DELETEOBJECT            record:  611 type:240 offset:   22698 size:       8
+   Object:         15
+U_WMR_CREATEFONTINDIRECT      record:  612 type:251 offset:   22706 size:      36
+   Font:Height:-30 Width:0 Escapement:1500 Orientation:1500 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_SELECTOBJECT            record:  613 type: 45 offset:   22742 size:       8
+   Object:         15
+U_WMR_EXTTEXTOUT              record:  614 type: 50 offset:   22750 size:      60
+   X,Y:{9200,300}
+   Length:15
+   Opts:0000
+   String:<....Degrees:150>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_DELETEOBJECT            record:  615 type:240 offset:   22810 size:       8
+   Object:         15
+U_WMR_CREATEFONTINDIRECT      record:  616 type:251 offset:   22818 size:      36
+   Font:Height:-30 Width:0 Escapement:1800 Orientation:1800 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_SELECTOBJECT            record:  617 type: 45 offset:   22854 size:       8
+   Object:         15
+U_WMR_EXTTEXTOUT              record:  618 type: 50 offset:   22862 size:      60
+   X,Y:{9200,300}
+   Length:15
+   Opts:0000
+   String:<....Degrees:180>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_DELETEOBJECT            record:  619 type:240 offset:   22922 size:       8
+   Object:         15
+U_WMR_CREATEFONTINDIRECT      record:  620 type:251 offset:   22930 size:      36
+   Font:Height:-30 Width:0 Escapement:2100 Orientation:2100 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_SELECTOBJECT            record:  621 type: 45 offset:   22966 size:       8
+   Object:         15
+U_WMR_EXTTEXTOUT              record:  622 type: 50 offset:   22974 size:      60
+   X,Y:{9200,300}
+   Length:15
+   Opts:0000
+   String:<....Degrees:210>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_DELETEOBJECT            record:  623 type:240 offset:   23034 size:       8
+   Object:         15
+U_WMR_CREATEFONTINDIRECT      record:  624 type:251 offset:   23042 size:      36
+   Font:Height:-30 Width:0 Escapement:2400 Orientation:2400 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_SELECTOBJECT            record:  625 type: 45 offset:   23078 size:       8
+   Object:         15
+U_WMR_EXTTEXTOUT              record:  626 type: 50 offset:   23086 size:      60
+   X,Y:{9200,300}
+   Length:15
+   Opts:0000
+   String:<....Degrees:240>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_DELETEOBJECT            record:  627 type:240 offset:   23146 size:       8
+   Object:         15
+U_WMR_CREATEFONTINDIRECT      record:  628 type:251 offset:   23154 size:      36
+   Font:Height:-30 Width:0 Escapement:2700 Orientation:2700 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_SELECTOBJECT            record:  629 type: 45 offset:   23190 size:       8
+   Object:         15
+U_WMR_EXTTEXTOUT              record:  630 type: 50 offset:   23198 size:      60
+   X,Y:{9200,300}
+   Length:15
+   Opts:0000
+   String:<....Degrees:270>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_DELETEOBJECT            record:  631 type:240 offset:   23258 size:       8
+   Object:         15
+U_WMR_CREATEFONTINDIRECT      record:  632 type:251 offset:   23266 size:      36
+   Font:Height:-30 Width:0 Escapement:3000 Orientation:3000 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_SELECTOBJECT            record:  633 type: 45 offset:   23302 size:       8
+   Object:         15
+U_WMR_EXTTEXTOUT              record:  634 type: 50 offset:   23310 size:      60
+   X,Y:{9200,300}
+   Length:15
+   Opts:0000
+   String:<....Degrees:300>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_DELETEOBJECT            record:  635 type:240 offset:   23370 size:       8
+   Object:         15
+U_WMR_CREATEFONTINDIRECT      record:  636 type:251 offset:   23378 size:      36
+   Font:Height:-30 Width:0 Escapement:3300 Orientation:3300 Weight:400 Italic:0x00 Underline:0x00 StrikeOut:0x00 CharSet:0x00 OutPrecision:0x00 ClipPrecision:0x00 Quality:0x00 PitchAndFamily:0x00 FaceName:Courier New 
+U_WMR_SELECTOBJECT            record:  637 type: 45 offset:   23414 size:       8
+   Object:         15
+U_WMR_EXTTEXTOUT              record:  638 type: 50 offset:   23422 size:      60
+   X,Y:{9200,300}
+   Length:15
+   Opts:0000
+   String:<....Degrees:330>
+   Dx:18:18:18:18:18:18:18:18:18:18:18:18:18:18:18:
+U_WMR_DELETEOBJECT            record:  639 type:240 offset:   23482 size:       8
+   Object:         15
+U_WMR_SETTEXTALIGN            record:  640 type: 46 offset:   23490 size:      10
+   iMode:          0x0018
+U_WMR_SELECTOBJECT            record:  641 type: 45 offset:   23500 size:       8
+   Object:         5
+U_WMR_CREATEBRUSHINDIRECT     record:  642 type:252 offset:   23508 size:      14
+   Brush:Style:0x0002 Color:{63,127,255} Hatch:0x0000 
+U_WMR_SELECTOBJECT            record:  643 type: 45 offset:   23522 size:       8
+   Object:         15
+U_WMR_RECTANGLE               record:  644 type: 27 offset:   23530 size:      14
+   Rect:LTRB{2000,3500,2300,3800} 
+U_WMR_DELETEOBJECT            record:  645 type:240 offset:   23544 size:       8
+   Object:         15
+U_WMR_CREATEBRUSHINDIRECT     record:  646 type:252 offset:   23552 size:      14
+   Brush:Style:0x0002 Color:{63,127,255} Hatch:0x0001 
+U_WMR_SELECTOBJECT            record:  647 type: 45 offset:   23566 size:       8
+   Object:         15
+U_WMR_RECTANGLE               record:  648 type: 27 offset:   23574 size:      14
+   Rect:LTRB{2330,3500,2630,3800} 
+U_WMR_DELETEOBJECT            record:  649 type:240 offset:   23588 size:       8
+   Object:         15
+U_WMR_CREATEBRUSHINDIRECT     record:  650 type:252 offset:   23596 size:      14
+   Brush:Style:0x0002 Color:{63,127,255} Hatch:0x0002 
+U_WMR_SELECTOBJECT            record:  651 type: 45 offset:   23610 size:       8
+   Object:         15
+U_WMR_RECTANGLE               record:  652 type: 27 offset:   23618 size:      14
+   Rect:LTRB{2660,3500,2960,3800} 
+U_WMR_DELETEOBJECT            record:  653 type:240 offset:   23632 size:       8
+   Object:         15
+U_WMR_CREATEBRUSHINDIRECT     record:  654 type:252 offset:   23640 size:      14
+   Brush:Style:0x0002 Color:{63,127,255} Hatch:0x0003 
+U_WMR_SELECTOBJECT            record:  655 type: 45 offset:   23654 size:       8
+   Object:         15
+U_WMR_RECTANGLE               record:  656 type: 27 offset:   23662 size:      14
+   Rect:LTRB{2990,3500,3290,3800} 
+U_WMR_DELETEOBJECT            record:  657 type:240 offset:   23676 size:       8
+   Object:         15
+U_WMR_CREATEBRUSHINDIRECT     record:  658 type:252 offset:   23684 size:      14
+   Brush:Style:0x0002 Color:{63,127,255} Hatch:0x0004 
+U_WMR_SELECTOBJECT            record:  659 type: 45 offset:   23698 size:       8
+   Object:         15
+U_WMR_RECTANGLE               record:  660 type: 27 offset:   23706 size:      14
+   Rect:LTRB{3320,3500,3620,3800} 
+U_WMR_DELETEOBJECT            record:  661 type:240 offset:   23720 size:       8
+   Object:         15
+U_WMR_CREATEBRUSHINDIRECT     record:  662 type:252 offset:   23728 size:      14
+   Brush:Style:0x0002 Color:{63,127,255} Hatch:0x0005 
+U_WMR_SELECTOBJECT            record:  663 type: 45 offset:   23742 size:       8
+   Object:         15
+U_WMR_RECTANGLE               record:  664 type: 27 offset:   23750 size:      14
+   Rect:LTRB{3650,3500,3950,3800} 
+U_WMR_DELETEOBJECT            record:  665 type:240 offset:   23764 size:       8
+   Object:         15
+U_WMR_CREATEBRUSHINDIRECT     record:  666 type:252 offset:   23772 size:      14
+   Brush:Style:0x0002 Color:{63,127,255} Hatch:0x0006 
+U_WMR_SELECTOBJECT            record:  667 type: 45 offset:   23786 size:       8
+   Object:         15
+U_WMR_RECTANGLE               record:  668 type: 27 offset:   23794 size:      14
+   Rect:LTRB{3980,3500,4280,3800} 
+U_WMR_DELETEOBJECT            record:  669 type:240 offset:   23808 size:       8
+   Object:         15
+U_WMR_CREATEBRUSHINDIRECT     record:  670 type:252 offset:   23816 size:      14
+   Brush:Style:0x0002 Color:{63,127,255} Hatch:0x0007 
+U_WMR_SELECTOBJECT            record:  671 type: 45 offset:   23830 size:       8
+   Object:         15
+U_WMR_RECTANGLE               record:  672 type: 27 offset:   23838 size:      14
+   Rect:LTRB{4310,3500,4610,3800} 
+U_WMR_DELETEOBJECT            record:  673 type:240 offset:   23852 size:       8
+   Object:         15
+U_WMR_CREATEBRUSHINDIRECT     record:  674 type:252 offset:   23860 size:      14
+   Brush:Style:0x0002 Color:{63,127,255} Hatch:0x0008 
+U_WMR_SELECTOBJECT            record:  675 type: 45 offset:   23874 size:       8
+   Object:         15
+U_WMR_RECTANGLE               record:  676 type: 27 offset:   23882 size:      14
+   Rect:LTRB{4640,3500,4940,3800} 
+U_WMR_DELETEOBJECT            record:  677 type:240 offset:   23896 size:       8
+   Object:         15
+U_WMR_CREATEBRUSHINDIRECT     record:  678 type:252 offset:   23904 size:      14
+   Brush:Style:0x0002 Color:{63,127,255} Hatch:0x0009 
+U_WMR_SELECTOBJECT            record:  679 type: 45 offset:   23918 size:       8
+   Object:         15
+U_WMR_RECTANGLE               record:  680 type: 27 offset:   23926 size:      14
+   Rect:LTRB{4970,3500,5270,3800} 
+U_WMR_DELETEOBJECT            record:  681 type:240 offset:   23940 size:       8
+   Object:         15
+U_WMR_CREATEBRUSHINDIRECT     record:  682 type:252 offset:   23948 size:      14
+   Brush:Style:0x0002 Color:{63,127,255} Hatch:0x000A 
+U_WMR_SELECTOBJECT            record:  683 type: 45 offset:   23962 size:       8
+   Object:         15
+U_WMR_RECTANGLE               record:  684 type: 27 offset:   23970 size:      14
+   Rect:LTRB{5300,3500,5600,3800} 
+U_WMR_DELETEOBJECT            record:  685 type:240 offset:   23984 size:       8
+   Object:         15
+U_WMR_CREATEBRUSHINDIRECT     record:  686 type:252 offset:   23992 size:      14
+   Brush:Style:0x0002 Color:{63,127,255} Hatch:0x000B 
+U_WMR_SELECTOBJECT            record:  687 type: 45 offset:   24006 size:       8
+   Object:         15
+U_WMR_RECTANGLE               record:  688 type: 27 offset:   24014 size:      14
+   Rect:LTRB{5630,3500,5930,3800} 
+U_WMR_DELETEOBJECT            record:  689 type:240 offset:   24028 size:       8
+   Object:         15
+U_WMR_SELECTOBJECT            record:  690 type: 45 offset:   24036 size:       8
+   Object:         4
+U_WMR_SELECTOBJECT            record:  691 type: 45 offset:   24044 size:       8
+   Object:         10
+U_WMR_MOVETO                  record:  692 type: 20 offset:   24052 size:      10
+   X,Y             {6300,3650}
+U_WMR_LINETO                  record:  693 type: 19 offset:   24062 size:      10
+   X,Y             {6300,4050}
+U_WMR_MOVETO                  record:  694 type: 20 offset:   24072 size:      10
+   X,Y             {6630,3650}
+U_WMR_LINETO                  record:  695 type: 19 offset:   24082 size:      10
+   X,Y             {6630,4050}
+U_WMR_MOVETO                  record:  696 type: 20 offset:   24092 size:      10
+   X,Y             {6960,3650}
+U_WMR_LINETO                  record:  697 type: 19 offset:   24102 size:      10
+   X,Y             {6960,4050}
+U_WMR_MOVETO                  record:  698 type: 20 offset:   24112 size:      10
+   X,Y             {7290,3650}
+U_WMR_LINETO                  record:  699 type: 19 offset:   24122 size:      10
+   X,Y             {7290,4050}
+U_WMR_MOVETO                  record:  700 type: 20 offset:   24132 size:      10
+   X,Y             {7620,3650}
+U_WMR_LINETO                  record:  701 type: 19 offset:   24142 size:      10
+   X,Y             {7620,4050}
+U_WMR_MOVETO                  record:  702 type: 20 offset:   24152 size:      10
+   X,Y             {7950,3650}
+U_WMR_LINETO                  record:  703 type: 19 offset:   24162 size:      10
+   X,Y             {7950,4050}
+U_WMR_MOVETO                  record:  704 type: 20 offset:   24172 size:      10
+   X,Y             {8280,3650}
+U_WMR_LINETO                  record:  705 type: 19 offset:   24182 size:      10
+   X,Y             {8280,4050}
+U_WMR_MOVETO                  record:  706 type: 20 offset:   24192 size:      10
+   X,Y             {8610,3650}
+U_WMR_LINETO                  record:  707 type: 19 offset:   24202 size:      10
+   X,Y             {8610,4050}
+U_WMR_MOVETO                  record:  708 type: 20 offset:   24212 size:      10
+   X,Y             {8940,3650}
+U_WMR_LINETO                  record:  709 type: 19 offset:   24222 size:      10
+   X,Y             {8940,4050}
+U_WMR_MOVETO                  record:  710 type: 20 offset:   24232 size:      10
+   X,Y             {9270,3650}
+U_WMR_LINETO                  record:  711 type: 19 offset:   24242 size:      10
+   X,Y             {9270,4050}
+U_WMR_MOVETO                  record:  712 type: 20 offset:   24252 size:      10
+   X,Y             {9600,3650}
+U_WMR_LINETO                  record:  713 type: 19 offset:   24262 size:      10
+   X,Y             {9600,4050}
+U_WMR_MOVETO                  record:  714 type: 20 offset:   24272 size:      10
+   X,Y             {9930,3650}
+U_WMR_LINETO                  record:  715 type: 19 offset:   24282 size:      10
+   X,Y             {9930,4050}
+U_WMR_SETBKCOLOR              record:  716 type:  1 offset:   24292 size:      10
+   Color:          {255,0,0} 
+U_WMR_SETTEXTCOLOR            record:  717 type:  9 offset:   24302 size:      10
+   Color:          {0,255,0} 
+U_WMR_SELECTOBJECT            record:  718 type: 45 offset:   24312 size:       8
+   Object:         5
+U_WMR_CREATEBRUSHINDIRECT     record:  719 type:252 offset:   24320 size:      14
+   Brush:Style:0x0002 Color:{63,127,255} Hatch:0x0000 
+U_WMR_SELECTOBJECT            record:  720 type: 45 offset:   24334 size:       8
+   Object:         15
+U_WMR_RECTANGLE               record:  721 type: 27 offset:   24342 size:      14
+   Rect:LTRB{2000,3830,2300,4130} 
+U_WMR_CREATEBRUSHINDIRECT     record:  722 type:252 offset:   24356 size:      14
+   Brush:Style:0x0002 Color:{63,127,255} Hatch:0x0001 
+U_WMR_SELECTOBJECT            record:  723 type: 45 offset:   24370 size:       8
+   Object:         16
+U_WMR_RECTANGLE               record:  724 type: 27 offset:   24378 size:      14
+   Rect:LTRB{2330,3830,2630,4130} 
+U_WMR_CREATEBRUSHINDIRECT     record:  725 type:252 offset:   24392 size:      14
+   Brush:Style:0x0002 Color:{63,127,255} Hatch:0x0002 
+U_WMR_SELECTOBJECT            record:  726 type: 45 offset:   24406 size:       8
+   Object:         17
+U_WMR_RECTANGLE               record:  727 type: 27 offset:   24414 size:      14
+   Rect:LTRB{2660,3830,2960,4130} 
+U_WMR_CREATEBRUSHINDIRECT     record:  728 type:252 offset:   24428 size:      14
+   Brush:Style:0x0002 Color:{63,127,255} Hatch:0x0003 
+U_WMR_SELECTOBJECT            record:  729 type: 45 offset:   24442 size:       8
+   Object:         18
+U_WMR_RECTANGLE               record:  730 type: 27 offset:   24450 size:      14
+   Rect:LTRB{2990,3830,3290,4130} 
+U_WMR_CREATEBRUSHINDIRECT     record:  731 type:252 offset:   24464 size:      14
+   Brush:Style:0x0002 Color:{63,127,255} Hatch:0x0004 
+U_WMR_SELECTOBJECT            record:  732 type: 45 offset:   24478 size:       8
+   Object:         19
+U_WMR_RECTANGLE               record:  733 type: 27 offset:   24486 size:      14
+   Rect:LTRB{3320,3830,3620,4130} 
+U_WMR_CREATEBRUSHINDIRECT     record:  734 type:252 offset:   24500 size:      14
+   Brush:Style:0x0002 Color:{63,127,255} Hatch:0x0005 
+U_WMR_SELECTOBJECT            record:  735 type: 45 offset:   24514 size:       8
+   Object:         20
+U_WMR_RECTANGLE               record:  736 type: 27 offset:   24522 size:      14
+   Rect:LTRB{3650,3830,3950,4130} 
+U_WMR_CREATEBRUSHINDIRECT     record:  737 type:252 offset:   24536 size:      14
+   Brush:Style:0x0002 Color:{63,127,255} Hatch:0x0006 
+U_WMR_SELECTOBJECT            record:  738 type: 45 offset:   24550 size:       8
+   Object:         21
+U_WMR_RECTANGLE               record:  739 type: 27 offset:   24558 size:      14
+   Rect:LTRB{3980,3830,4280,4130} 
+U_WMR_CREATEBRUSHINDIRECT     record:  740 type:252 offset:   24572 size:      14
+   Brush:Style:0x0002 Color:{63,127,255} Hatch:0x0007 
+U_WMR_SELECTOBJECT            record:  741 type: 45 offset:   24586 size:       8
+   Object:         22
+U_WMR_RECTANGLE               record:  742 type: 27 offset:   24594 size:      14
+   Rect:LTRB{4310,3830,4610,4130} 
+U_WMR_CREATEBRUSHINDIRECT     record:  743 type:252 offset:   24608 size:      14
+   Brush:Style:0x0002 Color:{63,127,255} Hatch:0x0008 
+U_WMR_SELECTOBJECT            record:  744 type: 45 offset:   24622 size:       8
+   Object:         23
+U_WMR_RECTANGLE               record:  745 type: 27 offset:   24630 size:      14
+   Rect:LTRB{4640,3830,4940,4130} 
+U_WMR_CREATEBRUSHINDIRECT     record:  746 type:252 offset:   24644 size:      14
+   Brush:Style:0x0002 Color:{63,127,255} Hatch:0x0009 
+U_WMR_SELECTOBJECT            record:  747 type: 45 offset:   24658 size:       8
+   Object:         24
+U_WMR_RECTANGLE               record:  748 type: 27 offset:   24666 size:      14
+   Rect:LTRB{4970,3830,5270,4130} 
+U_WMR_CREATEBRUSHINDIRECT     record:  749 type:252 offset:   24680 size:      14
+   Brush:Style:0x0002 Color:{63,127,255} Hatch:0x000A 
+U_WMR_SELECTOBJECT            record:  750 type: 45 offset:   24694 size:       8
+   Object:         25
+U_WMR_RECTANGLE               record:  751 type: 27 offset:   24702 size:      14
+   Rect:LTRB{5300,3830,5600,4130} 
+U_WMR_CREATEBRUSHINDIRECT     record:  752 type:252 offset:   24716 size:      14
+   Brush:Style:0x0002 Color:{63,127,255} Hatch:0x000B 
+U_WMR_SELECTOBJECT            record:  753 type: 45 offset:   24730 size:       8
+   Object:         26
+U_WMR_RECTANGLE               record:  754 type: 27 offset:   24738 size:      14
+   Rect:LTRB{5630,3830,5930,4130} 
+U_WMR_SETTEXTCOLOR            record:  755 type:  9 offset:   24752 size:      10
+   Color:          {255,0,255} 
+U_WMR_SETBKCOLOR              record:  756 type:  1 offset:   24762 size:      10
+   Color:          {0,255,255} 
+U_WMR_DIBCREATEPATTERNBRUSH   record:  757 type: 66 offset:   24772 size:     150
+   Style:6
+   cUsage:0
+   Src:DIB: (BitmapInfoHeader) BmiHeader: biSize:40 biWidth:5 biHeight:5 biPlanes:1 biBitCount:32 biCompression:0 biSizeImage:0 biXPelsPerMeter:47244 biYPelsPerMeter:47244 biClrUsed:0 biClrImportant:0 
+U_WMR_SELECTOBJECT            record:  758 type: 45 offset:   24922 size:       8
+   Object:         27
+U_WMR_RECTANGLE               record:  759 type: 27 offset:   24930 size:      14
+   Rect:LTRB{2330,4160,2360,4190} 
+U_WMR_RECTANGLE               record:  760 type: 27 offset:   24944 size:      14
+   Rect:LTRB{2660,4160,2720,4220} 
+U_WMR_RECTANGLE               record:  761 type: 27 offset:   24958 size:      14
+   Rect:LTRB{2990,4160,3080,4250} 
+U_WMR_RECTANGLE               record:  762 type: 27 offset:   24972 size:      14
+   Rect:LTRB{3320,4160,3440,4280} 
+U_WMR_RECTANGLE               record:  763 type: 27 offset:   24986 size:      14
+   Rect:LTRB{3650,4160,3800,4310} 
+U_WMR_RECTANGLE               record:  764 type: 27 offset:   25000 size:      14
+   Rect:LTRB{3980,4160,4160,4340} 
+U_WMR_RECTANGLE               record:  765 type: 27 offset:   25014 size:      14
+   Rect:LTRB{4310,4160,4520,4370} 
+U_WMR_RECTANGLE               record:  766 type: 27 offset:   25028 size:      14
+   Rect:LTRB{4640,4160,4880,4400} 
+U_WMR_RECTANGLE               record:  767 type: 27 offset:   25042 size:      14
+   Rect:LTRB{4970,4160,5240,4430} 
+U_WMR_RECTANGLE               record:  768 type: 27 offset:   25056 size:      14
+   Rect:LTRB{5300,4160,5600,4460} 
+U_WMR_DELETEOBJECT            record:  769 type:240 offset:   25070 size:       8
+   Object:         27
+U_WMR_DIBCREATEPATTERNBRUSH   record:  770 type: 66 offset:   25078 size:     122
+   Style:3
+   cUsage:0
+   Src:Bitmap16:Type:32 Width:5 Height:5 WidthBytes:20 Planes:1 BitsPixel:32 BitsBytes:100 
+U_WMR_SELECTOBJECT            record:  771 type: 45 offset:   25200 size:       8
+   Object:         27
+U_WMR_RECTANGLE               record:  772 type: 27 offset:   25208 size:      14
+   Rect:LTRB{5630,4160,5960,4490} 
+U_WMR_DELETEOBJECT            record:  773 type:240 offset:   25222 size:       8
+   Object:         27
+U_WMR_SELECTOBJECT            record:  774 type: 45 offset:   25230 size:       8
+   Object:         4
+U_WMR_SELECTOBJECT            record:  775 type: 45 offset:   25238 size:       8
+   Object:         5
+U_WMR_MOVETO                  record:  776 type: 20 offset:   25246 size:      10
+   X,Y             {6600,4150}
+U_WMR_LINETO                  record:  777 type: 19 offset:   25256 size:      10
+   X,Y             {6600,4870}
+U_WMR_SELECTOBJECT            record:  778 type: 45 offset:   25266 size:       8
+   Object:         10
+U_WMR_MOVETO                  record:  779 type: 20 offset:   25274 size:      10
+   X,Y             {6600,4310}
+U_WMR_LINETO                  record:  780 type: 19 offset:   25284 size:      10
+   X,Y             {6600,4710}
+U_WMR_SELECTOBJECT            record:  781 type: 45 offset:   25294 size:       8
+   Object:         5
+U_WMR_MOVETO                  record:  782 type: 20 offset:   25302 size:      10
+   X,Y             {6930,4150}
+U_WMR_LINETO                  record:  783 type: 19 offset:   25312 size:      10
+   X,Y             {6930,4870}
+U_WMR_SELECTOBJECT            record:  784 type: 45 offset:   25322 size:       8
+   Object:         10
+U_WMR_MOVETO                  record:  785 type: 20 offset:   25330 size:      10
+   X,Y             {6930,4310}
+U_WMR_LINETO                  record:  786 type: 19 offset:   25340 size:      10
+   X,Y             {6930,4710}
+U_WMR_SELECTOBJECT            record:  787 type: 45 offset:   25350 size:       8
+   Object:         5
+U_WMR_MOVETO                  record:  788 type: 20 offset:   25358 size:      10
+   X,Y             {7260,4150}
+U_WMR_LINETO                  record:  789 type: 19 offset:   25368 size:      10
+   X,Y             {7260,4870}
+U_WMR_SELECTOBJECT            record:  790 type: 45 offset:   25378 size:       8
+   Object:         10
+U_WMR_MOVETO                  record:  791 type: 20 offset:   25386 size:      10
+   X,Y             {7260,4310}
+U_WMR_LINETO                  record:  792 type: 19 offset:   25396 size:      10
+   X,Y             {7260,4710}
+U_WMR_SELECTOBJECT            record:  793 type: 45 offset:   25406 size:       8
+   Object:         5
+U_WMR_MOVETO                  record:  794 type: 20 offset:   25414 size:      10
+   X,Y             {7590,4150}
+U_WMR_LINETO                  record:  795 type: 19 offset:   25424 size:      10
+   X,Y             {7590,4870}
+U_WMR_SELECTOBJECT            record:  796 type: 45 offset:   25434 size:       8
+   Object:         10
+U_WMR_MOVETO                  record:  797 type: 20 offset:   25442 size:      10
+   X,Y             {7590,4310}
+U_WMR_LINETO                  record:  798 type: 19 offset:   25452 size:      10
+   X,Y             {7590,4710}
+U_WMR_SELECTOBJECT            record:  799 type: 45 offset:   25462 size:       8
+   Object:         5
+U_WMR_MOVETO                  record:  800 type: 20 offset:   25470 size:      10
+   X,Y             {7920,4150}
+U_WMR_LINETO                  record:  801 type: 19 offset:   25480 size:      10
+   X,Y             {7920,4870}
+U_WMR_SELECTOBJECT            record:  802 type: 45 offset:   25490 size:       8
+   Object:         10
+U_WMR_MOVETO                  record:  803 type: 20 offset:   25498 size:      10
+   X,Y             {7920,4310}
+U_WMR_LINETO                  record:  804 type: 19 offset:   25508 size:      10
+   X,Y             {7920,4710}
+U_WMR_SELECTOBJECT            record:  805 type: 45 offset:   25518 size:       8
+   Object:         5
+U_WMR_MOVETO                  record:  806 type: 20 offset:   25526 size:      10
+   X,Y             {8250,4150}
+U_WMR_LINETO                  record:  807 type: 19 offset:   25536 size:      10
+   X,Y             {8250,4870}
+U_WMR_SELECTOBJECT            record:  808 type: 45 offset:   25546 size:       8
+   Object:         10
+U_WMR_MOVETO                  record:  809 type: 20 offset:   25554 size:      10
+   X,Y             {8250,4310}
+U_WMR_LINETO                  record:  810 type: 19 offset:   25564 size:      10
+   X,Y             {8250,4710}
+U_WMR_SELECTOBJECT            record:  811 type: 45 offset:   25574 size:       8
+   Object:         5
+U_WMR_DIBCREATEPATTERNBRUSH   record:  812 type: 66 offset:   25582 size:      74
+   Style:6
+   cUsage:0
+   Src:DIB: (BitmapInfoHeader) BmiHeader: biSize:40 biWidth:4 biHeight:4 biPlanes:1 biBitCount:1 biCompression:0 biSizeImage:0 biXPelsPerMeter:47244 biYPelsPerMeter:47244 biClrUsed:2 biClrImportant:0 0:{170,170,170,170} 1:{85,85,85,85} 
+U_WMR_SELECTOBJECT            record:  813 type: 45 offset:   25656 size:       8
+   Object:         27
+U_WMR_RECTANGLE               record:  814 type: 27 offset:   25664 size:      14
+   Rect:LTRB{2330,4520,2360,4550} 
+U_WMR_RECTANGLE               record:  815 type: 27 offset:   25678 size:      14
+   Rect:LTRB{2660,4520,2720,4580} 
+U_WMR_RECTANGLE               record:  816 type: 27 offset:   25692 size:      14
+   Rect:LTRB{2990,4520,3080,4610} 
+U_WMR_RECTANGLE               record:  817 type: 27 offset:   25706 size:      14
+   Rect:LTRB{3320,4520,3440,4640} 
+U_WMR_RECTANGLE               record:  818 type: 27 offset:   25720 size:      14
+   Rect:LTRB{3650,4520,3800,4670} 
+U_WMR_RECTANGLE               record:  819 type: 27 offset:   25734 size:      14
+   Rect:LTRB{3980,4520,4160,4700} 
+U_WMR_RECTANGLE               record:  820 type: 27 offset:   25748 size:      14
+   Rect:LTRB{4310,4520,4520,4730} 
+U_WMR_RECTANGLE               record:  821 type: 27 offset:   25762 size:      14
+   Rect:LTRB{4640,4520,4880,4760} 
+U_WMR_RECTANGLE               record:  822 type: 27 offset:   25776 size:      14
+   Rect:LTRB{4970,4520,5240,4790} 
+U_WMR_RECTANGLE               record:  823 type: 27 offset:   25790 size:      14
+   Rect:LTRB{5300,4520,5600,4820} 
+U_WMR_DELETEOBJECT            record:  824 type:240 offset:   25804 size:       8
+   Object:         27
+U_WMR_DIBCREATEPATTERNBRUSH   record:  825 type: 66 offset:   25812 size:      30
+   Style:3
+   cUsage:0
+   Src:Bitmap16:Type:1 Width:4 Height:4 WidthBytes:4 Planes:1 BitsPixel:1 BitsBytes:8 
+U_WMR_SELECTOBJECT            record:  826 type: 45 offset:   25842 size:       8
+   Object:         27
+U_WMR_RECTANGLE               record:  827 type: 27 offset:   25850 size:      14
+   Rect:LTRB{5630,4160,5960,4490} 
+U_WMR_DELETEOBJECT            record:  828 type:240 offset:   25864 size:       8
+   Object:         27
+U_WMR_SELECTOBJECT            record:  829 type: 45 offset:   25872 size:       8
+   Object:         4
+U_WMR_SELECTOBJECT            record:  830 type: 45 offset:   25880 size:       8
+   Object:         5
+U_WMR_MOVETO                  record:  831 type: 20 offset:   25888 size:      10
+   X,Y             {9300,4150}
+U_WMR_LINETO                  record:  832 type: 19 offset:   25898 size:      10
+   X,Y             {9300,4870}
+U_WMR_SELECTOBJECT            record:  833 type: 45 offset:   25908 size:       8
+   Object:         10
+U_WMR_MOVETO                  record:  834 type: 20 offset:   25916 size:      10
+   X,Y             {9300,4310}
+U_WMR_LINETO                  record:  835 type: 19 offset:   25926 size:      10
+   X,Y             {9300,4710}
+U_WMR_SELECTOBJECT            record:  836 type: 45 offset:   25936 size:       8
+   Object:         5
+U_WMR_MOVETO                  record:  837 type: 20 offset:   25944 size:      10
+   X,Y             {9630,4150}
+U_WMR_LINETO                  record:  838 type: 19 offset:   25954 size:      10
+   X,Y             {9630,4870}
+U_WMR_SELECTOBJECT            record:  839 type: 45 offset:   25964 size:       8
+   Object:         10
+U_WMR_MOVETO                  record:  840 type: 20 offset:   25972 size:      10
+   X,Y             {9630,4310}
+U_WMR_LINETO                  record:  841 type: 19 offset:   25982 size:      10
+   X,Y             {9630,4710}
+U_WMR_SELECTOBJECT            record:  842 type: 45 offset:   25992 size:       8
+   Object:         5
+U_WMR_MOVETO                  record:  843 type: 20 offset:   26000 size:      10
+   X,Y             {9960,4150}
+U_WMR_LINETO                  record:  844 type: 19 offset:   26010 size:      10
+   X,Y             {9960,4870}
+U_WMR_SELECTOBJECT            record:  845 type: 45 offset:   26020 size:       8
+   Object:         10
+U_WMR_MOVETO                  record:  846 type: 20 offset:   26028 size:      10
+   X,Y             {9960,4310}
+U_WMR_LINETO                  record:  847 type: 19 offset:   26038 size:      10
+   X,Y             {9960,4710}
+U_WMR_SELECTOBJECT            record:  848 type: 45 offset:   26048 size:       8
+   Object:         5
+U_WMR_MOVETO                  record:  849 type: 20 offset:   26056 size:      10
+   X,Y             {10290,4150}
+U_WMR_LINETO                  record:  850 type: 19 offset:   26066 size:      10
+   X,Y             {10290,4870}
+U_WMR_SELECTOBJECT            record:  851 type: 45 offset:   26076 size:       8
+   Object:         10
+U_WMR_MOVETO                  record:  852 type: 20 offset:   26084 size:      10
+   X,Y             {10290,4310}
+U_WMR_LINETO                  record:  853 type: 19 offset:   26094 size:      10
+   X,Y             {10290,4710}
+U_WMR_SELECTOBJECT            record:  854 type: 45 offset:   26104 size:       8
+   Object:         5
+U_WMR_MOVETO                  record:  855 type: 20 offset:   26112 size:      10
+   X,Y             {10620,4150}
+U_WMR_LINETO                  record:  856 type: 19 offset:   26122 size:      10
+   X,Y             {10620,4870}
+U_WMR_SELECTOBJECT            record:  857 type: 45 offset:   26132 size:       8
+   Object:         10
+U_WMR_MOVETO                  record:  858 type: 20 offset:   26140 size:      10
+   X,Y             {10620,4310}
+U_WMR_LINETO                  record:  859 type: 19 offset:   26150 size:      10
+   X,Y             {10620,4710}
+U_WMR_SELECTOBJECT            record:  860 type: 45 offset:   26160 size:       8
+   Object:         5
+U_WMR_MOVETO                  record:  861 type: 20 offset:   26168 size:      10
+   X,Y             {10950,4150}
+U_WMR_LINETO                  record:  862 type: 19 offset:   26178 size:      10
+   X,Y             {10950,4870}
+U_WMR_SELECTOBJECT            record:  863 type: 45 offset:   26188 size:       8
+   Object:         10
+U_WMR_MOVETO                  record:  864 type: 20 offset:   26196 size:      10
+   X,Y             {10950,4310}
+U_WMR_LINETO                  record:  865 type: 19 offset:   26206 size:      10
+   X,Y             {10950,4710}
+U_WMR_SELECTOBJECT            record:  866 type: 45 offset:   26216 size:       8
+   Object:         1
+U_WMR_SELECTOBJECT            record:  867 type: 45 offset:   26224 size:       8
+   Object:         5
+U_WMR_RECTANGLE               record:  868 type: 27 offset:   26232 size:      14
+   Rect:LTRB{7000,5000,7100,5100} 
+U_WMR_RECTANGLE               record:  869 type: 27 offset:   26246 size:      14
+   Rect:LTRB{7330,5000,7430,5100} 
+U_WMR_RECTANGLE               record:  870 type: 27 offset:   26260 size:      14
+   Rect:LTRB{7660,5000,7760,5100} 
+U_WMR_RECTANGLE               record:  871 type: 27 offset:   26274 size:      14
+   Rect:LTRB{7990,5000,8090,5100} 
+U_WMR_RECTANGLE               record:  872 type: 27 offset:   26288 size:      14
+   Rect:LTRB{8320,5000,8420,5100} 
+U_WMR_SELECTOBJECT            record:  873 type: 45 offset:   26302 size:       8
+   Object:         2
+U_WMR_FLOODFILL               record:  874 type: 25 offset:   26310 size:      16
+   Mode 0x0000
+   Color:{0,0,0} 
+   X,Y {7020,5020}
+U_WMR_EXTFLOODFILL            record:  875 type: 72 offset:   26326 size:      16
+   Mode 0x0000
+   Color:{0,0,0} 
+   X,Y {7350,5020}
+U_WMR_EXTFLOODFILL            record:  876 type: 72 offset:   26342 size:      16
+   Mode 0x0001
+   Color:{196,127,255} 
+   X,Y {8010,5020}
+U_WMR_SETPIXEL                record:  877 type: 31 offset:   26358 size:      14
+   Color:{0,1,2} 
+   X,Y {8340,5020}
+U_WMR_CREATEREGION            record:  878 type:255 offset:   26372 size:     226
+   Brush:   Region: Type:6 Size:220 sCount:1 sMax:10000 sRect: LTRB{7000,5000,9000,6000} 
+U_WMR_FILLREGION              record:  879 type: 40 offset:   26598 size:      10
+   Region          27
+   Brush           2
+U_WMR_EOF                     record:  880 type:  0 offset:   26608 size:       6
