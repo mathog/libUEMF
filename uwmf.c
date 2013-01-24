@@ -17,8 +17,8 @@
 
 /*
 File:      uwmf.c
-Version:   0.0.2
-Date:      22-DEC-2013
+Version:   0.0.3
+Date:      24-JAN-2013
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2013 David Mathog and California Institute of Technology (Caltech)
@@ -1408,11 +1408,9 @@ int wmf_free(
     \brief  Finalize the emf in memory and write it to the file.
     \return 0 on success, >=1 on failure
     \param wt WMF in memory
-    \param wht  WMF handle table (peak handle number needed)
 */
 int  wmf_finish(
-      WMFTRACK   *wt,
-      WMFHANDLES *wht
+      WMFTRACK   *wt
    ){
    U_WMRHEADER *record;
    int off;
@@ -1547,7 +1545,7 @@ int  wmf_header_append(
       int               freerec
    ){
    size_t deficit;
-   int hsize;
+   unsigned int hsize;
    
    hsize = (((PU_WMRPLACEABLE) rec)->Key == 0x9AC6CDD7 ? U_SIZE_WMRHEADER + U_SIZE_WMRPLACEABLE: U_SIZE_WMRHEADER);
    
@@ -2208,8 +2206,6 @@ char *U_WMRHEADER_set(
       ((PU_WMRHEADER) (record + off))->iType     = 1;
       ((PU_WMRHEADER) (record + off))->version   = U_METAVERSION300;
       ((PU_WMRHEADER) (record + off))->Size16w   = U_SIZE_WMRHEADER/2;
-         ((PU_WMRPLACEABLE) record)->dst.right   = xm16;
-         ((PU_WMRPLACEABLE) record)->dst.bottom  = ym16;
    }
    return(record);
 }
@@ -5040,8 +5036,8 @@ int U_WMRBITBLT_get(
       PU_BITMAP16  Bm16,
       char       **px
    ){
-   uint8_t    xb;
-   int  size = U_WMRCORE_RECSAFE_get(contents, (U_SIZE_WMRBITBLT_NOPX));
+   uint8_t   xb;
+   uint32_t  size = U_WMRCORE_RECSAFE_get(contents, (U_SIZE_WMRBITBLT_NOPX));
    if(!size)return(0);
    xb               = *(uint8_t *)( contents + offsetof(U_METARECORD, xb));
    if(U_TEST_NOPXB(size,xb)){ /* no bitmap */
@@ -5091,8 +5087,8 @@ int U_WMRSTRETCHBLT_get(
       PU_BITMAP16  Bm16,
       char       **px
    ){
-   int  size = U_WMRCORE_RECSAFE_get(contents, (U_SIZE_WMRSTRETCHBLT_NOPX));
-   uint8_t    xb;
+   uint8_t   xb;
+   uint32_t  size = U_WMRCORE_RECSAFE_get(contents, (U_SIZE_WMRSTRETCHBLT_NOPX));
    if(!size)return(0);
    xb                = *(uint8_t *)( contents + offsetof(U_METARECORD, xb));
    if(U_TEST_NOPXB(size,xb)){ /* no bitmap */
@@ -5544,8 +5540,8 @@ int U_WMRDIBBITBLT_get(
       uint32_t    *dwRop3,
       char       **dib
    ){
-   uint8_t xb;
-   int  size = U_WMRCORE_RECSAFE_get(contents, (U_SIZE_WMRDIBBITBLT_NOPX));
+   uint8_t  xb;
+   uint32_t size = U_WMRCORE_RECSAFE_get(contents, (U_SIZE_WMRDIBBITBLT_NOPX));
    if(!size)return(0);
    xb                    = *(uint8_t *)( contents + offsetof(U_METARECORD, xb));
    if(U_TEST_NOPXB(size,xb)){ /* no bitmap */
@@ -5591,8 +5587,8 @@ int U_WMRDIBSTRETCHBLT_get(
       uint32_t    *dwRop3,
       char       **dib
    ){
-   uint8_t xb;
-   int  size = U_WMRCORE_RECSAFE_get(contents, (U_SIZE_WMRDIBSTRETCHBLT_NOPX));
+   uint8_t  xb;
+   uint32_t size = U_WMRCORE_RECSAFE_get(contents, (U_SIZE_WMRDIBSTRETCHBLT_NOPX));
    if(!size)return(0);
    xb                    = *(uint8_t *)( contents + offsetof(U_METARECORD, xb));
    if(U_TEST_NOPXB(size,xb)){ /* no bitmap */

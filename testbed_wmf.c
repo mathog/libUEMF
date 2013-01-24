@@ -1453,7 +1453,7 @@ int main(int argc, char *argv[]){
     }
 #endif // swap testing
 
-    status=wmf_finish(wt, wht);
+    status=wmf_finish(wt);
     if(status){ printf("emf_finish failed: %d\n", status); }
     else {      printf("emf_finish sucess\n");             }
 

@@ -246,7 +246,7 @@ int wmfheader_swap(
       char *contents,
       int torev
     ){
-    int Key,Size16w;
+    uint32_t Key,Size16w;
     int size=0;
     Key=*(uint32_t *)(contents + offsetof(U_WMRPLACEABLE,Key));
     if(!torev)U_swap4(&Key,1);

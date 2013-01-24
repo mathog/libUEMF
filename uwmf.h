@@ -710,9 +710,11 @@ enum {
 /** \defgroup Common_macros Common Macros
   @{
 */
-/* Because Size16_4 may not be aligned no tests should dereference it directly from a pointer. */
-#define U_TEST_NOPX2(A,B) (A == B + 3)     /* A is Size16_4 (extracted and aligned), B = xb    true if no bitmap associated with the structure, used with some BLT records*/
-#define U_TEST_NOPXB(A,B) (A/2 == B + 3)   /* A is Size16_4(extracted and aligned)*2, B - xb, true if no bitmap associated with the structure, used with some BLT records*/
+/* Because Size16_4 may not be aligned no tests should dereference it directly from a pointer. 
+in NOPX tests cast causes uint8_t to promote to uint32_t, without it c++ compiler complains about
+comparison of int with unsigned int */
+#define U_TEST_NOPX2(A,B) (A ==   (uint32_t) (B + 3))  /* A is Size16_4 (extracted and aligned), B = xb    true if no bitmap associated with the structure, used with some BLT records*/
+#define U_TEST_NOPXB(A,B) (A/2 == (uint32_t) (B + 3))  /* A is Size16_4(extracted and aligned)*2, B - xb, true if no bitmap associated with the structure, used with some BLT records*/
 #define U_WMRTYPE(A) (((PU_METARECORD)A)->iType)                       //!<  Get iType                from U_WMR* record
 #define U_WMRXB(A)   (((PU_METARECORD)A)->xb)                          //!<  Get xb                   from U_WMR* record
 #define U_WMR_XB_FROM_TYPE(A) ((uint8_t) (U_wmr_values(A)>>8))           //!<  Get xb from type value
@@ -1872,7 +1874,7 @@ typedef struct {
 char        *wmr_dup(char *wmr);
 int          wmf_start(const char *name, uint32_t initsize, uint32_t chunksize, WMFTRACK **wt);
 int          wmf_free(WMFTRACK **wt);
-int          wmf_finish(WMFTRACK *wt, WMFHANDLES *wht);
+int          wmf_finish(WMFTRACK *wt);
 int          wmf_append(U_METARECORD *rec, WMFTRACK *wt, int freerec);
 int          wmf_header_append(U_METARECORD *rec,WMFTRACK *et, int freerec);
 int          wmf_readdata(const char *filename, char **contents, size_t*length);
