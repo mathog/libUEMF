@@ -17,8 +17,8 @@
 
 /*
 File:      uwmf.c
-Version:   0.0.3
-Date:      24-JAN-2013
+Version:   0.0.4
+Date:      25-JAN-2013
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2013 David Mathog and California Institute of Technology (Caltech)
@@ -1412,9 +1412,10 @@ int wmf_free(
 int  wmf_finish(
       WMFTRACK   *wt
    ){
-   U_WMRHEADER *record;
+   char *record;
    int off;
    uint32_t tmp;
+   uint16_t tmp16;
 
    if(!wt->fp)return(1);   // This could happen if something stomps on memory, otherwise should be caught in wmf_start
 
@@ -1424,12 +1425,14 @@ int  wmf_finish(
    if((((PU_WMRPLACEABLE) wt->buf)->Key == 0x9AC6CDD7)){ off = U_SIZE_WMRPLACEABLE; }
    else {                                                off = 0;                   }
    
-   record = (PU_WMRHEADER)(wt->buf + off);
+   record = (wt->buf + off);
    tmp = (wt->used)/2;
-   memcpy(record->Sizew,      &tmp, 4);    /* 16 bit words in file. not aligned */
+   memcpy(record + offsetof(U_WMRHEADER,Sizew),      &tmp, 4);    /* 16 bit words in file. not aligned */
    tmp = (wt->largest)/2;
-   memcpy(&(record->maxSize), &tmp, 4);   /*  16 bit words in largest record, not aligned */
-   record->nObjects     = wt->sumObjects;   /*  Total number of brushes, pens, and other graphics objects defined in this file */
+   memcpy(record + offsetof(U_WMRHEADER,maxSize), &tmp, 4);   /*  16 bit words in largest record, not aligned */
+   if(wt->sumObjects > UINT16_MAX)return(3);
+   tmp16 = wt->sumObjects;
+   memcpy(record + offsetof(U_WMRHEADER,nObjects), &tmp16, 2);   /*  Total number of brushes, pens, and other graphics objects defined in this file */
   
 #if U_BYTE_SWAP
     //This is a Big Endian machine, WMF data must be  Little Endian
