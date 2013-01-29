@@ -24,8 +24,8 @@
 /* If Version or Date are changed also edit the text labels for the output.
 
 File:      testbed_wmf.c
-Version:   0.0.14
-Date:      22-JAN-2013
+Version:   0.0.16
+Date:      30-JAN-2013
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2013 David Mathog and California Institute of Technology (Caltech)
@@ -596,9 +596,12 @@ int main(int argc, char *argv[]){
 
     /* label the drawing */
     
-    textlabel(400, "libUEMF v0.1.0",       9700, 200, font_courier_400, wt, wht);
-    textlabel(400, "January 23, 2013",     9700, 500, font_courier_400, wt, wht);
-    textlabel(400, "WMF test",             9700, 800, font_courier_400, wt, wht);
+    textlabel(400, "libUEMF v0.1.3",       9700, 200, font_courier_400, wt, wht);
+    textlabel(400, "January 29, 2013",     9700, 500, font_courier_400, wt, wht);
+    rec = malloc(128);
+    (void)sprintf(rec,"WMF test: %2.2X",mode);
+    textlabel(400, rec,                    9700, 800, font_courier_400, wt, wht);
+    free(rec);
 
 
     /* ********************************************************************** */
@@ -644,9 +647,14 @@ int main(int argc, char *argv[]){
     rclBox = U_RECT16_set(ul,lr);
     rec = U_WMRPIE_set(point16_set(2350,1600), point16_set(2200,1300), rclBox);   taf(rec,wt,"U_WMRPIE_set");
 
+    ul     = point16_set(2600,1300);
+    lr     = point16_set(2900,1600);
+    rclBox = U_RECT16_set(ul,lr);
+    rec = U_WMRROUNDRECT_set(25,100,rclBox);                                      taf(rec,wt,"U_WMRROUNDRECT_set");
+
     /* WMRPATBLT is a rectangle with no border, type in WMF that has no specific record in EMF (not needed
     there) */
-    rec = U_WMRPATBLT_set(point16_set(2600,1300),point16_set(300,300),U_PATCOPY);
+    rec = U_WMRPATBLT_set(point16_set(3600,1300),point16_set(300,300),U_PATCOPY);
     taf(rec,wt,"U_WMRPATBLT_set");
 
     rec = wselectobject_set(pen_black_1, wht);      taf(rec,wt,"wselectobject_set");

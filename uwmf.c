@@ -2526,11 +2526,11 @@ char *U_WMRRECTANGLE_set(U_RECT16 rect){
 /**
     \brief Create and return a U_WMRROUNDRECT record
     \return pointer to the U_WMRROUNDRECT record, or NULL on error
-    \param Height     Vertical rounding length.
     \param Width      Horizontal rounding length.
+    \param Height     Vertical rounding length.
     \param rect       Boundaries.
 */
-char *U_WMRROUNDRECT_set(int16_t Height, int16_t Width, U_RECT16 rect){
+char *U_WMRROUNDRECT_set(int16_t Width, int16_t Height, U_RECT16 rect){
    return U_WMRCORE_6U16_set(
       U_WMR_ROUNDRECT,
       U_U16(Height), 
@@ -4914,14 +4914,14 @@ int U_WMRRECTANGLE_get(
     \brief Retrieve values from a U_WMRROUNDRECT record
     \return length of the U_WMRROUNDRECT record, or NULL on error
     \param  contents   record to extract data from
-    \param  Height     Vertical rounding length.
     \param  Width      Horizontal rounding length.
+    \param  Height     Vertical rounding length.
     \param  rect       Boundaries.
 */
 int U_WMRROUNDRECT_get(
       char       *contents,
-      int16_t    *Height,
       int16_t    *Width, 
+      int16_t    *Height,
       PU_RECT16   rect
    ){
    return U_WMRCORE_6U16_get(

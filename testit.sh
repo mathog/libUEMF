@@ -11,6 +11,8 @@ USEDIFF=/usr/bin/diff
 EXTRACT=/usr/local/bin/extract
 EXECINPUT=/usr/local/bin/execinput
 #
+./testbed_emf 4 >/dev/null
+mv test_libuemf.emf test_libuemf30.emf
 ./testbed_emf 0 >/dev/null
 ./reademf test_libuemf.emf >test_libuemf_emf.txt
 ./testbed_wmf 0  >/dev/null
@@ -19,4 +21,19 @@ EXECINPUT=/usr/local/bin/execinput
 ls -1 test*ref* | \
   $EXTRACT -fmt "$USEDIFF -s [1,] [rtds_ref:1,]" | \
   $EXECINPUT
-
+#
+# clean up
+#
+rm -f test_libuemf30.emf
+rm -f test_libuemf.emf
+rm -f test_libuemf.wmf
+rm -f test_libuemf_emf.txt
+rm -f test_libuemf_wmf.txt
+rm -f test_mm_anisotropic.emf
+rm -f test_mm_hienglish.emf
+rm -f test_mm_himetric.emf
+rm -f test_mm_isotropic.emf
+rm -f test_mm_loenglish.emf
+rm -f test_mm_lometric.emf
+rm -f test_mm_text.emf
+rm -f test_mm_twips.emf

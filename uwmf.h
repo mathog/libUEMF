@@ -34,8 +34,8 @@
 
 /*
 File:      uwmf.h
-Version:   0.0.2
-Date:      22-JAN-2013
+Version:   0.0.3
+Date:      30-JAN-2013
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2013 David Mathog and California Institute of Technology (Caltech)
@@ -661,7 +661,7 @@ enum {
 #define U_SIZE_WMRSETPIXEL                           14         /* X   16 */
 #define U_SIZE_WMRPIE                                22         /* X   24 */
 #define U_SIZE_WMRCHORD                              22         /* X   24 */
-#define U_SIZE_WMRROUNDRECT                          20         /* +   20 */
+#define U_SIZE_WMRROUNDRECT                          18         /* X   20 */
 #define U_SIZE_WMRPATBLT                             18         /* X   20 */
 #define U_SIZE_WMRTEXTOUT                             8         /* X   12 (not including String,y,x) */
 #define U_SIZE_WMRBITBLT_NOPX                        24         /* +   24 */
@@ -1951,7 +1951,7 @@ char        *U_WMRELLIPSE_set(U_RECT16 rect);
 char        *U_WMRFLOODFILL_set(uint16_t Mode, U_COLORREF Color, U_POINT16 coord);
 char        *U_WMRPIE_set(U_POINT16 Radial1, U_POINT16 Radial2, U_RECT16 rect);
 char        *U_WMRRECTANGLE_set(U_RECT16 rect);
-char        *U_WMRROUNDRECT_set(int16_t Height, int16_t Width, U_RECT16 rect);
+char        *U_WMRROUNDRECT_set(int16_t Width, int16_t Height, U_RECT16 rect);
 char        *U_WMRPATBLT_set(U_POINT16 Dst, U_POINT16 cwh, uint32_t dwRop3);
 char        *U_WMRSAVEDC_set(void);
 char        *U_WMRSETPIXEL_set(U_COLORREF Color, U_POINT16 coord);
@@ -2217,7 +2217,7 @@ int          U_WMRELLIPSE_get(char *contents, PU_RECT16 rect);
 int          U_WMRFLOODFILL_get(char *contents, uint16_t *Mode, PU_COLORREF Color, PU_POINT16 coord);
 int          U_WMRPIE_get(char *contents, PU_POINT16 Radial1, PU_POINT16 Radial2, PU_RECT16 rect);
 int          U_WMRRECTANGLE_get(char *contents, PU_RECT16 rect);
-int          U_WMRROUNDRECT_get(char *contents, int16_t *Height, int16_t *Width, PU_RECT16 rect);
+int          U_WMRROUNDRECT_get(char *contents, int16_t *Width, int16_t *Height, PU_RECT16 rect);
 int          U_WMRPATBLT_get(char *contents, PU_POINT16 Dst, PU_POINT16 cwh, uint32_t *dwRop3);
 int          U_WMRSAVEDC_get(char *contents);
 int          U_WMRSETPIXEL_get(char *contents, PU_COLORREF Color, PU_POINT16 coord);

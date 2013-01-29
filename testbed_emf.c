@@ -4,7 +4,8 @@
  Single command line parameter, hexadecimal bit flag.
    1  Disable tests that block EMF import into PowerPoint (dotted lines)
    2  Enable tests that block EMF being displayed in Windows Preview (currently, GradientFill)
-   Default is 0, neither option set.
+   4  Use a rotated, scaled, offset world transform
+   Default is 0, no option set.
 
  Compile with 
  
@@ -23,11 +24,11 @@
 /* If Version or Date are changed also edit the text labels for the output.
 
 File:      testbed_emf.c
-Version:   0.0.11
-Date:      20-DEC-2012
+Version:   0.0.13
+Date:      30-JAN-2013
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
-Copyright: 2012 David Mathog and California Institute of Technology (Caltech)
+Copyright: 2013 David Mathog and California Institute of Technology (Caltech)
 */
 
 #include <stdlib.h>
@@ -38,6 +39,7 @@ Copyright: 2012 David Mathog and California Institute of Technology (Caltech)
 
 #define PPT_BLOCKERS     1
 #define PREVIEW_BLOCKERS 2
+#define WORLDXFORM_TEST  4
 
 // noa special conditions:
 // 1 then s2 is expected to have zero in the "a" channel
@@ -459,7 +461,7 @@ int main(int argc, char *argv[]){
     char                *rgba_px;
     char                *rgba_px2;
     U_RECTL              rclBounds,rclFrame,rclBox;
-    U_SIZEL              szlDev,szlMm;
+    U_SIZEL              szlDev,szlMm,corners;
     uint16_t            *Description;
     uint16_t            *FontStyle;
     uint16_t            *FontName;
@@ -491,6 +493,7 @@ int main(int argc, char *argv[]){
 
     int                  mode = 0;   // conditional for some tests
     unsigned int         umode;
+    double               sc;
     uint8_t pngarray[138]= {
        0x89,0x50,0x4E,0x47,0x0D,0x0A,0x1A,0x0A,0x00,0x00,
        0x00,0x0D,0x49,0x48,0x44,0x52,0x00,0x00,0x00,0x0A,
@@ -592,6 +595,7 @@ int main(int argc, char *argv[]){
       printf("   Flags is a hexadecimal number composed of the following optional bits (use 0 for a standard run):\n");
       printf("   1  Disable tests that block EMF import into PowerPoint (dotted lines)\n");
       printf("   2  Enable tests that block EMF being displayed in Windows Preview (currently, GradientFill)\n");
+      printf("   4  Rotate and scale the test image within the page.\n");
       exit(EXIT_FAILURE);
     }
 
@@ -652,7 +656,10 @@ int main(int argc, char *argv[]){
     rec = U_EMRSETMAPMODE_set(U_MM_TEXT);
     taf(rec,et,"U_EMRSETMAPMODE_set");
 
-    xform = xform_set(1, 0, 0, 1, 0, 0);
+    sc = 0.635659913;
+    if(mode & WORLDXFORM_TEST){ xform = xform_set(sc*cos(0.52359877559), -sc*sin(0.52359877559), sc*sin(0.52359877559), sc*cos(0.52359877559), 
+                                           0, 4459.5);} /* rotated and scaled to fit at an angle in same page.  Offset may be off a tiny fraction. */
+    else {                      xform = xform_set(1, 0, 0, 1, 0, 0);  } 
     rec = U_EMRMODIFYWORLDTRANSFORM_set(xform, U_MWT_LEFTMULTIPLY);
     taf(rec,et,"U_EMRMODIFYWORLDTRANSFORM_set");
 
@@ -706,9 +713,12 @@ int main(int argc, char *argv[]){
 
     /* label the drawing */
     
-    textlabel(400, "libUEMF v0.1.0",      9700, 200, &font, et, eht);
-    textlabel(400, "January 23, 2013",    9700, 500, &font, et, eht);
-    textlabel(400, "EMF test",            9700, 800, &font, et, eht);
+    textlabel(400, "libUEMF v0.1.3",      9700, 200, &font, et, eht);
+    textlabel(400, "January 29, 2013",    9700, 500, &font, et, eht);
+    rec = malloc(128);
+    (void)sprintf(rec,"EMF test: %2.2X",mode);
+    textlabel(400, rec,                   9700, 800, &font, et, eht);
+    free(rec);
 
 
     /* ********************************************************************** */
@@ -774,6 +784,12 @@ int main(int argc, char *argv[]){
     rclBox = rectl_set(ul,lr);
     rec = U_EMRPIE_set(rclBox, ul,  pointl_set(2350,1600));     taf(rec,et,"U_EMRPIE_set"); 
 
+    ul      = pointl_set(2600,1300);
+    lr      = pointl_set(2900,1600);
+    rclBox  = rectl_set(ul,lr);
+    corners = sizel_set(100,25);
+    rec = U_EMRROUNDRECT_set(rclBox,corners);
+    taf(rec,et,"U_EMRROUNDRECT_set");
 
 
     rec = selectobject_set(U_BLACK_PEN, eht); // make stock object BLACK_PEN active

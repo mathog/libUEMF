@@ -657,10 +657,10 @@ void U_WMRRECTANGLE_print(char *contents){
 void U_WMRROUNDRECT_print(char *contents){
    int16_t  Height, Width;
    U_RECT16 rect16;
-   int      size = U_WMRROUNDRECT_get(contents, &Height, &Width, &rect16);
+   int      size = U_WMRROUNDRECT_get(contents, &Width, &Height, &rect16);
    if(size > 0){
-      printf("   Height:%d\n", Height);
       printf("   Width:%d\n",  Width);
+      printf("   Height:%d\n", Height);
       printf("   Rect:");
       rect16_ltrb_print(rect16);
       printf("\n");
