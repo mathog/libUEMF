@@ -17,8 +17,8 @@
 
 /*
 File:      uemf_endian.h
-Version:   0.0.10
-Date:      11-JAN-2013
+Version:   0.0.11
+Date:      04-FEB-2013
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2013 David Mathog and California Institute of Technology (Caltech)
@@ -635,9 +635,10 @@ void U_EMRHEADER_swap(char *record, int torev){
    PU_EMRHEADER pEmr = (PU_EMRHEADER)(record);
    if(torev){
      nSize = pEmr->emr.nSize;
+     core5_swap(record, torev);
    }
-   core5_swap(record, torev);
-   if(!torev){
+   else {
+     core5_swap(record, torev);
      nSize = pEmr->emr.nSize;
    }
 
@@ -647,9 +648,10 @@ void U_EMRHEADER_swap(char *record, int torev){
    if(torev){
       nDesc = pEmr->nDescription;
       offDesc = pEmr->offDescription;
+      U_swap4(&(pEmr->nDescription), 3);       // nDescription offDescription nPalEntries 
    } 
-   U_swap4(&(pEmr->nDescription), 3);       // nDescription offDescription nPalEntries 
-   if(!torev){
+   else {
+      U_swap4(&(pEmr->nDescription), 3);       // nDescription offDescription nPalEntries 
       nDesc = pEmr->nDescription;
       offDesc = pEmr->offDescription;
    } 
@@ -662,9 +664,10 @@ void U_EMRHEADER_swap(char *record, int torev){
         cbPix = pEmr->cbPixelFormat;
         offPix = pEmr->offPixelFormat;
         if(cbPix)pixelformatdescriptor_swap( (PU_PIXELFORMATDESCRIPTOR) (record + pEmr->offPixelFormat));
+        U_swap4(&(pEmr->cbPixelFormat), 2);      // cbPixelFormat offPixelFormat 
      }
-     U_swap4(&(pEmr->cbPixelFormat), 2);      // cbPixelFormat offPixelFormat 
-     if(!torev){
+     else {
+        U_swap4(&(pEmr->cbPixelFormat), 2);      // cbPixelFormat offPixelFormat 
         cbPix = pEmr->cbPixelFormat;
         offPix = pEmr->offPixelFormat;
         if(cbPix)pixelformatdescriptor_swap( (PU_PIXELFORMATDESCRIPTOR) (record + pEmr->offPixelFormat));

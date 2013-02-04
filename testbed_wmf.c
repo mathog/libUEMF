@@ -24,8 +24,8 @@
 /* If Version or Date are changed also edit the text labels for the output.
 
 File:      testbed_wmf.c
-Version:   0.0.16
-Date:      30-JAN-2013
+Version:   0.0.17
+Date:      04-FEB-2013
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2013 David Mathog and California Institute of Technology (Caltech)
@@ -212,6 +212,30 @@ void textlabel(uint32_t size, const char *string, uint32_t x, uint32_t y, uint32
     free(dx16);
 }
 
+void label_column(int x1, int y1, uint32_t font, WMFTRACK *wt, WMFHANDLES *wht){
+    textlabel(40, "STRETCHDIB   ", x1, y1, font, wt, wht);          y1 += 220;
+    textlabel(40, "BITBLT       ", x1, y1, font, wt, wht);          y1 += 220;
+    textlabel(40, "STRETCHBLT   ", x1, y1, font, wt, wht);          y1 += 240;
+    textlabel(40, "DIBBITBLT    ", x1, y1, font, wt, wht);          y1 += 220;
+    textlabel(40, "DIBSTRETCHBLT", x1, y1, font, wt, wht);          y1 += 220;
+    return;
+}
+
+void label_row(int x1, int y1, uint32_t font, WMFTRACK *wt, WMFHANDLES *wht){
+    textlabel(30, "+COLOR32 ", x1, y1, font, wt, wht);          x1 += 220;
+    textlabel(30, "+COLOR24 ", x1, y1, font, wt, wht);          x1 += 220;
+    textlabel(30, "+COLOR16 ", x1, y1, font, wt, wht);          x1 += 220;
+    textlabel(30, "-COLOR16 ", x1, y1, font, wt, wht);          x1 += 220;
+    textlabel(30, "+COLOR8  ", x1, y1, font, wt, wht);          x1 += 220;
+    textlabel(30, "+COLOR4  ", x1, y1, font, wt, wht);          x1 += 220;
+    textlabel(30, "+MONO    ", x1, y1, font, wt, wht);          x1 += 220;
+    textlabel(30, "-MONO    ", x1, y1, font, wt, wht);          x1 += 220;
+    textlabel(30, "+COLOR8 0", x1, y1, font, wt, wht);          x1 += 220;
+    textlabel(30, "+COLOR4 0", x1, y1, font, wt, wht);          x1 += 220;
+    textlabel(30, "+MONO   0", x1, y1, font, wt, wht);          x1 += 220;
+    return;
+}
+
 void image_column(WMFTRACK *wt, int x1, int y1, int w, int h, PU_BITMAPINFO Bmi, uint32_t cbPx, char *px){
     char *rec;
     int   step=0;
@@ -313,6 +337,7 @@ int main(int argc, char *argv[]){
     int                  pen_darkred_200;
     int                  pen_null;
     int                  font_courier_400;
+    int                  font_courier_40;
     int                  font_courier_30;
     int                  font_arial_300;
     int                  reg_1;
@@ -352,6 +377,7 @@ int main(int argc, char *argv[]){
     PU_RGBQUAD           ct;         //color table
     int                  numCt;      //number of entries in the color table
     int                  i,j,k;
+    int                  offset;
 
     int                  mode = 0;   // conditional for some tests
     unsigned int         umode;
@@ -571,6 +597,14 @@ int main(int argc, char *argv[]){
     free(puf);
     font_courier_400=font;
     
+    puf = U_FONT_set(  -40, 0, 0, 0, 
+                      U_FW_NORMAL, U_FW_NOITALIC, U_FW_NOUNDERLINE, U_FW_NOSTRIKEOUT,
+                      U_ANSI_CHARSET, U_OUT_DEFAULT_PRECIS, U_CLIP_DEFAULT_PRECIS, 
+                      U_DEFAULT_QUALITY, U_DEFAULT_PITCH, "Courier New");
+    rec  = wcreatefontindirect_set( &font, wht, puf); taf(rec,wt,"wextcreatefontindirect_set");
+    free(puf);
+    font_courier_40=font;
+    
     puf = U_FONT_set(  -30, 0, 0, 0, 
                       U_FW_NORMAL, U_FW_NOITALIC, U_FW_NOUNDERLINE, U_FW_NOSTRIKEOUT,
                       U_ANSI_CHARSET, U_OUT_DEFAULT_PRECIS, U_CLIP_DEFAULT_PRECIS, 
@@ -596,8 +630,8 @@ int main(int argc, char *argv[]){
 
     /* label the drawing */
     
-    textlabel(400, "libUEMF v0.1.3",       9700, 200, font_courier_400, wt, wht);
-    textlabel(400, "January 29, 2013",     9700, 500, font_courier_400, wt, wht);
+    textlabel(400, "libUEMF v0.1.4",       9700, 200, font_courier_400, wt, wht);
+    textlabel(400, "February 4, 2013",     9700, 500, font_courier_400, wt, wht);
     rec = malloc(128);
     (void)sprintf(rec,"WMF test: %2.2X",mode);
     textlabel(400, rec,                    9700, 800, font_courier_400, wt, wht);
@@ -834,6 +868,11 @@ int main(int argc, char *argv[]){
     /* ********************************************************************** */
     // bitmaps
     
+    offset = 5000;
+    label_column(offset, 5000, font_courier_40, wt, wht);
+    label_row(offset + 400, 5000 - 30, font_courier_30, wt,  wht);
+    offset += 400;
+
     // Make the first test image, it is 10 x 10 and has various colors, R,G,B in each of 3 corners
     rgba_px = (char *) malloc(10*10*4);
     FillImage(rgba_px,10,10,40);
@@ -849,7 +888,8 @@ int main(int argc, char *argv[]){
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(10, 10, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
     Bmi = bitmapinfo_set(Bmih, ct);
-    image_column(wt, 5000,5000,10,10,Bmi, cbPx, px);
+    image_column(wt, offset, 5000,10,10,Bmi, cbPx, px);
+    offset += 220;
 
     // we are going to step on this one with little rectangles using different binary raster operations
     rec = U_WMRSTRETCHDIB_set(
@@ -877,7 +917,8 @@ int main(int argc, char *argv[]){
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(10, 10, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
     Bmi = bitmapinfo_set(Bmih, NULL);
-    image_column(wt, 5220,5000,10,10,Bmi, cbPx, px);
+    image_column(wt, offset, 5000,10,10,Bmi, cbPx, px);
+    offset += 220;
     free(Bmi);
     free(px);
 
@@ -891,12 +932,14 @@ int main(int argc, char *argv[]){
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(10, 10, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
     Bmi = bitmapinfo_set(Bmih, ct);
-    image_column(wt, 5440,5000,10,10,Bmi, cbPx, px);
+    image_column(wt, offset, 5000,10,10,Bmi, cbPx, px);
+    offset += 220;
        
     // write a second copy next to it using the negative height method to indicate it should be upside down
     /* Windows XP Preview (GDI?) does not render this properly, colors are offset  */
     Bmi->bmiHeader.biHeight *= -1;
-    image_column(wt, 5660,5000,10,10,Bmi, cbPx, px);
+    image_column(wt, offset, 5000,10,10,Bmi, cbPx, px);
+    offset += 220;
 
     free(Bmi);
     free(px);
@@ -911,9 +954,17 @@ int main(int argc, char *argv[]){
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(10, 10, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
     Bmi = bitmapinfo_set(Bmih, ct);
-    free(ct);
-    image_column(wt, 5880,5000,10,10,Bmi, cbPx, px);
+    image_column(wt, offset, 5000,10,10,Bmi, cbPx, px);
+    offset += 220;
     free(Bmi);
+    
+    // also test the numCt==0 form
+    Bmih = bitmapinfoheader_set(10, 10, 1, colortype, U_BI_RGB, 0, 47244, 47244, 0, 0);
+    Bmi = bitmapinfo_set(Bmih, ct);
+    image_column(wt, offset+660, 5000,10,10,Bmi, cbPx, px);
+    free(Bmi);
+        
+    free(ct);
     free(px);
 
     // done with the first test image, make the 2nd
@@ -931,8 +982,16 @@ int main(int argc, char *argv[]){
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(4, 4, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
     Bmi = bitmapinfo_set(Bmih, ct);
+    image_column(wt, offset, 5000,4,4,Bmi, cbPx, px);
+    offset += 220;
+    free(Bmi);
+
+    // also test the numCt==0 form
+    Bmih = bitmapinfoheader_set(4, 4, 1, colortype, U_BI_RGB, 0, 47244, 47244, 0, 0);
+    Bmi = bitmapinfo_set(Bmih, ct);
+    image_column(wt, offset + 660, 5000,4,4,Bmi, cbPx, px);
+
     free(ct);
-    image_column(wt, 6100,5000,4,4,Bmi, cbPx, px);
     free(Bmi);
     free(px);
 
@@ -949,15 +1008,22 @@ int main(int argc, char *argv[]){
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(4, 4, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
     Bmi = bitmapinfo_set(Bmih, ct);
-    
-    free(ct);
-    image_column(wt, 6320,5000,10,10,Bmi, cbPx, px);
+        image_column(wt, offset, 5000,4,4,Bmi, cbPx, px);
+    offset += 220;
 
     // write a second copy next to it using the negative height method to indicate it should be upside down
     /* Windows XP Preview (GDI?) does render this properly */
     Bmi->bmiHeader.biHeight *= -1;
-    image_column(wt, 6540,5000,10,10,Bmi, cbPx, px);
+    image_column(wt, offset,5000,10,10,Bmi, cbPx, px);
+    offset += 220;
+    free(Bmi);
 
+    // also test the numCt==0 form
+    Bmih = bitmapinfoheader_set(4, 4, 1, colortype, U_BI_RGB, 0, 47244, 47244, 0, 0);
+    Bmi = bitmapinfo_set(Bmih, ct);
+    image_column(wt, offset + 660 - 220 ,5000,4,4,Bmi, cbPx, px);
+
+    free(ct);
     free(Bmi);
     free(px);
 
@@ -974,6 +1040,9 @@ int main(int argc, char *argv[]){
     taf(rec,wt,"U_WMRBITBLT_set");
 
     if(!(mode & (PPT_BLOCKERS | LODRAW_BLOCKERS))){
+
+        textlabel(40, "STRETCHDIBITS", 5000, 6200, font_courier_40, wt, wht);
+
         /* Screen display in GDI apparently does not support either the PNG or JPG mode, some printers may. 
         When these are used the images will not be visible in Windows XP Preview and they will terminate
         processing of the WMF if ungrouped within PowerPoint 2003 at this point. */
@@ -982,7 +1051,7 @@ int main(int argc, char *argv[]){
         Bmih = bitmapinfoheader_set(10, -10, 1, U_BCBM_EXPLICIT, U_BI_PNG, cbPx, 0, 0, 0, 0); /* PNG, fields 5 and 6 must be present! */
         Bmi  = bitmapinfo_set(Bmih, NULL);
         rec = U_WMRSTRETCHDIB_set(
-           point16_set(6860,5000),
+           point16_set(5400,6200),
            point16_set(200,200),
            point16_set(0,0), 
            point16_set(10,10),
@@ -993,13 +1062,14 @@ int main(int argc, char *argv[]){
            px);
         taf(rec,wt,"U_WMRSTRETCHDIB_set");
         free(Bmi);
+        textlabel(30, "PNG", 5400, 6200-30, font_courier_30, wt, wht);
 
         px   = (char *) &jpgarray[0];
         cbPx = 676; 
         Bmih = bitmapinfoheader_set(10, -10, 1, U_BCBM_EXPLICIT, U_BI_JPEG, cbPx, 0, 0, 0, 0); /* JPG, fields 5 and 6 must be present! */
         Bmi  = bitmapinfo_set(Bmih, NULL);
         rec = U_WMRSTRETCHDIB_set(
-           point16_set(7180,5000),
+           point16_set(5620,6200),
            point16_set(200,200),
            point16_set(0,0), 
            point16_set(10,10),
@@ -1010,6 +1080,7 @@ int main(int argc, char *argv[]){
            px);
         taf(rec,wt,"U_WMRSTRETCHDIB_set");
         free(Bmi);
+        textlabel(30, "JPG", 5620, 6200-30, font_courier_30, wt, wht);
     } //PPT_BLOCKERS || LODRAW_BLOCKERS
 
     // testing binary raster operations
@@ -1385,7 +1456,7 @@ int main(int argc, char *argv[]){
   lr = point16_set(100,100);
   rclBox = U_RECT16_set(ul,lr);
   for (i=0; i<5; i++){
-    point16 = point16_transform((PU_POINT16) &rclBox, 2, xform_alt_set(1.0, 1.0, 0.0, 0.0, 7000+i*330, 5000));
+    point16 = point16_transform((PU_POINT16) &rclBox, 2, xform_alt_set(1.0, 1.0, 0.0, 0.0, 8000+i*330, 5000));
     rec = U_WMRRECTANGLE_set(*(PU_RECT16)point16); taf(rec,wt,"U_WMRRECTANGLE_set");
     free(point16);
   }
@@ -1395,19 +1466,19 @@ int main(int argc, char *argv[]){
 /*
   Broken in XP Preview, does not fill the rectangle.  
 */
-  rec = U_WMRFLOODFILL_set(U_FLOODFILLBORDER,      colorref_set(0,0,0),         point16_set(7020+0*330, 5020));//limited by black edge
+  rec = U_WMRFLOODFILL_set(U_FLOODFILLBORDER,      colorref_set(0,0,0),         point16_set(8020+0*330, 5020));//limited by black edge
   taf(rec,wt,"U_WMRFLOODFILL_set");
-  rec = U_WMREXTFLOODFILL_set(U_FLOODFILLBORDER,   colorref_set(0,0,0),         point16_set(7020+1*330, 5020));//limited by black edge
+  rec = U_WMREXTFLOODFILL_set(U_FLOODFILLBORDER,   colorref_set(0,0,0),         point16_set(8020+1*330, 5020));//limited by black edge
   taf(rec,wt,"U_WMREXTFLOODFILL_set");
 /*
   Broken in XP Preview, fills entire window.  
-  rec = U_WMRFLOODFILL_set(U_FLOODFILLSURFACE,     colorref_set(196, 127, 255), point16_set(7020+2*330, 5020));//limited to purple center
+  rec = U_WMRFLOODFILL_set(U_FLOODFILLSURFACE,     colorref_set(196, 127, 255), point16_set(8020+2*330, 5020));//limited to purple center
   taf(rec,wt,"U_WMRFLOODFILL_set");
 */
-  rec = U_WMREXTFLOODFILL_set(U_FLOODFILLSURFACE,  colorref_set(196, 127, 255), point16_set(7020+3*330, 5020));//limited to purple center
+  rec = U_WMREXTFLOODFILL_set(U_FLOODFILLSURFACE,  colorref_set(196, 127, 255), point16_set(8020+3*330, 5020));//limited to purple center
   taf(rec,wt,"U_WMREXTFLOODFILL_set");
 
-  rec = U_WMRSETPIXEL_set(colorref_set(0, 1, 2), point16_set(7020+4*330, 5020));
+  rec = U_WMRSETPIXEL_set(colorref_set(0, 1, 2), point16_set(8020+4*330, 5020));
   taf(rec,wt,"U_WMRSETPIXEL_set");
   
   /* create a region, fill it
@@ -1419,7 +1490,7 @@ int main(int argc, char *argv[]){
        U_SIZE_REGION + 50*2*2, //!< aScans in bytes + regions size in bytes (size of this header plus all U_SCAN objects?)
        1,             //!< number of scan objects in region (docs say scanlines, but then no way to add sizes)
        10000,          //!< ???? largest number of points in any scan, what is a "point" here?
-       U_RECT16_set(point16_set(7000,5000),point16_set(9000,6000)),  //!< bounding rectangle
+       U_RECT16_set(point16_set(8000,5000),point16_set(10000,6000)),  //!< bounding rectangle
        (uint16_t *)scans              //!< series of U_SCAN objects to append. This is also an array of uint16_t, but should be handled as a bunch of U_SCAN objects tightly packed into the buffer.
    );   
    rec = wcreateregion_set(&reg,  wht, Region);   taf(rec,wt,"wcreateregion_set");

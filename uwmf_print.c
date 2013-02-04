@@ -398,7 +398,7 @@ void wcore_points_print(uint16_t nPoints, char *aPoints){
 /* **********************************************************************************************
 These are the core WMR functions, each creates a particular type of record.  
 All return these records via a char* pointer, which is NULL if the call failed.  
-They are listed in order by the corresponding U_EMR_* index number.  
+They are listed in order by the corresponding U_WMR_* index number.  
 *********************************************************************************************** */
 
 /**

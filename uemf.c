@@ -14,8 +14,8 @@
 
 /*
 File:      uemf.c
-Version:   0.0.13
-Date:      17-JAN-2013
+Version:   0.0.16
+Date:      04-FEB-2013
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2013 David Mathog and California Institute of Technology (Caltech)
@@ -196,7 +196,7 @@ definitions are not needed in end user code, so they are here rather than in uem
      if(!B)return(NULL);  /* size is derived from U_BIMAPINFO, but NOT from its size field, go figure*/ \
      C = F;\
      D = UP4(C);          /*  pixel array might not be a multiples of 4 bytes*/ \
-     E    = sizeof(U_BITMAPINFOHEADER) +  4 * B->bmiHeader.biClrUsed;  /*  bmiheader + colortable*/ \
+     E    = sizeof(U_BITMAPINFOHEADER) +  4 * get_real_color_count(&(B->bmiHeader));  /*  bmiheader + colortable*/ \
    }\
    else { C = 0; D = 0; E=0; }
 
@@ -763,15 +763,64 @@ int RGBA_to_DIB(
 }
 
 /**
+    \brief Get the actual number of colors in the color table from the BitMapInfoHeader.  
+    BitmapInfoHeader may list 0 for some types which implies the maximum value.
+    If the image is big enough, that is set by the bit count, as in 256 for an 8
+    bit image.  
+    If the image is smaller it is set by width * height.
+    
+    \return Number of entries in the color table.
+    \param PU_BITMAPINFOHEADER pointer to to the U_BITMAPINFOHEADER
+*/
+int get_real_color_count(
+       PU_BITMAPINFOHEADER  Bmih
+   ){
+   
+   int Colors    = Bmih->biClrUsed;
+   int BitCount  = Bmih->biBitCount;
+   int Width     = Bmih->biWidth;
+   int Height    = Bmih->biHeight;
+   return(get_real_color_icount(Colors, BitCount, Width, Height));
+}
+
+/**
+    \brief Get the actual number of colors in the color table from the ClrUsed, BitCount, Width, and Height.  
+    BitmapInfoHeader may list 0 for some types which implies the maximum value.
+    If the image is big enough, that is set by the bit count, as in 256 for an 8
+    bit image.  
+    If the image is smaller it is set by width * height.
+    
+    \return Number of entries in the color table.
+    \param PU_BITMAPINFOHEADER pointer to to the U_BITMAPINFOHEADER
+*/
+int get_real_color_icount(
+       int Colors,
+       int BitCount,
+       int Width,
+       int Height
+   ){
+   int area = Width * Height;
+   if(area < 0){ area = -area; } /* Height might be negative */
+   if(Colors == 0){
+         if(     BitCount == U_BCBM_MONOCHROME){ Colors = 2;   }                                                                                          
+         else if(BitCount == U_BCBM_COLOR4    ){ Colors = 16;  }                                                                                          
+         else if(BitCount == U_BCBM_COLOR8    ){ Colors = 256; } 
+         if(Colors > area){  Colors = area; }
+   }
+   return(Colors);
+}
+
+
+/**
     \brief Get the DIB parameters from the BMI of the record for use by DBI_to_RGBA()
     
-    \return 0 on success, other values on errors.
+    \return BI_Compression Enumeration.  For anything other than U_BI_RGB values other than px may not be valid.
     \param pEmr        pointer to EMR record that has a U_BITMAPINFO and bitmap
     \param offBitsSrc  Offset to the bitmap
     \param offBmiSrc   Offset to the U_BITMAPINFO
     \param px          pointer to DIB pixel array in pEmr
     \param ct          pointer to DIB color table in pEmr
-    \param numCt       DIB color table number of entries
+    \param numCt       DIB color table number of entries, for PNG or JPG returns the number of bytes in the image
     \param width       Width of pixel array
     \param height      Height of pixel array (always returned as a positive number)
     \param colortype   DIB BitCount Enumeration
@@ -789,24 +838,32 @@ int get_DIB_params(
        uint32_t     *colortype,
        uint32_t     *invert
    ){
+   uint32_t bic;
    PU_BITMAPINFO Bmi = (PU_BITMAPINFO)((char *)pEmr + offBmiSrc);
-   if(Bmi->bmiHeader.biCompression != U_BI_RGB)return(1);
-   *width     = Bmi->bmiHeader.biWidth;
-   *colortype = Bmi->bmiHeader.biBitCount;
-   *numCt     = Bmi->bmiHeader.biClrUsed;
-   if(Bmi->bmiHeader.biHeight < 0){
-      *height = -Bmi->bmiHeader.biHeight;
+   PU_BITMAPINFOHEADER Bmih = &(Bmi->bmiHeader);
+   /* if biCompression is not U_BI_RGB some or all of the following might not hold real values */
+   bic        = Bmih->biCompression;
+   *width     = Bmih->biWidth;
+   *colortype = Bmih->biBitCount;
+   if(Bmih->biHeight < 0){
+      *height = -Bmih->biHeight;
       *invert = 1;
    }
    else {
-      *height = Bmi->bmiHeader.biHeight;
+      *height = Bmih->biHeight;
       *invert = 0;
    }
-   if(numCt){
-      *ct = (PU_RGBQUAD) ((char *)Bmi + sizeof(U_BITMAPINFOHEADER));
+   if(bic == U_BI_RGB){
+      *numCt     = get_real_color_count(Bmih);
+      if( numCt){ *ct = (PU_RGBQUAD) ((char *)Bmi + sizeof(U_BITMAPINFOHEADER)); }
+      else {      *ct = NULL;                                                    }                                                                                       
+   }
+   else {
+      *numCt     = Bmih->biSizeImage;
+      *ct        = NULL;
    }
    *px = (char *)((char *)pEmr + offBitsSrc);
-   return(0);
+   return(bic);
 }
 
 /**
@@ -1934,9 +1991,9 @@ PU_BITMAPINFO bitmapinfo_set(
    ){
    char *record;
    int   irecsize;
-   int   cbColors, cbColors4,off;
+   int   cbColors, cbColors4, off;
 
-   cbColors  = 4*BmiHeader.biClrUsed;
+   cbColors  = 4*get_real_color_count(&BmiHeader);
    cbColors4 = UP4(cbColors);
    irecsize  = sizeof(U_BITMAPINFOHEADER) + cbColors4;
    record    = malloc(irecsize);

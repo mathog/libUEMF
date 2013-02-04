@@ -24,8 +24,8 @@
 /* If Version or Date are changed also edit the text labels for the output.
 
 File:      testbed_emf.c
-Version:   0.0.13
-Date:      30-JAN-2013
+Version:   0.0.14
+Date:      04-FEB-2013
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2013 David Mathog and California Institute of Technology (Caltech)
@@ -251,9 +251,41 @@ void textlabel(uint32_t size, const char *string, uint32_t x, uint32_t y, uint32
     free(FontStyle);
 }
 
+void label_column(int x1, int y1, uint32_t *font, EMFTRACK *et, EMFHANDLES *eht){
+    textlabel(40, "STRETCHDIBITS 1", x1, y1, font, et, eht);          y1 += 220;
+    textlabel(40, "BITBLT        1", x1, y1, font, et, eht);          y1 += 220;
+    textlabel(40, "STRETCHBLT    1", x1, y1, font, et, eht);          y1 += 240;
+    textlabel(40, "STRETCHDIBITS 2", x1, y1, font, et, eht);          y1 += 220;
+    textlabel(40, "BITBLT        2", x1, y1, font, et, eht);          y1 += 220;
+    textlabel(40, "STRETCHBLT    2", x1, y1, font, et, eht);          y1 += 240;
+    textlabel(40, "STRETCHDIBITS 3", x1, y1, font, et, eht);          y1 += 220;
+    textlabel(40, "BITBLT        3", x1, y1, font, et, eht);          y1 += 220;
+    textlabel(40, "STRETCHBLT    3", x1, y1, font, et, eht);          y1 += 240;
+    textlabel(40, "STRETCHDIBITS 4", x1, y1, font, et, eht);          y1 += 220;
+    textlabel(40, "BITBLT        4", x1, y1, font, et, eht);          y1 += 220;
+    textlabel(40, "STRETCHBLT    4", x1, y1, font, et, eht);          y1 += 220;
+    return;
+}
+
+void label_row(int x1, int y1, uint32_t *font, EMFTRACK *et, EMFHANDLES *eht){
+    textlabel(30, "+COLOR32 ", x1, y1, font, et, eht);          x1 += 220;
+    textlabel(30, "+COLOR24 ", x1, y1, font, et, eht);          x1 += 220;
+    textlabel(30, "+COLOR16 ", x1, y1, font, et, eht);          x1 += 220;
+    textlabel(30, "-COLOR16 ", x1, y1, font, et, eht);          x1 += 220;
+    textlabel(30, "+COLOR8  ", x1, y1, font, et, eht);          x1 += 220;
+    textlabel(30, "+COLOR4  ", x1, y1, font, et, eht);          x1 += 220;
+    textlabel(30, "+MONO    ", x1, y1, font, et, eht);          x1 += 220;
+    textlabel(30, "-MONO    ", x1, y1, font, et, eht);          x1 += 220;
+    textlabel(30, "+COLOR8 0", x1, y1, font, et, eht);          x1 += 220;
+    textlabel(30, "+COLOR4 0", x1, y1, font, et, eht);          x1 += 220;
+    textlabel(30, "+MONO   0", x1, y1, font, et, eht);          x1 += 220;
+    return;
+}
+
 void image_column(EMFTRACK *et, int x1, int y1, int w, int h, PU_BITMAPINFO Bmi, uint32_t cbPx, char *px){
     char *rec;
     int   step=0;
+
     rec = U_EMRSTRETCHDIBITS_set(
        U_RCL_DEF,
        pointl_set(x1,y1 + step),
@@ -494,6 +526,7 @@ int main(int argc, char *argv[]){
     int                  mode = 0;   // conditional for some tests
     unsigned int         umode;
     double               sc;
+    int                  offset;
     uint8_t pngarray[138]= {
        0x89,0x50,0x4E,0x47,0x0D,0x0A,0x1A,0x0A,0x00,0x00,
        0x00,0x0D,0x49,0x48,0x44,0x52,0x00,0x00,0x00,0x0A,
@@ -713,8 +746,8 @@ int main(int argc, char *argv[]){
 
     /* label the drawing */
     
-    textlabel(400, "libUEMF v0.1.3",      9700, 200, &font, et, eht);
-    textlabel(400, "January 29, 2013",    9700, 500, &font, et, eht);
+    textlabel(400, "libUEMF v0.1.4",      9700, 200, &font, et, eht);
+    textlabel(400, "February 4, 2013",    9700, 500, &font, et, eht);
     rec = malloc(128);
     (void)sprintf(rec,"EMF test: %2.2X",mode);
     textlabel(400, rec,                   9700, 800, &font, et, eht);
@@ -1237,6 +1270,11 @@ int main(int argc, char *argv[]){
     /* ********************************************************************** */
     // bitmaps
     
+    offset = 5000;
+    label_column(offset, 5000, &font, et, eht);
+    label_row(offset + 400, 5000 - 30, &font, et,  eht);
+    offset += 400;
+   
     // Make the first test image, it is 10 x 10 and has various colors, R,G,B in each of 3 corners
     rgba_px = (char *) malloc(10*10*4);
     FillImage(rgba_px,10,10,40);
@@ -1252,7 +1290,8 @@ int main(int argc, char *argv[]){
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(10, 10, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
     Bmi = bitmapinfo_set(Bmih, ct);
-    image_column(et, 5000,5000,10,10,Bmi, cbPx, px);
+    image_column(et, offset ,5000,10,10,Bmi, cbPx, px);
+    offset += 220;
 
     // we are going to step on this one with little rectangles using different binary raster operations
     rec = U_EMRSTRETCHDIBITS_set(
@@ -1272,7 +1311,6 @@ int main(int argc, char *argv[]){
     free(px);
 
 
-
     colortype = U_BCBM_COLOR24;
     status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  10, 10, 40, colortype, 0, 1);
        //  Test the inverse operation - this does not affect the EMF contents
@@ -1281,7 +1319,8 @@ int main(int argc, char *argv[]){
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(10, 10, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
     Bmi = bitmapinfo_set(Bmih, NULL);
-    image_column(et, 5220,5000,10,10,Bmi, cbPx, px);
+    image_column(et, offset ,5000,10,10,Bmi, cbPx, px);
+    offset += 220;
     free(Bmi);
     free(px);
 
@@ -1294,11 +1333,13 @@ int main(int argc, char *argv[]){
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(10, 10, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
     Bmi = bitmapinfo_set(Bmih, ct);
-    image_column(et, 5440,5000,10,10,Bmi, cbPx, px);
+    image_column(et, offset ,5000,10,10,Bmi, cbPx, px);
+    offset += 220;
        
     // write a second copy next to it using the negative height method to indicate it should be upside down
     Bmi->bmiHeader.biHeight *= -1;
-    image_column(et, 5660,5000,10,10,Bmi, cbPx, px);
+    image_column(et, offset ,5000,10,10,Bmi, cbPx, px);
+    offset += 220;
 
     free(Bmi);
     free(px);
@@ -1312,9 +1353,17 @@ int main(int argc, char *argv[]){
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(10, 10, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
     Bmi = bitmapinfo_set(Bmih, ct);
-    free(ct);
-    image_column(et, 5880,5000,10,10,Bmi, cbPx, px);
+    image_column(et, offset ,5000,10,10,Bmi, cbPx, px);
+    offset += 220;
     free(Bmi);
+
+    // also test the numCt==0 form
+    Bmih = bitmapinfoheader_set(10, 10, 1, colortype, U_BI_RGB, 0, 47244, 47244, 0, 0);
+    Bmi = bitmapinfo_set(Bmih, ct);
+    image_column(et, offset + 660 ,5000,10,10,Bmi, cbPx, px);
+    free(Bmi);
+
+    free(ct);
     free(px);
 
     // done with the first test image, make the 2nd
@@ -1331,9 +1380,17 @@ int main(int argc, char *argv[]){
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(4, 4, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
     Bmi = bitmapinfo_set(Bmih, ct);
-    free(ct);
-    image_column(et, 6100,5000,4,4,Bmi, cbPx, px);
+    image_column(et, offset ,5000,4,4,Bmi, cbPx, px);
+    offset += 220;
     free(Bmi);
+
+    // also test the numCt==0 form
+    Bmih = bitmapinfoheader_set(4, 4, 1, colortype, U_BI_RGB, 0, 47244, 47244, 0, 0);
+    Bmi = bitmapinfo_set(Bmih, ct);
+    image_column(et, offset + 660 ,5000,4,4,Bmi, cbPx, px);
+    free(Bmi);
+
+    free(ct);
     free(px);
 
     // make a two color image in the existing RGBA array
@@ -1348,15 +1405,22 @@ int main(int argc, char *argv[]){
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(4, 4, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
     Bmi = bitmapinfo_set(Bmih, ct);
-    
-    free(ct);
-    image_column(et, 6320,5000,10,10,Bmi, cbPx, px);
+    image_column(et, offset ,5000,4,4,Bmi, cbPx, px);
+    offset += 220;
 
     // write a second copy next to it using the negative height method to indicate it should be upside down
     Bmi->bmiHeader.biHeight *= -1;
-    image_column(et, 6540,5000,10,10,Bmi, cbPx, px);
+    image_column(et, offset ,5000,4,4,Bmi, cbPx, px);
+    offset += 220;
+    free(Bmi);
+
+    // also test the numCt==0 form
+    Bmih = bitmapinfoheader_set(4, 4, 1, colortype, U_BI_RGB, 0, 47244, 47244, 0, 0);
+    Bmi = bitmapinfo_set(Bmih, ct);
+    image_column(et, offset + 660 - 220 ,5000,4,4,Bmi, cbPx, px);
 
     free(Bmi);
+    free(ct);
     free(px);
 
     free(rgba_px); 
@@ -1381,13 +1445,15 @@ if(!(mode & PPT_BLOCKERS)){
     When these are used the images will not be visible in Windows XP Preview and they will prevent the EMF
     from being ungrouped within PowerPoint 2003. */
 
+    textlabel(40, "STRETCHDIBITS", 5000, 8000, &font, et, eht);
+
     px   = (char *) &pngarray[0];
     cbPx = 138; 
     Bmih = bitmapinfoheader_set(10, -10, 1, U_BCBM_EXPLICIT, U_BI_PNG, cbPx, 0, 0, 0, 0); /* PNG, fields 5 and 6 must be present! */
     Bmi  = bitmapinfo_set(Bmih, NULL);
     rec = U_EMRSTRETCHDIBITS_set(
        U_RCL_DEF,
-       pointl_set(6860,5000),
+       pointl_set(5400,8000),
        pointl_set(200,200),
        pointl_set(0,0), 
        pointl_set(10,10),
@@ -1398,6 +1464,7 @@ if(!(mode & PPT_BLOCKERS)){
        px);
     taf(rec,et,"U_EMRSTRETCHDIBITS_set");
     free(Bmi);
+    textlabel(30, "PNG", 5400, 8000-30, &font, et, eht);
 
     px   = (char *) &jpgarray[0];
     cbPx = 676; 
@@ -1405,7 +1472,7 @@ if(!(mode & PPT_BLOCKERS)){
     Bmi  = bitmapinfo_set(Bmih, NULL);
     rec = U_EMRSTRETCHDIBITS_set(
        U_RCL_DEF,
-       pointl_set(7180,5000),
+       pointl_set(5620,8000),
        pointl_set(200,200),
        pointl_set(0,0), 
        pointl_set(10,10),
@@ -1416,6 +1483,8 @@ if(!(mode & PPT_BLOCKERS)){
        px);
     taf(rec,et,"U_EMRSTRETCHDIBITS_set");
     free(Bmi);
+    textlabel(30, "JPG", 5620, 8000-30, &font, et, eht);
+
 } //PPT_BLOCKERS
 
     // testing binary raster operations

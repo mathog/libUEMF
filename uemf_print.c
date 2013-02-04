@@ -4,8 +4,8 @@
 
 /*
 File:      uemf_print.c
-Version:   0.0.11
-Date:      22-JAN-2013
+Version:   0.0.12
+Date:      04-FEB-2013
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2013 David Mathog and California Institute of Technology (Caltech)
@@ -312,31 +312,42 @@ void logfont_panose_print(
 
 /**
     \brief Print a pointer to U_BITMAPINFOHEADER object.
-    \param Bmih pointer to a U_BITMAPINFOHEADER object
+
     This may be called indirectly from WMF _print routines, where problems could occur
     if the data was passed as the struct or a pointer to the struct, as the struct may not
     be aligned in memory.
+
+    \returns Actual number of color table entries.
+    \param Bmih pointer to a U_BITMAPINFOHEADER object
 */
-void bitmapinfoheader_print(
+int bitmapinfoheader_print(
       char *Bmih
    ){
    uint32_t  utmp4;
    int32_t   tmp4;
    int16_t   tmp2;
+   int       Colors, BitCount, Width, Height, RealColors;
 
    /* DIB from a WMF may not be properly aligned on a 4 byte boundary, will be aligned on a 2 byte boundary */
 
    memcpy(&utmp4, Bmih + offsetof(U_BITMAPINFOHEADER,biSize),          4);  printf("biSize:%u "            ,utmp4 );
    memcpy(&tmp4,  Bmih + offsetof(U_BITMAPINFOHEADER,biWidth),         4);  printf("biWidth:%d "           ,tmp4  );
+   Width = tmp4;
    memcpy(&tmp4,  Bmih + offsetof(U_BITMAPINFOHEADER,biHeight),        4);  printf("biHeight:%d "          ,tmp4  );
+   Height = tmp4;
    memcpy(&tmp2,  Bmih + offsetof(U_BITMAPINFOHEADER,biPlanes),        2);  printf("biPlanes:%u "          ,tmp2  );
    memcpy(&tmp2,  Bmih + offsetof(U_BITMAPINFOHEADER,biBitCount),      2);  printf("biBitCount:%u "        ,tmp2  );
+   BitCount = tmp2;
    memcpy(&utmp4, Bmih + offsetof(U_BITMAPINFOHEADER,biCompression),   4);  printf("biCompression:%u "     ,utmp4 );
    memcpy(&utmp4, Bmih + offsetof(U_BITMAPINFOHEADER,biSizeImage),     4);  printf("biSizeImage:%u "       ,utmp4 );
    memcpy(&tmp4,  Bmih + offsetof(U_BITMAPINFOHEADER,biXPelsPerMeter), 4);  printf("biXPelsPerMeter:%d "   ,tmp4  );
    memcpy(&tmp4,  Bmih + offsetof(U_BITMAPINFOHEADER,biYPelsPerMeter), 4);  printf("biYPelsPerMeter:%d "   ,tmp4  );
    memcpy(&utmp4, Bmih + offsetof(U_BITMAPINFOHEADER,biClrUsed),       4);  printf("biClrUsed:%u "         ,utmp4 );
+   Colors = utmp4;
    memcpy(&utmp4, Bmih + offsetof(U_BITMAPINFOHEADER,biClrImportant),  4);  printf("biClrImportant:%u "    ,utmp4 );
+   RealColors = get_real_color_icount(Colors, BitCount, Width, Height);
+   printf("ColorEntries:%d ",RealColors);
+   return(RealColors);
 }
 
 
@@ -351,13 +362,13 @@ void bitmapinfo_print(
       char *Bmi
    ){
    int       i,k;
-   uint32_t  biClrUsed;
+   int       ClrUsed;
    U_RGBQUAD BmiColor;
-   printf("BmiHeader: ");  bitmapinfoheader_print(Bmi + offsetof(U_BITMAPINFO,bmiHeader));
-   memcpy(&biClrUsed, Bmi + offsetof(U_BITMAPINFO,bmiHeader) + offsetof(U_BITMAPINFOHEADER,biClrUsed), 4);
-   if(biClrUsed){
+   printf("BmiHeader: ");
+   ClrUsed = bitmapinfoheader_print(Bmi + offsetof(U_BITMAPINFO,bmiHeader));
+   if(ClrUsed){
      k= offsetof(U_BITMAPINFO,bmiColors);
-     for(i=0; i<biClrUsed; i++, k+= sizeof(U_RGBQUAD)){
+     for(i=0; i<ClrUsed; i++, k+= sizeof(U_RGBQUAD)){
         memcpy(&BmiColor, Bmi+k, sizeof(U_RGBQUAD));
         printf("%d:",i); rgbquad_print(BmiColor);
      }

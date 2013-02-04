@@ -13,8 +13,8 @@
 
 /*
 File:      uemf.h
-Version:   0.0.12
-Date:      17-JAN-2013
+Version:   0.0.13
+Date:      04-FEB-2013
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2013 David Mathog and California Institute of Technology (Caltech)
@@ -2616,6 +2616,8 @@ char     *U_emr_names(unsigned int idx);
 uint32_t *dx_set(int32_t height,  uint32_t weight, uint32_t members);
 uint32_t  emr_properties(uint32_t type);
 int       emr_arc_points(PU_ENHMETARECORD record, int *f1, int f2, PU_PAIRF center, PU_PAIRF start, PU_PAIRF end, PU_PAIRF size);
+int       get_real_color_count(PU_BITMAPINFOHEADER  Bmi);
+int       get_real_color_icount(int Colors, int BitCount, int Width, int Height);
 int       RGBA_to_DIB( char **px, uint32_t *cbPx, PU_RGBQUAD *ct, int *numCt, 
                char *rgba_px, int w, int h, int stride, uint32_t colortype, int use_ct, int invert);
 int       get_DIB_params( void *pEmr, uint32_t offBitsSrc, uint32_t offBmiSrc, 

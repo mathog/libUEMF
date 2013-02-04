@@ -17,8 +17,8 @@
 
 /*
 File:      uwmf.c
-Version:   0.0.4
-Date:      25-JAN-2013
+Version:   0.0.5
+Date:      04-FEB-2013
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2013 David Mathog and California Institute of Technology (Caltech)
@@ -689,7 +689,7 @@ uint32_t U_wmr_size(PU_METARECORD record){
      if(!B)return(NULL);  /* size is derived from U_BITMAPINFO, but NOT from its size field, go figure*/ \
      C = F;\
      D = UP4(C);          /*  pixel array might not be a multiples of 4 bytes*/ \
-     E    = sizeof(U_BITMAPINFOHEADER) +  4 * B->bmiHeader.biClrUsed;  /*  bmiheader + colortable*/ \
+     E    = sizeof(U_BITMAPINFOHEADER) +  4 * get_real_color_count(&(B->bmiHeader));  /*  bmiheader + colortable*/ \
    }\
    else { C = 0; D = 0; E=0; }
 
