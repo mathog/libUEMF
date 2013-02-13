@@ -24,8 +24,8 @@
 /* If Version or Date are changed also edit the text labels for the output.
 
 File:      testbed_wmf.c
-Version:   0.0.17
-Date:      04-FEB-2013
+Version:   0.0.20
+Date:      21-FEB-2013
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2013 David Mathog and California Institute of Technology (Caltech)
@@ -66,7 +66,7 @@ int rgba_diff(char *s1, char *s2, uint32_t size, int noa){
    return(0);
 }
 
-void taf(char *rec,WMFTRACK *wt, char *text){  // Test, append, free
+void taf(const char *rec,WMFTRACK *wt, char *text){  // Test, append, free
     if(!rec){ printf("%s failed",text);                     }
     else {    printf("%s recsize: %d",text,U_wmr_size((PU_METARECORD) rec)); }
     (void) wmf_append((PU_METARECORD)rec,wt, 1);
@@ -160,13 +160,13 @@ U_COLORREF color;
     }
 }
 
-void spintext(uint32_t x, uint32_t y, uint32_t textalign, WMFTRACK *wt, EMFHANDLES *wht){
+void spintext(uint32_t x, uint32_t y, uint32_t textalign, WMFTRACK *wt, WMFHANDLES *wht){
     char               *rec;
     int                 i;
     char               *string;
     int                 slen;
     int16_t            *dx;
-    uint32_t            font;
+    uint32_t            font=0;
     PU_FONT             puf;
     
     
@@ -195,7 +195,7 @@ void spintext(uint32_t x, uint32_t y, uint32_t textalign, WMFTRACK *wt, EMFHANDL
     free(string);
 }
     
-void textlabel(uint32_t size, const char *string, uint32_t x, uint32_t y, uint32_t font, WMFTRACK *wt, EMFHANDLES *wht){
+void textlabel(uint32_t size, const char *string, uint32_t x, uint32_t y, uint32_t font, WMFTRACK *wt, WMFHANDLES *wht){
     char               *rec;
     int                 slen;
     int16_t            *dx16;
@@ -381,6 +381,7 @@ int main(int argc, char *argv[]){
 
     int                  mode = 0;   // conditional for some tests
     unsigned int         umode;
+    int                  cap, join, miter;
     uint8_t pngarray[138]= {
        0x89,0x50,0x4E,0x47,0x0D,0x0A,0x1A,0x0A,0x00,0x00,
        0x00,0x0D,0x49,0x48,0x44,0x52,0x00,0x00,0x00,0x0A,
@@ -489,8 +490,7 @@ int main(int argc, char *argv[]){
     // set up and begin the WMF
  
     status=wmf_start("test_libuemf.wmf",1000000, 250000, &wt);  // space allocation initial and increment 
-    status=htable_create(128, 128, &wht);
-    (void) htable_mftype(U_MFT_WMF, wht);  /* Set the type to WMF, makes it easier to catch calls to EMF functions */
+    status=wmf_htable_create(128, 128, &wht);
 
     ps = U_PAIRF_set(11.692913,8.267717);
     rec = U_WMRHEADER_set(ps,1200); // Example: drawing is A4 horizontal,  1200 dpi
@@ -527,7 +527,7 @@ int main(int argc, char *argv[]){
     lb  = U_WLOGBRUSH_set(U_BS_SOLID, cr, U_HS_SOLIDCLR);
     rec = wcreatebrushindirect_set(&brush, wht, lb);   taf(rec,wt,"wcreatebrushindirect_set");
     brush_yellow = brush;
-   
+
     cr  = colorref_set(196, 127, 255);
     lb  = U_WLOGBRUSH_set(U_BS_SOLID, cr, U_HS_SOLIDCLR);
     rec = wcreatebrushindirect_set(&brush, wht,lb);                taf(rec,wt,"wcreatebrushindirect_set");
@@ -555,32 +555,32 @@ int main(int argc, char *argv[]){
     */
 
     cr  = colorref_set(0,0,0);        //black color
-    up  = U_PEN_set(U_PS_SOLID, 1, cr);
+    up  = U_PEN_set(U_PS_SOLID | U_PS_JOIN_MITER | U_PS_ENDCAP_SQUARE, 1, cr);
     rec = wcreatepenindirect_set(&pen, wht, up);       taf(rec,wt,"wcreatepenindirect_set");
     pen_black_1 = pen;
 
     cr  = colorref_set(255,255,255);        //white color
-    up  = U_PEN_set(U_PS_SOLID, 1, cr);
+    up  = U_PEN_set(U_PS_SOLID | U_PS_JOIN_MITER | U_PS_ENDCAP_SQUARE, 1, cr);
     rec = wcreatepenindirect_set(&pen, wht, up);       taf(rec,wt,"wcreatepenindirect_set");
     pen_white_1 = pen;
 
     cr  = colorref_set(127, 255, 196);
-    up  = U_PEN_set(U_PS_SOLID, 50, cr);
+    up  = U_PEN_set(U_PS_SOLID | U_PS_JOIN_MITER | U_PS_ENDCAP_SQUARE, 50, cr);
     rec = wcreatepenindirect_set(&pen, wht, up);                   taf(rec,wt,"wcreatepenindect_set");
     pen_turquoise_50 = pen;
 
     cr  = colorref_set(255, 0, 0);
-    up  = U_PEN_set(U_PS_SOLID, 10, cr);
+    up  = U_PEN_set(U_PS_SOLID | U_PS_JOIN_MITER | U_PS_ENDCAP_SQUARE, 10, cr);
     rec = wcreatepenindirect_set(&pen, wht, up);                   taf(rec,wt,"wcreatepenindect_set");
     pen_red_10 = pen;
 
     cr  = colorref_set(0x8B, 0x00, 0x00);
-    up  = U_PEN_set(U_PS_SOLID, 10, cr);
+    up  = U_PEN_set(U_PS_SOLID | U_PS_JOIN_MITER | U_PS_ENDCAP_SQUARE, 10, cr);
     rec = wcreatepenindirect_set(&pen, wht, up);                   taf(rec,wt,"wcreatepenindect_set");
     pen_darkred_10 = pen;
 
     cr  = colorref_set(0x8B, 0x00, 0x00);
-    up  = U_PEN_set(U_PS_SOLID, 200, cr);
+    up  = U_PEN_set(U_PS_SOLID | U_PS_JOIN_MITER | U_PS_ENDCAP_SQUARE, 200, cr);
     rec = wcreatepenindirect_set(&pen, wht, up);                   taf(rec,wt,"wcreatepenindect_set");
     pen_darkred_200 = pen;
 
@@ -623,15 +623,15 @@ int main(int argc, char *argv[]){
 
    /* **********put a rectangle under everything, so that transparency is obvious ******************* */
 
-    rec = wselectobject_set(pen_black_1, wht);           taf(rec,wt,"wselectobject_set");
+    rec = wselectobject_set(pen_black_1, wht);         taf(rec,wt,"wselectobject_set");
     rec = wselectobject_set(brush_yellow, wht);        taf(rec,wt,"wselectobject_set");
     rclBox = U_RECT16_set(point16_set(14031,9921),point16_set(0,0));
     rec = U_WMRRECTANGLE_set(rclBox);                  taf(rec,wt,"U_WMRRECTANGLE_set");
 
     /* label the drawing */
     
-    textlabel(400, "libUEMF v0.1.4",       9700, 200, font_courier_400, wt, wht);
-    textlabel(400, "February 4, 2013",     9700, 500, font_courier_400, wt, wht);
+    textlabel(400, "libUEMF v0.1.5",       9700, 200, font_courier_400, wt, wht);
+    textlabel(400, "February 14, 2013",    9700, 500, font_courier_400, wt, wht);
     rec = malloc(128);
     (void)sprintf(rec,"WMF test: %2.2X",mode);
     textlabel(400, rec,                    9700, 800, font_courier_400, wt, wht);
@@ -863,6 +863,27 @@ int main(int argc, char *argv[]){
     rec = U_WMRPOLYLINE_set(3, point16); taf(rec,wt,"U_WMRPOLYLINE_set");
     free(point16);
 
+    /* run over all combinations of cap(join(miter 1,5))), but draw as solid lines with */
+    pl12[0] = point16_set(0,   0  );
+    pl12[1] = point16_set(600, 200);
+    pl12[2] = point16_set(0,   400);
+    for (cap=U_PS_ENDCAP_ROUND; cap<= U_PS_ENDCAP_FLAT; cap+= U_PS_ENDCAP_SQUARE){
+       for(join=U_PS_JOIN_ROUND; join<=U_PS_JOIN_MITER; join+= U_PS_JOIN_BEVEL){
+          for(miter=1;miter<=5;miter+=4){
+             rec = wmiterlimit_set(miter);                      taf(rec,wt,"wmiterlimit_set");
+
+             up  = U_PEN_set(U_PS_SOLID| U_PS_GEOMETRIC | cap | join, 20, colorref_set(64*(5-miter), 0, 0));
+             rec = wcreatepenindirect_set(&pen, wht, up);       taf(rec,wt,"wcreatepenindirect_set");
+             rec = wselectobject_set(pen, wht);                 taf(rec,wt,"wselectobject_set");
+
+             point16 = point16_transform(pl12, 3, xform_alt_set(1.0, 1.0, 0.0, 0.0, 500 + (cap/U_PS_ENDCAP_SQUARE)*250 + miter*20, 5200 + (join/U_PS_JOIN_BEVEL)*450));
+             rec = U_WMRPOLYLINE_set(3, point16); taf(rec,wt,"U_WMRPOLYLINE_set");
+             free(point16);
+             rec = wdeleteobject_set(&pen, wht);  taf(rec,wt,"deleteobject_set");
+          }
+       }
+    }
+    rec = wmiterlimit_set(8);                       taf(rec,wt,"wmiterlimit_set");
     rec = wselectobject_set(pen_black_1, wht);      taf(rec,wt,"wselectobject_set");
 
     /* ********************************************************************** */
@@ -1123,7 +1144,7 @@ int main(int argc, char *argv[]){
 
     string = U_strdup("Text from U_WMRTEXTOUT");
     rec = U_WMRTEXTOUT_set(point16_set(100, 350), string);
-    taf(rec,wt,"U_WMREXTTEXTOUT_set");
+    taf(rec,wt,"U_WMRTEXTOUT_set");
     free(string);
 
     not_in_wmf(1.0, 100, 650, pen_red_10, brush_darkred, wt, wht);  /* WMF has no SMALLTEXTOUT or EXTTEXTOUTA  */
@@ -1255,6 +1276,7 @@ int main(int argc, char *argv[]){
        point16 = point16_transform((PU_POINT16) &rclBox, 2, xform_alt_set(1.0, 1.0, 0.0, 0.0, 2000+i*330, 3830));
        rec = U_WMRRECTANGLE_set(*(PU_RECT16)point16); taf(rec,wt,"U_WMRRECTANGLE_set");
        free(point16);
+       rec = wdeleteobject_set(&brush, wht);             taf(rec,wt,"wdeleteobject_set");
     }
     
     // restore original settings
@@ -1407,7 +1429,7 @@ int main(int argc, char *argv[]){
 
     lr = point16_set(30*i,30*i);
     rclBox = U_RECT16_set(ul,lr);
-    point16 = point16_transform((PU_POINT16) &rclBox, 2, xform_alt_set(1.0, 1.0, 0.0, 0.0, 2000+i*330, 4160));
+    point16 = point16_transform((PU_POINT16) &rclBox, 2, xform_alt_set(1.0, 1.0, 0.0, 0.0, 2000+i*330, 4520));
     rec = U_WMRRECTANGLE_set(*(PU_RECT16)point16); taf(rec,wt,"U_WMRRECTANGLE_set");
     free(point16);
 
@@ -1537,11 +1559,7 @@ int main(int argc, char *argv[]){
     else {      printf("emf_finish sucess\n");             }
 
     wmf_free(&wt);
-    htable_free(&wht);
-/*
-    status=htable_delete(uint32_t ih, EMFHANDLES *wht);
-    status=htable_insert(uint32_t *ih, EMFHANDLES *wht);
-*/
+    wmf_htable_free(&wht);
 
   exit(EXIT_SUCCESS);
 }

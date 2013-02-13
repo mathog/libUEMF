@@ -17,8 +17,8 @@
 
 /*
 File:      uemf_endian.h
-Version:   0.0.11
-Date:      04-FEB-2013
+Version:   0.0.12
+Date:      14-FEB-2013
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2013 David Mathog and California Institute of Technology (Caltech)
@@ -129,8 +129,8 @@ void trivertex_swap(
       unsigned int count
    ){
    for(;count; count--, tv++){
-      U_swap4(tv,2);
-      U_swap2(&(tv->Red),4);
+      U_swap4(tv,2);          /* x,y */
+      U_swap2(&(tv->Red),4);  /* Red, Green, Blue, Alpha */
    }
 }
 
@@ -155,7 +155,7 @@ void gradient4_swap(
       PU_GRADIENT4 g4,
       unsigned int count
    ){
-   U_swap4(g4,4*count);
+   U_swap4(g4,2*count); //a gradient4 object has 2 int4's, NOT 4!
 }
 
 /**

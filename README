@@ -16,7 +16,7 @@ This code has been tested on 32 bit Ubuntu (LE), 32 bit Mingw, 64 bit Manriva, a
 
 libUEMF is released under the GPL 2 license, read the file 'COPYING' for more information
 
-Version 0.1.4, released February 4, 2013.
+Version 0.1.5, released February 13, 2013.
 
 To report bugs or provide feedback send email to David Mathog, mathog@caltech.edu.
 
@@ -290,6 +290,21 @@ History
   (Note, version numbers in files represent the libUEMF release where it was last modified, so not
   all files will show the same version numbers in each release.)
   
+0.1.5. 2013-02-13
+  Added missing parameter for WMF RESTOREDC_set/get.
+  Replaced all sizeof() in uwmf.c that referred to UWMF structures with their
+    U_SIZE_* equivalents.
+  Added DIB related WMF _get functions.  (Which were missing).  These are U_BITMAPCOREHEADER_get,
+    U_BITMAPINFOHEADER_get, wget_dib_params
+  Added const where appropriate to wmf _get functions.
+  Added comprehensive cap,join,miter tests to testbeds.
+  Fixed bug in gradient4_swap().
+  Fixed bug in emr_arc_points_common(), used vector where unit vectors were
+    needed, sometimes flipped direction for arcs/chords.
+  Fixed bug in U_WMFTEXTOUT_get().
+  Changed all dst->Dst and src->Src as call variables in WMF code.
+  Denigrated htable_*() for emf, these become emf_htable_*(), to match naming convention
+    used for wmf_table_*().
 0.1.4  2013-02-04 
   Added code to handle DIB formats that use clrUsed=0 to mean "maximum number of color entries",
     this showed up in several places, including uemf.c and uemf_print.c.

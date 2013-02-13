@@ -24,8 +24,8 @@
 /* If Version or Date are changed also edit the text labels for the output.
 
 File:      testbed_emf.c
-Version:   0.0.14
-Date:      04-FEB-2013
+Version:   0.0.16
+Date:      20-FEB-2013
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2013 David Mathog and California Institute of Technology (Caltech)
@@ -527,6 +527,7 @@ int main(int argc, char *argv[]){
     unsigned int         umode;
     double               sc;
     int                  offset;
+    int                  cap, join, miter;
     uint8_t pngarray[138]= {
        0x89,0x50,0x4E,0x47,0x0D,0x0A,0x1A,0x0A,0x00,0x00,
        0x00,0x0D,0x49,0x48,0x44,0x52,0x00,0x00,0x00,0x0A,
@@ -669,7 +670,7 @@ int main(int argc, char *argv[]){
     // set up and begin the EMF
  
     status=emf_start("test_libuemf.emf",1000000, 250000, &et);  // space allocation initial and increment 
-    status=htable_create(128, 128, &eht);
+    status=emf_htable_create(128, 128, &eht);
 
     (void) device_size(216, 279, 47.244094, &szlDev, &szlMm); // Example: device is Letter vertical, 1200 dpi = 47.244 DPmm
     (void) drawing_size(297, 210, 47.244094, &rclBounds, &rclFrame);  // Example: drawing is A4 horizontal,  1200 dpi = 47.244 DPmm
@@ -724,7 +725,7 @@ int main(int argc, char *argv[]){
     lb = logbrush_set(U_BS_SOLID, cr, U_HS_SOLIDCLR);
     rec = createbrushindirect_set(&brush, eht,lb);                 taf(rec,et,"createbrushindirect_set");
 /* tested and works
-    (void) htable_insert(&ih, eht);
+    (void) emf_htable_insert(&ih, eht);
     rec = U_EMRCREATEBRUSHINDIRECT_set(ih,lb);
     taf(rec,et,"U_EMRCREATEBRUSHINDIRECT_set");
 */
@@ -746,13 +747,12 @@ int main(int argc, char *argv[]){
 
     /* label the drawing */
     
-    textlabel(400, "libUEMF v0.1.4",      9700, 200, &font, et, eht);
-    textlabel(400, "February 4, 2013",    9700, 500, &font, et, eht);
+    textlabel(400, "libUEMF v0.1.5",      9700, 200, &font, et, eht);
+    textlabel(400, "February 14, 2013",    9700, 500, &font, et, eht);
     rec = malloc(128);
     (void)sprintf(rec,"EMF test: %2.2X",mode);
     textlabel(400, rec,                   9700, 800, &font, et, eht);
     free(rec);
-
 
     /* ********************************************************************** */
     // basic drawing operations
@@ -1264,6 +1264,34 @@ int main(int argc, char *argv[]){
           rec = deleteobject_set(&pen, eht); // delete current (custom) pen
           taf(rec,et,"deleteobject_set");
        }
+
+
+       /* run over all combinations of cap(join(miter 1,5))), but draw as solid lines with */
+       pl12[0] = point_set(0,   0  );
+       pl12[1] = point_set(600, 200);
+       pl12[2] = point_set(0,   400);
+       for (cap=U_PS_ENDCAP_ROUND; cap<= U_PS_ENDCAP_FLAT; cap+= U_PS_ENDCAP_SQUARE){
+          for(join=U_PS_JOIN_ROUND; join<=U_PS_JOIN_MITER; join+= U_PS_JOIN_BEVEL){
+             for(miter=1;miter<=5;miter+=4){
+                rec = U_EMRSETMITERLIMIT_set(miter); taf(rec,et,"U_EMRSETMITERLIMIT_set");
+
+                elp = extlogpen_set(U_PS_SOLID| U_PS_GEOMETRIC | cap | join, 20, U_BS_SOLID, colorref_set(64*(5-miter), 0, 0), U_HS_HORIZONTAL,0,NULL);
+                rec = extcreatepen_set(&pen, eht,  NULL, 0, NULL, elp );        taf(rec,et,"emrextcreatepen_set");
+                free(elp);
+
+                rec = selectobject_set(pen, eht);  taf(rec,et,"selectobject_set");
+
+                points = points_transform(pl12, 3, xform_alt_set(1.0, 1.0, 0.0, 0.0, 500 + (cap/U_PS_ENDCAP_SQUARE)*250 + miter*20, 5200 + (join/U_PS_JOIN_BEVEL)*450));
+                rec = U_EMRPOLYLINE_set(findbounds(3, points, 0), 3, points); taf(rec,et,"U_EMRPOLYLINE_set");
+                free(points);
+                rec = deleteobject_set(&pen, eht);  taf(rec,et,"deleteobject_set");
+             }
+          }
+       }
+       rec = selectobject_set(U_BLACK_PEN, eht);    taf(rec,et,"selectobject_set");
+       rec = U_EMRSETMITERLIMIT_set(8);             taf(rec,et,"U_EMRSETMITERLIMIT_set");
+
+
 
     } //PPT_BLOCKERS
 
@@ -1955,11 +1983,7 @@ if(!(mode & PPT_BLOCKERS)){
     else {      printf("emf_finish sucess\n");             }
 
     emf_free(&et);
-    htable_free(&eht);
-/*
-    status=htable_delete(uint32_t ih, EMFHANDLES *eht);
-    status=htable_insert(uint32_t *ih, EMFHANDLES *eht);
-*/
+    emf_htable_free(&eht);
 
   exit(EXIT_SUCCESS);
 }

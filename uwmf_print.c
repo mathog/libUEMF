@@ -4,8 +4,8 @@
 
 /*
 File:      uwmf_print.c
-Version:   0.0.1
-Date:      09-JAN-2013
+Version:   0.0.2
+Date:      18-FEB-2013
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2012 David Mathog and California Institute of Technology (Caltech)
@@ -71,7 +71,7 @@ void brush_print(
     \param font U_FONT object (as a char * pointer)
 */
 void font_print(
-       char  *font
+       const char *font
    ){
    printf("Height:%d ",              *(int16_t *)(font + offsetof(U_FONT,Height        )));
    printf("Width:%d ",               *(int16_t *)(font + offsetof(U_FONT,Width         )));
@@ -110,8 +110,8 @@ void pltntry_print(
     \param PalEntries Array of Palette Entries
 */
 void palette_print(
-      PU_PALETTE  p,
-      char       *PalEntries
+      const PU_PALETTE  p,
+      const char       *PalEntries
    ){
    int            i;
    U_PLTNTRY pny;
@@ -183,7 +183,7 @@ void rect16_brtl_print(
     \param region U_REGION object
 */
 void region_print(
-      char *region
+      const char *region
     ){
     U_RECT16 rect16;
     printf("Type:%d ",  *(uint16_t *)(region + offsetof(U_REGION,Type  )));
@@ -240,7 +240,7 @@ void bitmapcoreheader_print(
   U_BS_HATCHED         ColorRef Object      HatchStyle Enumeration
 */
 void wlogbrush_print(
-      char *lb  
+      const char *lb  
    ){
     U_COLORREF Color;
     uint16_t Style = *(uint16_t *)(lb + offsetof(U_WLOGBRUSH,Style));
@@ -278,9 +278,9 @@ void wlogbrush_print(
     \param  Points       pointer to array of U_POINT16 in memory.  Probably not aligned.
 */
 void polypolygon_print(
-     uint16_t  nPolys,
-     uint16_t *aPolyCounts,
-     char     *Points
+     uint16_t        nPolys,
+     const uint16_t *aPolyCounts,
+     const char     *Points
    ){
    int i,j;
    U_POINT16 pt;
@@ -311,7 +311,7 @@ void scan_print(
     \param dh void pointer to DIB header
     A DIB header in an WMF may be either a BitmapCoreHeader or BitmapInfoHeader.
 */
-void dibheader_print(void *dh){
+void dibheader_print(const void *dh){
    uint32_t Size;
    memcpy(&Size, dh, 4); /* may not be aligned */
    if(Size == 0xC ){
@@ -335,8 +335,8 @@ void dibheader_print(void *dh){
     If the header is preceded by a placeable struture, print that as well.
 */
 int wmfheader_print(
-       char *contents,
-       char *blimit
+       const char *contents,
+       const char *blimit
     ){
     U_WMRPLACEABLE  Placeable;
     U_WMRHEADER     Header;
@@ -348,7 +348,7 @@ int wmfheader_print(
     if(Placeable.Key == 0x9AC6CDD7){
        printf("WMF, Placeable: ");
        printf("HWmf:%u ",      Placeable.HWmf);
-       memcpy(&rect16,       &(Placeable.dst),  sizeof(U_RECT16));
+       memcpy(&rect16,       &(Placeable.Dst),  sizeof(U_RECT16));
        printf("Box:"); rect16_ltrb_print(rect16);
        printf("Inch:%u ",      Placeable.Inch);
        printf("Checksum:%d ",  Placeable.Checksum);
@@ -380,7 +380,7 @@ by end user code and to further that end prototypes are NOT provided and they ar
 *********************************************************************************************** */
 
 
-void wcore_points_print(uint16_t nPoints, char *aPoints){
+void wcore_points_print(uint16_t nPoints, const char *aPoints){
    int i;
    U_POINT16 pt;
    printf("  Points: ");
@@ -405,14 +405,14 @@ They are listed in order by the corresponding U_WMR_* index number.
     \brief Print a pointer to a U_WMR_whatever record which has not been implemented.
     \param contents   pointer to a buffer holding a WMR record
 */
-void U_WMRNOTIMPLEMENTED_print(char *contents){
+void U_WMRNOTIMPLEMENTED_print(const char *contents){
    printf("   Not Implemented!\n");
 }
 
-void U_WMREOF_print(char *contents){
+void U_WMREOF_print(const char *contents){
 }
 
-void U_WMRSETBKCOLOR_print(char *contents){
+void U_WMRSETBKCOLOR_print(const char *contents){
    U_COLORREF  Color;
    int size = U_WMRSETBKCOLOR_get(contents, &Color);
    if(size>0){
@@ -420,7 +420,7 @@ void U_WMRSETBKCOLOR_print(char *contents){
    }
 }
 
-void U_WMRSETBKMODE_print(char *contents){
+void U_WMRSETBKMODE_print(const char *contents){
    uint16_t iMode;
    int size = U_WMRSETBKMODE_get(contents, &iMode);
    if(size>0){
@@ -428,7 +428,7 @@ void U_WMRSETBKMODE_print(char *contents){
    }
 }
 
-void U_WMRSETMAPMODE_print(char *contents){
+void U_WMRSETMAPMODE_print(const char *contents){
    uint16_t iMode;
    int size = U_WMRSETMAPMODE_get(contents, &iMode);
    if(size>0){
@@ -436,7 +436,7 @@ void U_WMRSETMAPMODE_print(char *contents){
    }
 }
 
-void U_WMRSETROP2_print(char *contents){
+void U_WMRSETROP2_print(const char *contents){
    uint16_t iMode;
    int size = U_WMRSETROP2_get(contents, &iMode);
    if(size>0){
@@ -444,11 +444,11 @@ void U_WMRSETROP2_print(char *contents){
    }
 }
 
-void U_WMRSETRELABS_print(char *contents){
+void U_WMRSETRELABS_print(const char *contents){
    /* This record type has only the common 6 bytes, so nothing (else) to print */
 }
 
-void U_WMRSETPOLYFILLMODE_print(char *contents){
+void U_WMRSETPOLYFILLMODE_print(const char *contents){
    uint16_t iMode;
    int size = U_WMRSETPOLYFILLMODE_get(contents, &iMode);
    if(size>0){
@@ -456,7 +456,7 @@ void U_WMRSETPOLYFILLMODE_print(char *contents){
    }
 }
 
-void U_WMRSETSTRETCHBLTMODE_print(char *contents){
+void U_WMRSETSTRETCHBLTMODE_print(const char *contents){
    uint16_t iMode;
    int size = U_WMRSETSTRETCHBLTMODE_get(contents, &iMode);
    if(size>0){
@@ -464,7 +464,7 @@ void U_WMRSETSTRETCHBLTMODE_print(char *contents){
    }
 }
 
-void U_WMRSETTEXTCHAREXTRA_print(char *contents){
+void U_WMRSETTEXTCHAREXTRA_print(const char *contents){
    uint16_t iMode;
    int size = U_WMRSETTEXTCHAREXTRA_get(contents, &iMode);
    if(size>0){
@@ -472,7 +472,7 @@ void U_WMRSETTEXTCHAREXTRA_print(char *contents){
    }
 }
 
-void U_WMRSETTEXTCOLOR_print(char *contents){
+void U_WMRSETTEXTCOLOR_print(const char *contents){
    U_COLORREF  Color;
    int size = U_WMRSETTEXTCOLOR_get(contents, &Color);
    if(size>0){
@@ -480,7 +480,7 @@ void U_WMRSETTEXTCOLOR_print(char *contents){
    }
 }
 
-void U_WMRSETTEXTJUSTIFICATION_print(char *contents){
+void U_WMRSETTEXTJUSTIFICATION_print(const char *contents){
    uint16_t Count;
    uint16_t Extra;
    int      size = U_WMRSETTEXTJUSTIFICATION_get(contents, &Count, &Extra);
@@ -490,7 +490,7 @@ void U_WMRSETTEXTJUSTIFICATION_print(char *contents){
    }
 }
 
-void U_WMRSETWINDOWORG_print(char *contents){
+void U_WMRSETWINDOWORG_print(const char *contents){
    U_POINT16 coord;
    int       size = U_WMRSETWINDOWORG_get(contents, &coord);
    if(size){
@@ -498,7 +498,7 @@ void U_WMRSETWINDOWORG_print(char *contents){
    }
 }
 
-void U_WMRSETWINDOWEXT_print(char *contents){
+void U_WMRSETWINDOWEXT_print(const char *contents){
    U_POINT16 coord;
    int       size = U_WMRSETWINDOWEXT_get(contents, &coord);
    if(size){
@@ -506,7 +506,7 @@ void U_WMRSETWINDOWEXT_print(char *contents){
    }
 }
 
-void U_WMRSETVIEWPORTORG_print(char *contents){
+void U_WMRSETVIEWPORTORG_print(const char *contents){
    U_POINT16 coord;
    int       size = U_WMRSETVIEWPORTORG_get(contents, &coord);
    if(size){
@@ -514,7 +514,7 @@ void U_WMRSETVIEWPORTORG_print(char *contents){
    }
 }
 
-void U_WMRSETVIEWPORTEXT_print(char *contents){
+void U_WMRSETVIEWPORTEXT_print(const char *contents){
    U_POINT16 coord;
    int       size = U_WMRSETVIEWPORTEXT_get(contents, &coord);
    if(size){
@@ -522,7 +522,7 @@ void U_WMRSETVIEWPORTEXT_print(char *contents){
    }
 }
 
-void U_WMROFFSETWINDOWORG_print(char *contents){
+void U_WMROFFSETWINDOWORG_print(const char *contents){
    U_POINT16 coord;
    int       size = U_WMROFFSETWINDOWORG_get(contents, &coord);
    if(size){
@@ -530,7 +530,7 @@ void U_WMROFFSETWINDOWORG_print(char *contents){
    }
 }
 
-void U_WMRSCALEWINDOWEXT_print(char *contents){
+void U_WMRSCALEWINDOWEXT_print(const char *contents){
    U_POINT16 Denom, Num;
    int size = U_WMRSCALEWINDOWEXT_get(contents, &Denom, &Num);
    if(size > 0){
@@ -541,7 +541,7 @@ void U_WMRSCALEWINDOWEXT_print(char *contents){
    }
 }
 
-void U_WMROFFSETVIEWPORTORG_print(char *contents){
+void U_WMROFFSETVIEWPORTORG_print(const char *contents){
    U_POINT16 coord;
    int       size = U_WMROFFSETVIEWPORTORG_get(contents, &coord);
    if(size){
@@ -549,7 +549,7 @@ void U_WMROFFSETVIEWPORTORG_print(char *contents){
    }
 }
 
-void U_WMRSCALEVIEWPORTEXT_print(char *contents){
+void U_WMRSCALEVIEWPORTEXT_print(const char *contents){
    U_POINT16 Denom, Num;
    int       size = U_WMRSCALEVIEWPORTEXT_get(contents, &Denom, &Num);
    if(size > 0){
@@ -560,7 +560,7 @@ void U_WMRSCALEVIEWPORTEXT_print(char *contents){
    }
 }
 
-void U_WMRLINETO_print(char *contents){
+void U_WMRLINETO_print(const char *contents){
    U_POINT16 coord;
    int       size = U_WMRLINETO_get(contents, &coord);
    if(size){
@@ -568,7 +568,7 @@ void U_WMRLINETO_print(char *contents){
    }
 }
 
-void U_WMRMOVETO_print(char *contents){
+void U_WMRMOVETO_print(const char *contents){
    U_POINT16 coord;
    int       size = U_WMRMOVETO_get(contents, &coord);
    if(size > 0){
@@ -576,7 +576,7 @@ void U_WMRMOVETO_print(char *contents){
    }
 }
 
-void U_WMREXCLUDECLIPRECT_print(char *contents){
+void U_WMREXCLUDECLIPRECT_print(const char *contents){
    U_RECT16 rect16;
    int      size = U_WMREXCLUDECLIPRECT_get(contents, &rect16);
    if(size > 0){
@@ -586,7 +586,7 @@ void U_WMREXCLUDECLIPRECT_print(char *contents){
    }
 }
 
-void U_WMRINTERSECTCLIPRECT_print(char *contents){
+void U_WMRINTERSECTCLIPRECT_print(const char *contents){
    U_RECT16 rect16;
    int      size = U_WMRINTERSECTCLIPRECT_get(contents, &rect16);
    if(size > 0){
@@ -596,7 +596,7 @@ void U_WMRINTERSECTCLIPRECT_print(char *contents){
    }
 }
 
-void U_WMRARC_print(char *contents){
+void U_WMRARC_print(const char *contents){
    U_POINT16 StartArc, EndArc;
    U_RECT16  rect16;
    int       size = U_WMRARC_get(contents, &StartArc, &EndArc, &rect16);
@@ -609,7 +609,7 @@ void U_WMRARC_print(char *contents){
    }
 }
 
-void U_WMRELLIPSE_print(char *contents){
+void U_WMRELLIPSE_print(const char *contents){
    U_RECT16 rect16;
    int      size = U_WMRELLIPSE_get(contents, &rect16);
    if(size > 0){
@@ -619,7 +619,7 @@ void U_WMRELLIPSE_print(char *contents){
    }
 }
 
-void U_WMRFLOODFILL_print(char *contents){
+void U_WMRFLOODFILL_print(const char *contents){
    uint16_t   Mode;
    U_COLORREF Color;
    U_POINT16  coord;
@@ -631,7 +631,7 @@ void U_WMRFLOODFILL_print(char *contents){
    }
 }
 
-void U_WMRPIE_print(char *contents){
+void U_WMRPIE_print(const char *contents){
    U_POINT16 StartArc, EndArc;
    U_RECT16  rect16;
    int       size = U_WMRPIE_get(contents, &StartArc, &EndArc, &rect16);
@@ -644,7 +644,7 @@ void U_WMRPIE_print(char *contents){
    }
 }
 
-void U_WMRRECTANGLE_print(char *contents){
+void U_WMRRECTANGLE_print(const char *contents){
    U_RECT16 rect16;
    int      size = U_WMRRECTANGLE_get(contents, &rect16);
    if(size > 0){
@@ -654,7 +654,7 @@ void U_WMRRECTANGLE_print(char *contents){
    }
 }
 
-void U_WMRROUNDRECT_print(char *contents){
+void U_WMRROUNDRECT_print(const char *contents){
    int16_t  Height, Width;
    U_RECT16 rect16;
    int      size = U_WMRROUNDRECT_get(contents, &Width, &Height, &rect16);
@@ -667,7 +667,7 @@ void U_WMRROUNDRECT_print(char *contents){
    }
 }
 
-void U_WMRPATBLT_print(char *contents){
+void U_WMRPATBLT_print(const char *contents){
    uint32_t   dwRop3;
    U_POINT16  Dst;
    U_POINT16  cwh;
@@ -675,15 +675,15 @@ void U_WMRPATBLT_print(char *contents){
    if(size > 0){
       printf("    Rop3:%8.8X\n",      dwRop3 );
       printf("    W,H:%d,%d\n",       cwh.x, cwh.y );
-      printf("    dst X,Y:{%d,%d}\n", Dst.x,  Dst.y );
+      printf("    Dst X,Y:{%d,%d}\n", Dst.x,  Dst.y );
    }
 }
 
-void U_WMRSAVEDC_print(char *contents){
+void U_WMRSAVEDC_print(const char *contents){
    /* This record type has only the common 6 bytes, so nothing (else) to print */
 }
 
-void U_WMRSETPIXEL_print(char *contents){
+void U_WMRSETPIXEL_print(const char *contents){
    U_COLORREF Color;
    U_POINT16  coord;
    int        size = U_WMRSETPIXEL_get(contents, &Color, &coord);
@@ -693,7 +693,7 @@ void U_WMRSETPIXEL_print(char *contents){
    }
 }
 
-void U_WMROFFSETCLIPRGN_print(char *contents){
+void U_WMROFFSETCLIPRGN_print(const char *contents){
    U_POINT16 coord;
    int    size = U_WMROFFSETCLIPRGN_get(contents, &coord);
    if(size > 0){
@@ -701,10 +701,10 @@ void U_WMROFFSETCLIPRGN_print(char *contents){
    }
 }
 
-void U_WMRTEXTOUT_print(char *contents){
-   int16_t   Length;
-   char     *string;
-   U_POINT16 Dst;
+void U_WMRTEXTOUT_print(const char *contents){
+   int16_t         Length;
+   const char     *string;
+   U_POINT16       Dst;
    int       size = U_WMRTEXTOUT_get(contents, &Dst, &Length, &string);
    if(size > 0){
       printf("   X,Y:{%d,%d}\n", Dst.y,Dst.x);  /* y/x order in record is reversed, fix that here */
@@ -713,63 +713,63 @@ void U_WMRTEXTOUT_print(char *contents){
    }
 }
 
-void U_WMRBITBLT_print(char *contents){
-   uint32_t   dwRop3;
-   U_POINT16  Dst, Src, cwh;    
-   U_BITMAP16 Bm16;
-   char      *px;
-   int       size = U_WMRBITBLT_get(contents, &Dst, &cwh, &Src, &dwRop3, &Bm16, &px);
+void U_WMRBITBLT_print(const char *contents){
+   uint32_t         dwRop3;
+   U_POINT16        Dst, Src, cwh;
+   U_BITMAP16       Bm16;
+   const char      *px;
+   int              size = U_WMRBITBLT_get(contents, &Dst, &cwh, &Src, &dwRop3, &Bm16, &px);
    if(size > 0){
       printf("    Rop3:%8.8X\n",      dwRop3 );
-      printf("    src X,Y:{%d,%d}\n", Src.x,  Src.y);
+      printf("    Src X,Y:{%d,%d}\n", Src.x,  Src.y);
       printf("    W,H:%d,%d\n",       cwh.x,  cwh.y);
-      printf("    dst X,Y:{%d,%d}\n", Dst.x,  Dst.y);
+      printf("    Dst X,Y:{%d,%d}\n", Dst.x,  Dst.y);
       if(px){ printf("    Bitmap16:");   bitmap16_print(Bm16);  printf("\n"); }
       else {  printf("    Bitmap16: none\n");                                 }
    }
 }
 
-void U_WMRSTRETCHBLT_print(char *contents){
-   uint32_t   dwRop3;
-   U_POINT16  Dst, Src, cDst, cSrc;    
-   U_BITMAP16 Bm16;
-   char      *px;
-   int       size = U_WMRSTRETCHBLT_get(contents, &Dst, &cDst, &Src, &cSrc, &dwRop3, &Bm16, &px);
+void U_WMRSTRETCHBLT_print(const char *contents){
+   uint32_t         dwRop3;
+   U_POINT16        Dst, Src, cDst, cSrc;  
+   U_BITMAP16       Bm16;
+   const char      *px;
+   int              size = U_WMRSTRETCHBLT_get(contents, &Dst, &cDst, &Src, &cSrc, &dwRop3, &Bm16, &px);
    if(size > 0){
       printf("    Rop3:%8.8X\n",      dwRop3 );
-      printf("    src W,H:%d,%d\n",   cSrc.x,  cSrc.y);
-      printf("    src X,Y:{%d,%d}\n", Src.x,   Src.y );
-      printf("    dst W,H:%d,%d\n",   cDst.x,  cDst.y);
-      printf("    dst X,Y:{%d,%d}\n", Dst.x,   Dst.y );
+      printf("    Src W,H:%d,%d\n",   cSrc.x,  cSrc.y);
+      printf("    Src X,Y:{%d,%d}\n", Src.x,   Src.y );
+      printf("    Dst W,H:%d,%d\n",   cDst.x,  cDst.y);
+      printf("    Dst X,Y:{%d,%d}\n", Dst.x,   Dst.y );
       if(px){ printf("    Bitmap16:");   bitmap16_print(Bm16);  printf("\n"); }
       else {  printf("    Bitmap16: none\n");                                 }
    }
 }
 
-void U_WMRPOLYGON_print(char *contents){
-   uint16_t  Length;
-   char     *Data;
-   int       size = U_WMRPOLYGON_get(contents, &Length, &Data);
+void U_WMRPOLYGON_print(const char *contents){
+   uint16_t        Length;
+   const char     *Data;
+   int             size = U_WMRPOLYGON_get(contents, &Length, &Data);
    if(size > 0){
       wcore_points_print(Length, Data);
    }
 }
 
-void U_WMRPOLYLINE_print(char *contents){
-   uint16_t  Length;
-   char     *Data;
-   int       size = U_WMRPOLYLINE_get(contents, &Length, &Data);
+void U_WMRPOLYLINE_print(const char *contents){
+   uint16_t        Length;
+   const char     *Data;
+   int             size = U_WMRPOLYLINE_get(contents, &Length, &Data);
    if(size > 0){
       wcore_points_print(Length, Data);
    }
 }
 
-void U_WMRESCAPE_print(char *contents){
-   uint32_t  utmp4;
-   uint16_t  Escape;
-   uint16_t  Length;
-   char     *Data;
-   int       size = U_WMRESCAPE_get(contents, &Escape, &Length, &Data);
+void U_WMRESCAPE_print(const char *contents){
+   uint32_t        utmp4;
+   uint16_t        Escape;
+   uint16_t        Length;
+   const char     *Data;
+   int             size = U_WMRESCAPE_get(contents, &Escape, &Length, &Data);
    if(size > 0){
       printf("   EscType:%s\n",U_wmr_escnames(Escape));
       printf("   nBytes:%d\n",Length);
@@ -783,11 +783,11 @@ void U_WMRESCAPE_print(char *contents){
    }
 }
 
-void U_WMRRESTOREDC_print(char *contents){
+void U_WMRRESTOREDC_print(const char *contents){
    /* This record type has only the common 6 bytes, so nothing (else) to print */
 }
 
-void U_WMRFILLREGION_print(char *contents){
+void U_WMRFILLREGION_print(const char *contents){
    uint16_t Region;
    uint16_t Brush;
    int    size = U_WMRFILLREGION_get(contents, &Region, &Brush);
@@ -797,7 +797,7 @@ void U_WMRFILLREGION_print(char *contents){
    }
 }
 
-void U_WMRFRAMEREGION_print(char *contents){
+void U_WMRFRAMEREGION_print(const char *contents){
    uint16_t Region;
    uint16_t Brush;
    int16_t  Height;
@@ -811,7 +811,7 @@ void U_WMRFRAMEREGION_print(char *contents){
    }
 }
 
-void U_WMRINVERTREGION_print(char *contents){
+void U_WMRINVERTREGION_print(const char *contents){
    uint16_t Region;
    int      size = U_WMRSETTEXTALIGN_get(contents, &Region);
    if(size > 0){
@@ -819,7 +819,7 @@ void U_WMRINVERTREGION_print(char *contents){
    }
 }
 
-void U_WMRPAINTREGION_print(char *contents){
+void U_WMRPAINTREGION_print(const char *contents){
    uint16_t Region;
    int      size = U_WMRPAINTREGION_get(contents, &Region);
    if(size>0){
@@ -827,7 +827,7 @@ void U_WMRPAINTREGION_print(char *contents){
    }
 }
 
-void U_WMRSELECTCLIPREGION_print(char *contents){
+void U_WMRSELECTCLIPREGION_print(const char *contents){
    uint16_t Region;
    int      size = U_WMRSELECTCLIPREGION_get(contents, &Region);
    if(size>0){
@@ -835,7 +835,7 @@ void U_WMRSELECTCLIPREGION_print(char *contents){
    }
 }
 
-void U_WMRSELECTOBJECT_print(char *contents){
+void U_WMRSELECTOBJECT_print(const char *contents){
    uint16_t Object;
    int      size = U_WMRSELECTOBJECT_get(contents, &Object);
    if(size>0){
@@ -843,7 +843,7 @@ void U_WMRSELECTOBJECT_print(char *contents){
    }
 }
 
-void U_WMRSETTEXTALIGN_print(char *contents){
+void U_WMRSETTEXTALIGN_print(const char *contents){
    uint16_t iMode;
    int      size = U_WMRSETTEXTALIGN_get(contents, &iMode);
    if(size>0){
@@ -853,7 +853,7 @@ void U_WMRSETTEXTALIGN_print(char *contents){
 
 #define U_WMRDRAWTEXT_print     U_WMRNOTIMPLEMENTED_print
 
-void U_WMRCHORD_print(char *contents){
+void U_WMRCHORD_print(const char *contents){
    U_POINT16 StartArc, EndArc;
    U_RECT16  rect16;
    int       size = U_WMRCHORD_get(contents, &StartArc, &EndArc, &rect16);
@@ -866,7 +866,7 @@ void U_WMRCHORD_print(char *contents){
    }
 }
 
-void U_WMRSETMAPPERFLAGS_print(char *contents){
+void U_WMRSETMAPPERFLAGS_print(const char *contents){
    uint32_t Flags4;
    int      size = U_WMRSETMAPPERFLAGS_get(contents, &Flags4);
    if(size > 0){
@@ -874,15 +874,15 @@ void U_WMRSETMAPPERFLAGS_print(char *contents){
    }
 }
 
-void U_WMREXTTEXTOUT_print(char *contents){
-   U_RECT16    rect16;
-   U_POINT16   Dst;
-   int16_t     Length;
-   uint16_t    Opts;
-   int16_t    *dx;
-   char       *string;
-   int         i;
-   int         size  = U_WMREXTTEXTOUT_get(contents, &Dst, &Length, &Opts, &string, &dx, &rect16);
+void U_WMREXTTEXTOUT_print(const char *contents){
+   U_RECT16          rect16;
+   U_POINT16         Dst;
+   int16_t           Length;
+   uint16_t          Opts;
+   const int16_t    *dx;
+   const char       *string;
+   int               i;
+   int               size  = U_WMREXTTEXTOUT_get(contents, &Dst, &Length, &Opts, &string, &dx, &rect16);
    if(size > 0){
       printf("   X,Y:{%d,%d}\n",      Dst.x, Dst.y);
       printf("   Length:%d\n",        Length      );
@@ -897,27 +897,27 @@ void U_WMREXTTEXTOUT_print(char *contents){
    }
 }
 
-void U_WMRSETDIBTODEV_print(char *contents){
-   uint16_t     cUsage;
-   uint16_t     ScanCount;
-   uint16_t     StartScan;
-   U_POINT16    Dst;
-   U_POINT16    cwh;
-   U_POINT16    Src;
-   char        *dib;
-   int          size = U_WMRSETDIBTODEV_get(contents, &Dst, &cwh, &Src, &cUsage, &ScanCount, &StartScan, &dib);
+void U_WMRSETDIBTODEV_print(const char *contents){
+   uint16_t           cUsage;
+   uint16_t           ScanCount;
+   uint16_t           StartScan;
+   U_POINT16          Dst;
+   U_POINT16          cwh;
+   U_POINT16          Src;
+   const char        *dib;
+   int                size = U_WMRSETDIBTODEV_get(contents, &Dst, &cwh, &Src, &cUsage, &ScanCount, &StartScan, &dib);
    if(size > 0){
       printf("    cUsage:%d\n",       cUsage        );
       printf("    ScanCount:%d\n",    ScanCount     );
       printf("    StartScan:%d\n",    StartScan     );
-      printf("    src X,Y:{%d,%d}\n", Src.x,  Src.y );
+      printf("    Src X,Y:{%d,%d}\n", Src.x,  Src.y );
       printf("    W,H:%d,%d\n",       cwh.x,  cwh.y );
-      printf("    dst X,Y:{%d,%d}\n", Dst.x,  Dst.y );
+      printf("    Dst X,Y:{%d,%d}\n", Dst.x,  Dst.y );
       printf("    DIB:");   dibheader_print(dib);   printf("\n");
    }
 }
 
-void U_WMRSELECTPALETTE_print(char *contents){
+void U_WMRSELECTPALETTE_print(const char *contents){
    uint16_t Palette;
    int      size = U_WMRSELECTPALETTE_get(contents, &Palette);
    if(size > 0){
@@ -925,40 +925,40 @@ void U_WMRSELECTPALETTE_print(char *contents){
    }
 }
 
-void U_WMRREALIZEPALETTE_print(char *contents){
+void U_WMRREALIZEPALETTE_print(const char *contents){
    /* This record type has only the common 6 bytes, so nothing (else) to print */
 }
 
-void U_WMRANIMATEPALETTE_print(char *contents){
-   U_PALETTE Palette;
-   char     *PalEntries;
-   int       size = U_WMRANIMATEPALETTE_get(contents, &Palette, &PalEntries);
+void U_WMRANIMATEPALETTE_print(const char *contents){
+   U_PALETTE       Palette;
+   const char     *PalEntries;
+   int             size = U_WMRANIMATEPALETTE_get(contents, &Palette, &PalEntries);
    if(size > 0){
       printf("   Palette:");  palette_print(&Palette, PalEntries);  printf("\n");
        
    }
 }
 
-void U_WMRSETPALENTRIES_print(char *contents){
-   U_PALETTE Palette;
-   char     *PalEntries;
-   int       size = U_WMRSETPALENTRIES_get(contents, &Palette, &PalEntries);
+void U_WMRSETPALENTRIES_print(const char *contents){
+   U_PALETTE       Palette;
+   const char     *PalEntries;
+   int             size = U_WMRSETPALENTRIES_get(contents, &Palette, &PalEntries);
    if(size > 0){
       printf("   Palette:");  palette_print(&Palette, PalEntries);  printf("\n");
    }
 }
 
-void U_WMRPOLYPOLYGON_print(char *contents){
-   uint16_t  nPolys;
-   uint16_t *aPolyCounts;
-   char     *Points;
-   int       size = U_WMRPOLYPOLYGON_get(contents, &nPolys, &aPolyCounts, &Points);
+void U_WMRPOLYPOLYGON_print(const char *contents){
+   uint16_t        nPolys;
+   const uint16_t *aPolyCounts;
+   const char     *Points;
+   int             size = U_WMRPOLYPOLYGON_get(contents, &nPolys, &aPolyCounts, &Points);
    if(size > 0){
       printf("   Polygons:"); polypolygon_print(nPolys, aPolyCounts, Points); printf("\n");
    }
 }
 
-void U_WMRRESIZEPALETTE_print(char *contents){
+void U_WMRRESIZEPALETTE_print(const char *contents){
    uint16_t Palette;
    int size = U_WMRSELECTCLIPREGION_get(contents, &Palette);
    if(size>0){
@@ -973,42 +973,42 @@ void U_WMRRESIZEPALETTE_print(char *contents){
 #define U_WMR3E_print    U_WMRNOTIMPLEMENTED_print
 #define U_WMR3F_print    U_WMRNOTIMPLEMENTED_print
 
-void U_WMRDIBBITBLT_print(char *contents){
-   U_POINT16 Dst, cwh, Src;
-   uint32_t  dwRop3;
-   char      *dib;
-   int       size = U_WMRDIBBITBLT_get(contents, &Dst, &cwh, &Src, &dwRop3, &dib);
+void U_WMRDIBBITBLT_print(const char *contents){
+   U_POINT16        Dst, cwh, Src;
+   uint32_t         dwRop3;
+   const char      *dib;
+   int              size = U_WMRDIBBITBLT_get(contents, &Dst, &cwh, &Src, &dwRop3, &dib);
    if(size > 0){
       printf("    Rop3:%8.8X\n",      dwRop3 );
-      printf("    src X,Y:{%d,%d}\n", Src.x, Src.x );
+      printf("    Src X,Y:{%d,%d}\n", Src.x, Src.x );
       printf("    W,H:%d,%d\n",       cwh.x, cwh.y );
-      printf("    dst X,Y:{%d,%d}\n", Dst.x, Dst.y );
+      printf("    Dst X,Y:{%d,%d}\n", Dst.x, Dst.y );
       if(dib){  printf("    DIB:");   dibheader_print(dib);  printf("\n"); }
       else {    printf("    DIB: none\n");                                 }
    }
 }
 
-void U_WMRDIBSTRETCHBLT_print(char *contents){
-   U_POINT16 Dst, cDst, Src, cSrc;
-   uint32_t  dwRop3;
-   char      *dib;
-   int       size = U_WMRDIBSTRETCHBLT_get(contents, &Dst, &cDst, &Src, &cSrc, &dwRop3, &dib);
+void U_WMRDIBSTRETCHBLT_print(const char *contents){
+   U_POINT16        Dst, cDst, Src, cSrc;
+   uint32_t         dwRop3;
+   const char      *dib;
+   int              size = U_WMRDIBSTRETCHBLT_get(contents, &Dst, &cDst, &Src, &cSrc, &dwRop3, &dib);
    if(size > 0){
       printf("    Rop3:%8.8X\n",      dwRop3 );
-      printf("    src W,H:%d,%d\n",   cSrc.x, cSrc.y );
-      printf("    src X,Y:{%d,%d}\n", Src.x,  Src.x );
-      printf("    dst W,H:%d,%d\n",   cDst.x, cDst.y );
-      printf("    dst X,Y:{%d,%d}\n", Dst.x,  Dst.y );
+      printf("    Src W,H:%d,%d\n",   cSrc.x, cSrc.y );
+      printf("    Src X,Y:{%d,%d}\n", Src.x,  Src.x );
+      printf("    Dst W,H:%d,%d\n",   cDst.x, cDst.y );
+      printf("    Dst X,Y:{%d,%d}\n", Dst.x,  Dst.y );
       if(dib){  printf("    DIB:");   dibheader_print(dib);  printf("\n"); }
       else {    printf("    DIB: none\n");                                 }
    }
 }
 
-void U_WMRDIBCREATEPATTERNBRUSH_print(char *contents){
-   uint16_t  Style, cUsage;
-   char     *TBm16;
-   char     *dib;
-   int size = U_WMRDIBCREATEPATTERNBRUSH_get(contents, &Style, &cUsage, &TBm16, &dib);
+void U_WMRDIBCREATEPATTERNBRUSH_print(const char *contents){
+   uint16_t        Style, cUsage;
+   const char     *TBm16;
+   const char     *dib;
+   int             size = U_WMRDIBCREATEPATTERNBRUSH_get(contents, &Style, &cUsage, &TBm16, &dib);
    if(size > 0){
       U_BITMAP16 Bm16;
       printf("   Style:%d\n",   Style );
@@ -1023,19 +1023,19 @@ void U_WMRDIBCREATEPATTERNBRUSH_print(char *contents){
    }
 }
 
-void U_WMRSTRETCHDIB_print(char *contents){
-   U_POINT16 Dst, cDst, Src, cSrc;
-   uint32_t  dwRop3;
-   uint16_t  cUsage;
-   char      *dib;
-   int       size = U_WMRSTRETCHDIB_get(contents, &Dst, &cDst, &Src, &cSrc, &cUsage, &dwRop3, &dib);
+void U_WMRSTRETCHDIB_print(const char *contents){
+   U_POINT16        Dst, cDst, Src, cSrc;
+   uint32_t         dwRop3;
+   uint16_t         cUsage;
+   const char      *dib;
+   int              size = U_WMRSTRETCHDIB_get(contents, &Dst, &cDst, &Src, &cSrc, &cUsage, &dwRop3, &dib);
    if(size > 0){
       printf("    Rop3:%8.8X\n",      dwRop3 );
       printf("    cUsage:%d\n",       cUsage );
-      printf("    src W,H:%d,%d\n",   cSrc.x, cSrc.y );
-      printf("    src X,Y:{%d,%d}\n", Src.x,  Src.x );
-      printf("    dst W,H:%d,%d\n",   cDst.x, cDst.y );
-      printf("    dst X,Y:{%d,%d}\n", Dst.x,  Dst.y );
+      printf("    Src W,H:%d,%d\n",   cSrc.x, cSrc.y );
+      printf("    Src X,Y:{%d,%d}\n", Src.x,  Src.x );
+      printf("    Dst W,H:%d,%d\n",   cDst.x, cDst.y );
+      printf("    Dst X,Y:{%d,%d}\n", Dst.x,  Dst.y );
       if(dib){  printf("    DIB:");   dibheader_print(dib);  printf("\n"); }
       else {    printf("    DIB: none\n");                                 }
    }
@@ -1046,7 +1046,7 @@ void U_WMRSTRETCHDIB_print(char *contents){
 #define U_WMR46_print    U_WMRNOTIMPLEMENTED_print
 #define U_WMR47_print    U_WMRNOTIMPLEMENTED_print
 
-void U_WMREXTFLOODFILL_print(char *contents){
+void U_WMREXTFLOODFILL_print(const char *contents){
    uint16_t   Mode;
    U_COLORREF Color;
    U_POINT16  coord;
@@ -1226,7 +1226,7 @@ void U_WMREXTFLOODFILL_print(char *contents){
 #define U_WMREE_print    U_WMRNOTIMPLEMENTED_print
 #define U_WMREF_print    U_WMRNOTIMPLEMENTED_print
 
-void U_WMRDELETEOBJECT_print(char *contents){
+void U_WMRDELETEOBJECT_print(const char *contents){
    uint16_t Object;
    int size = U_WMRDELETEOBJECT_get(contents, &Object);
    if(size>0){
@@ -1241,10 +1241,10 @@ void U_WMRDELETEOBJECT_print(char *contents){
 #define  U_WMRF5_print    U_WMRNOTIMPLEMENTED_print
 #define  U_WMRF6_print    U_WMRNOTIMPLEMENTED_print
 
-void U_WMRCREATEPALETTE_print(char *contents){
-   U_PALETTE Palette;
-   char     *PalEntries;
-   int       size = U_WMRCREATEPALETTE_get(contents, &Palette, &PalEntries);
+void U_WMRCREATEPALETTE_print(const char *contents){
+   U_PALETTE       Palette;
+   const char     *PalEntries;
+   int             size = U_WMRCREATEPALETTE_get(contents, &Palette, &PalEntries);
    if(size > 0){
       printf("   Palette:");  palette_print(&Palette, PalEntries);  printf("\n");
        
@@ -1253,11 +1253,11 @@ void U_WMRCREATEPALETTE_print(char *contents){
 
 #define  U_WMRF8_print   U_WMRNOTIMPLEMENTED_print
 
-void U_WMRCREATEPATTERNBRUSH_print(char *contents){
-   U_BITMAP16 Bm16;
-   int        pasize;
-   int        i;
-   char      *Pattern;
+void U_WMRCREATEPATTERNBRUSH_print(const char *contents){
+   U_BITMAP16       Bm16;
+   int              pasize;
+   int              i;
+   const char      *Pattern;
 
    int size = U_WMRCREATEPATTERNBRUSH_get(contents, &Bm16, &pasize, &Pattern);
    if(size > 0){
@@ -1271,7 +1271,7 @@ void U_WMRCREATEPATTERNBRUSH_print(char *contents){
    }
 }
 
-void U_WMRCREATEPENINDIRECT_print(char *contents){
+void U_WMRCREATEPENINDIRECT_print(const char *contents){
    U_PEN pen;
    int   size = U_WMRCREATEPENINDIRECT_get(contents, &pen);
    if(size > 0){
@@ -1279,9 +1279,9 @@ void U_WMRCREATEPENINDIRECT_print(char *contents){
    }
 }
 
-void U_WMRCREATEFONTINDIRECT_print(char *contents){
-   char *font; /* Note, because of possible struct alignment issue have to use char * to reference the data */
-   int   size = U_WMRCREATEFONTINDIRECT_get(contents, &font);
+void U_WMRCREATEFONTINDIRECT_print(const char *contents){
+   const char *font; /* Note, because of possible struct alignment issue have to use char * to reference the data */
+   int         size = U_WMRCREATEFONTINDIRECT_get(contents, &font);
    if(size > 0){
       printf("   Font:"); 
       font_print(font);
@@ -1289,9 +1289,9 @@ void U_WMRCREATEFONTINDIRECT_print(char *contents){
    }
 }
 
-void U_WMRCREATEBRUSHINDIRECT_print(char *contents){
-   char *brush; /* Note, because of possible struct alignment issue have to use char * to reference the data */
-   int   size = U_WMRCREATEBRUSHINDIRECT_get(contents, &brush);
+void U_WMRCREATEBRUSHINDIRECT_print(const char *contents){
+   const char *brush; /* Note, because of possible struct alignment issue have to use char * to reference the data */
+   int         size = U_WMRCREATEBRUSHINDIRECT_get(contents, &brush);
    if(size > 0){
       printf("   Brush:"); 
       wlogbrush_print(brush);
@@ -1299,17 +1299,17 @@ void U_WMRCREATEBRUSHINDIRECT_print(char *contents){
    }
 }
 
-void U_WMRCREATEBITMAPINDIRECT_print(char *contents){ /* in Wine, not in WMF PDF */
+void U_WMRCREATEBITMAPINDIRECT_print(const char *contents){ /* in Wine, not in WMF PDF */
    U_WMRNOTIMPLEMENTED_print(contents);
 }
 
-void U_WMRCREATEBITMAP_print(char *contents){ /* in Wine, not in WMF PDF */
+void U_WMRCREATEBITMAP_print(const char *contents){ /* in Wine, not in WMF PDF */
    U_WMRNOTIMPLEMENTED_print(contents);
 }
 
-void U_WMRCREATEREGION_print(char *contents){
-   char *region; /* Note, because of possible struct alignment issue have to use char * to reference the data */
-   int   size = U_WMRCREATEBRUSHINDIRECT_get(contents, &region);
+void U_WMRCREATEREGION_print(const char *contents){
+   const char *region; /* Note, because of possible struct alignment issue have to use char * to reference the data */
+   int         size = U_WMRCREATEBRUSHINDIRECT_get(contents, &region);
    if(size > 0){
       printf("   Brush:"); 
       printf("   Region: ");  region_print(region); printf("\n");
@@ -1324,7 +1324,7 @@ void U_WMRCREATEREGION_print(char *contents){
     \param recnum     number of this record in contents
     \param off        offset to this record in contents
 */
-int U_wmf_onerec_print(char *contents, char *blimit, int recnum, size_t off){
+int U_wmf_onerec_print(const char *contents, const char *blimit, int recnum, size_t off){
       
 
     uint8_t   iType;

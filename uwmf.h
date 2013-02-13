@@ -34,8 +34,8 @@
 
 /*
 File:      uwmf.h
-Version:   0.0.3
-Date:      30-JAN-2013
+Version:   0.0.7
+Date:      20-FEB-2013
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2013 David Mathog and California Institute of Technology (Caltech)
@@ -68,7 +68,7 @@ extern "C" {
   \defgroup U_WMR_RecordTypes WMR Record types
   @{
 */
-enum {
+enum U_WMR_TYPES{
    U_WMR_EOF,                    //!< 0x0000  U_WMREOF                               record
    U_WMR_SETBKCOLOR,             //!< 0x0201  U_WMRSETBKCOLOR                        record
    U_WMR_SETBKMODE,              //!< 0x0102  U_WMRSETBKMODE                         record
@@ -325,10 +325,10 @@ enum {
    U_WMR_CREATEBITMAPINDIRECT,   //!< 0x02FD  U_WMRCREATEBITMAPINDIRECT              record
    U_WMR_CREATEBITMAP,           //!< 0x06FE  U_WMRCREATEBITMAP                      record
    U_WMR_CREATEREGION,           //!< 0x06FF  U_WMRCREATEREGION                      record
-} U_WMR_TYPES; 
+}; 
 /** @} */
 #define U_WMR_MIN 0                  //!< Minimum U_WMR_ value.
-#define U_WMR_MAX 255                //!< Maximum U_WMR_ value.  (most not implemented)
+#define U_WMR_MAX 255                //!< Maximum U_WMR_ value.
 #define U_WMR_MASK  0xFF             //!< Mask for enumerator (lower) byte
 #define U_WMR_INVALID         0xFFFFFFFF //!< Not any valid U_EMF_ valuee
 
@@ -607,16 +607,20 @@ enum {
   @{
 */
 /*                                                 Record         sizeof (+ same, X differs)   */
+#define U_SIZE_PAIRF                                  8         /* +    8 this might be different on 64 bit platform */
+#define U_SIZE_COLORREF                               4         /* +    4 */
 #define U_SIZE_BRUSH                                  8         /* +    8 */
 #define U_SIZE_FONT                                  19         /* +   20 */
 #define U_SIZE_FONT_CORE                             18                   /* Minus the FaceName part */
 #define U_SIZE_PLTNTRY                                4         /* +    4 */
 #define U_SIZE_PALETTE                                8         /* +    8 */
 #define U_SIZE_PEN                                   10         /* +   10 */
+#define U_SIZE_POINT16                                4         /* +    4 */
 #define U_SIZE_RECT16                                 8         /* +    8 */
 #define U_SIZE_REGION                                20         /* X   22   20 is minums the variable part */
 #define U_SIZE_BITMAP16                              10         /* +   10 */
 #define U_SIZE_BITMAPCOREHEADER                      12         /* +   12 */
+#define U_SIZE_BITMAPINFOHEADER                      40         /* +   40 */
 #define U_SIZE_BITMAPV4HEADER                       108         /* ?  108 not tested */
 #define U_SIZE_BITMAPV5HEADER                       124         /* ?  124 not tested */
 #define U_SIZE_WLOGBRUSH                              8         /* +    8 */
@@ -628,15 +632,15 @@ enum {
 #define U_SIZE_WMREOF                                 6         /* X    8 */
 #define U_SIZE_WMRSETRELABS                           6         /* X    8 */
 #define U_SIZE_WMRSAVEDC                              6         /* X    8 */
-#define U_SIZE_WMRRESTOREDC                           6         /* X    8 */
+#define U_SIZE_WMRRESTOREDC                           8         /* *    8 */
 #define U_SIZE_WMRREALIZEPALETTE                      6         /* X    8 */
 #define U_SIZE_WMRSETBKCOLOR                         10         /* X   12 */
 #define U_SIZE_WMRSETTEXTCOLOR                       10         /* X   12 */
-#define U_SIZE_WMRSETBKMODE                          10         /* X   12 */
-#define U_SIZE_WMRSETROP2                            10         /* X   12 */
-#define U_SIZE_WMRSETPOLYFILLMODE                    10         /* X   12 */
-#define U_SIZE_WMRSETSTRETCHBLTMODE                  10         /* X   12 */
-#define U_SIZE_WMRSETTEXTALIGN                       10         /* X   12 */
+#define U_SIZE_WMRSETBKMODE                           8         /* X   12 last 2 bytes are optional */
+#define U_SIZE_WMRSETROP2                             8         /* X   12 last 2 bytes are optional */
+#define U_SIZE_WMRSETPOLYFILLMODE                     8         /* X   12 last 2 bytes are optional */
+#define U_SIZE_WMRSETSTRETCHBLTMODE                   8         /* X   12 last 2 bytes are optional */
+#define U_SIZE_WMRSETTEXTALIGN                        8         /* X   12 last 2 bytes are optional */
 #define U_SIZE_WMRSETMAPMODE                          8         /* +    8 */
 #define U_SIZE_WMRSETTEXTCHAREXTRA                    8         /* +    8 */
 #define U_SIZE_WMRSETTEXTJUSTIFICATION               10         /* X   12 */
@@ -1043,7 +1047,7 @@ typedef struct {
 typedef struct {
     uint32_t            Key;                //!< MUST be 0x9AC6CDD7
     uint16_t            HWmf;               //!< 0.  (Always.  Manual says total number of 16bit words in record, but no examples found like that)
-    U_RECT16            dst;                //!< Destination bounding box in logical units
+    U_RECT16            Dst;                //!< Destination bounding box in logical units
     uint16_t            Inch;               //!< Logical units/inch (convention if not specified:  1440 logical units/inch)
     uint32_t            Reserved;           //!< must be 0
     uint16_t            Checksum;           //!< Checksum of preceding 10 16 bit values
@@ -1074,7 +1078,6 @@ typedef struct {
 } U_WMREOF, *PU_WMREOF,
   U_WMRSETRELABS, *PU_WMRSETRELABS,
   U_WMRSAVEDC, *PU_WMRSAVEDC,
-  U_WMRRESTOREDC, *PU_WMRRESTOREDC,
   U_WMRREALIZEPALETTE, *PU_WMRREALIZEPALETTE;
 
 /* Index 01 U_WMRSETBKCOLOR                 WMF PDF 2.3.5.14 */
@@ -1306,13 +1309,13 @@ typedef struct {
     uint8_t             iType;              //!< RecordType enumeration
     uint8_t             xb;                 //!< Extra high order byte associated with record type
     uint16_t            rop3w[2];           //!< reassemble/store the Ternary raster operation rop3 value using rop3w, the 32 bit value is not aligned.
-    int16_t             ySrc;               //!< in logical units (UL corner of src rect)
-    int16_t             xSrc;               //!< in logical units (UL corner of src rect)
+    int16_t             ySrc;               //!< in logical units (UL corner of Src rect)
+    int16_t             xSrc;               //!< in logical units (UL corner of Src rect)
     int16_t             ignore;             //!< ignore
-    int16_t             Height;             //!< in logical units (of src and dst rects)
-    int16_t             Width;              //!< in logical units (of src and dst rects)
-    int16_t             yDst;               //!< in logical units (UL corner of dst rect)
-    int16_t             xDst;               //!< in logical units (UL corner of dst rect)
+    int16_t             Height;             //!< in logical units (of Src and Dst rects)
+    int16_t             Width;              //!< in logical units (of Src and Dst rects)
+    int16_t             yDst;               //!< in logical units (UL corner of Dst rect)
+    int16_t             xDst;               //!< in logical units (UL corner of Dst rect)
 } U_WMRBITBLT_NOPX, *PU_WMRBITBLT_NOPX;
 
 typedef struct {
@@ -1320,13 +1323,13 @@ typedef struct {
     uint8_t             iType;              //!< RecordType enumeration
     uint8_t             xb;                 //!< Extra high order byte associated with record type
     uint16_t            rop3w[2];           //!< reassemble/store the Ternary raster operation rop3 value using rop3w, the 32 bit value is not aligned.
-    int16_t             ySrc;               //!< in logical units (UL corner of src rect)
-    int16_t             xSrc;               //!< in logical units (UL corner of src rect)
-    int16_t             Height;             //!< in logical units (of src and dst rects)
-    int16_t             Width;              //!< in logical units (of src and dst rects)
-    int16_t             yDst;               //!< in logical units (UL corner of dst rect)
-    int16_t             xDst;               //!< in logical units (UL corner of dst rect)
-    U_BITMAP16          bitmap;             //!< src bitmap
+    int16_t             ySrc;               //!< in logical units (UL corner of Src rect)
+    int16_t             xSrc;               //!< in logical units (UL corner of Src rect)
+    int16_t             Height;             //!< in logical units (of Src and Dst rects)
+    int16_t             Width;              //!< in logical units (of Src and Dst rects)
+    int16_t             yDst;               //!< in logical units (UL corner of Dst rect)
+    int16_t             xDst;               //!< in logical units (UL corner of Dst rect)
+    U_BITMAP16          bitmap;             //!< Src bitmap
 } U_WMRBITBLT_PX, *PU_WMRBITBLT_PX;
 
 
@@ -1341,15 +1344,15 @@ typedef struct {
     uint8_t             iType;              //!< RecordType enumeration
     uint8_t             xb;                 //!< Extra high order byte associated with record type
     uint16_t            rop3w[2];           //!< reassemble/store the Ternary raster operation rop3 value using rop3w, the 32 bit value is not aligned.
-    int16_t             hSrc;               //!< Height in logical units of src rect
-    int16_t             wSrc;               //!< Wdith  in logical units of dst rect
-    int16_t             ySrc;               //!< in logical units (UL corner of src rect)
-    int16_t             xSrc;               //!< in logical units (UL corner of src rect)
+    int16_t             hSrc;               //!< Height in logical units of Src rect
+    int16_t             wSrc;               //!< Wdith  in logical units of Dst rect
+    int16_t             ySrc;               //!< in logical units (UL corner of Src rect)
+    int16_t             xSrc;               //!< in logical units (UL corner of Src rect)
     int16_t             ignore;             //!< ignored
-    int16_t             hDst;               //!< Height in logical units of dst rect
-    int16_t             wDst;               //!< Wdith  in logical units of dst rect
-    int16_t             yDst;               //!< in logical units (UL corner of dst rect)
-    int16_t             xDst;               //!< in logical units (UL corner of dst rect)
+    int16_t             hDst;               //!< Height in logical units of Dst rect
+    int16_t             wDst;               //!< Wdith  in logical units of Dst rect
+    int16_t             yDst;               //!< in logical units (UL corner of Dst rect)
+    int16_t             xDst;               //!< in logical units (UL corner of Dst rect)
 } U_WMRSTRETCHBLT_NOPX, *PU_WMRSTRETCHBLT_NOPX;
 
 typedef struct {
@@ -1357,15 +1360,15 @@ typedef struct {
     uint8_t             iType;              //!< RecordType enumeration
     uint8_t             xb;                 //!< Extra high order byte associated with record type
     uint16_t            rop3w[2];           //!< reassemble/store the Ternary raster operation rop3 value using rop3w, the 32 bit value is not aligned.
-    int16_t             hSrc;               //!< Height in logical units of src rect
-    int16_t             wSrc;               //!< Wdith  in logical units of dst rect
-    int16_t             ySrc;               //!< in logical units (UL corner of src rect)
-    int16_t             xSrc;               //!< in logical units (UL corner of src rect)
-    int16_t             hDst;               //!< Height in logical units of dst rect
-    int16_t             wDst;               //!< Wdith  in logical units of dst rect
-    int16_t             yDst;               //!< in logical units (UL corner of dst rect)
-    int16_t             xDst;               //!< in logical units (UL corner of dst rect)
-    U_BITMAP16          bitmap;             //!< src bitmap
+    int16_t             hSrc;               //!< Height in logical units of Src rect
+    int16_t             wSrc;               //!< Wdith  in logical units of Dst rect
+    int16_t             ySrc;               //!< in logical units (UL corner of Src rect)
+    int16_t             xSrc;               //!< in logical units (UL corner of Src rect)
+    int16_t             hDst;               //!< Height in logical units of Dst rect
+    int16_t             wDst;               //!< Wdith  in logical units of Dst rect
+    int16_t             yDst;               //!< in logical units (UL corner of Dst rect)
+    int16_t             xDst;               //!< in logical units (UL corner of Dst rect)
+    U_BITMAP16          bitmap;             //!< Src bitmap
 } U_WMRSTRETCHBLT_PX, *PU_WMRSTRETCHBLT_PX;
 
 /* Index 24 U_WMRPOLYGON                    WMF PDF 2.3.3.15
@@ -1389,7 +1392,13 @@ typedef struct {
     uint8_t             Data[1];            //!< data array
 } U_WMRESCAPE, *PU_WMRESCAPE;
 
-/* Index 27 U_WMRRESTOREDC                  WMF PDF 2.3.5.10 See Index 00*/
+/* Index 27 U_WMRRESTOREDC                  WMF PDF 2.3.5.10*/
+typedef struct {
+    uint16_t            Size16_4[2];        //!< Total number of 16bit words in record
+    uint8_t             iType;              //!< RecordType enumeration
+    uint8_t             xb;                 //!< Extra high order byte associated with record type
+    int16_t             DC;                 //!< DC to restore (negative is relative to current, positive is absolute)
+} U_WMRRESTOREDC, *PU_WMRRESTOREDC;
 
 /* Index 28 U_WMRFILLREGION                 WMF PDF 2.3.3.6  */
 typedef struct {
@@ -1478,14 +1487,14 @@ typedef struct {
     uint8_t             iType;              //!< RecordType enumeration
     uint8_t             xb;                 //!< Extra high order byte associated with record type
     uint16_t            cUsage;             //!< ColorUsage enumeration
-    uint16_t            ScanCount;          //!< Number of scan lines in src
-    uint16_t            StartScan;          //!< First Scan line in src
-    int16_t             ySrc;               //!< in logical units (UL corner of src rect)
-    int16_t             xSrc;               //!< in logical units (UL corner of src rect)
-    int16_t             Height;             //!< in logical units (of src and dst)
-    int16_t             Width;              //!< in logical units (of src and dst)
-    int16_t             yDst;               //!< in logical units (UL corner of dst rect)
-    int16_t             xDst;               //!< in logical units (UL corner of dst rect)
+    uint16_t            ScanCount;          //!< Number of scan lines in Src
+    uint16_t            StartScan;          //!< First Scan line in Src
+    int16_t             ySrc;               //!< in logical units (UL corner of Src rect)
+    int16_t             xSrc;               //!< in logical units (UL corner of Src rect)
+    int16_t             Height;             //!< in logical units (of Src and Dst)
+    int16_t             Width;              //!< in logical units (of Src and Dst)
+    int16_t             yDst;               //!< in logical units (UL corner of Dst rect)
+    int16_t             xDst;               //!< in logical units (UL corner of Dst rect)
     uint8_t             dib[1];             //!< DeviceIndependentBitmap object
 } U_WMRSETDIBTODEV, *PU_WMRSETDIBTODEV;
 
@@ -1527,13 +1536,13 @@ typedef struct {
     uint8_t             iType;              //!< RecordType enumeration
     uint8_t             xb;                 //!< Extra high order byte associated with record type
     uint16_t            rop3w[2];           //!< reassemble/store the Ternary raster operation rop3 value using rop3w, the 32 bit value is not aligned.
-    int16_t             ySrc;               //!< in logical units (UL corner of src rect)
-    int16_t             xSrc;               //!< in logical units (UL corner of src rect)
+    int16_t             ySrc;               //!< in logical units (UL corner of Src rect)
+    int16_t             xSrc;               //!< in logical units (UL corner of Src rect)
     uint16_t            ignore;             //!< ignore
-    int16_t             Height;             //!< in logical units (of src and dst)
-    int16_t             Width;              //!< in logical units (of src and dst)
-    int16_t             yDst;               //!< in logical units (UL corner of dst rect)
-    int16_t             xDst;               //!< in logical units (UL corner of dst rect)
+    int16_t             Height;             //!< in logical units (of Src and Dst)
+    int16_t             Width;              //!< in logical units (of Src and Dst)
+    int16_t             yDst;               //!< in logical units (UL corner of Dst rect)
+    int16_t             xDst;               //!< in logical units (UL corner of Dst rect)
 } U_WMRDIBBITBLT_NOPX, *PU_WMRDIBBITBLT_NOPX;
 
 typedef struct {
@@ -1541,12 +1550,12 @@ typedef struct {
     uint8_t             iType;              //!< RecordType enumeration
     uint8_t             xb;                 //!< Extra high order byte associated with record type
     uint16_t            rop3w[2];           //!< reassemble/store the Ternary raster operation rop3 value using rop3w, the 32 bit value is not aligned.
-    int16_t             ySrc;               //!< in logical units (UL corner of src rect)
-    int16_t             xSrc;               //!< in logical units (UL corner of src rect)
-    int16_t             Height;             //!< in logical units (of src and dst)
-    int16_t             Width;              //!< in logical units (of src and dst)
-    int16_t             yDst;               //!< in logical units (UL corner of dst rect)
-    int16_t             xDst;               //!< in logical units (UL corner of dst rect)
+    int16_t             ySrc;               //!< in logical units (UL corner of Src rect)
+    int16_t             xSrc;               //!< in logical units (UL corner of Src rect)
+    int16_t             Height;             //!< in logical units (of Src and Dst)
+    int16_t             Width;              //!< in logical units (of Src and Dst)
+    int16_t             yDst;               //!< in logical units (UL corner of Dst rect)
+    int16_t             xDst;               //!< in logical units (UL corner of Dst rect)
     uint8_t             dib[1];             //!< DeviceIndependentBitmap object
 } U_WMRDIBBITBLT_PX, *PU_WMRDIBBITBLT_PX;
 
@@ -1563,15 +1572,15 @@ typedef struct {
     uint8_t             iType;              //!< RecordType enumeration
     uint8_t             xb;                 //!< Extra high order byte associated with record type
     uint16_t            rop3w[2];           //!< reassemble/store the Ternary raster operation rop3 value using rop3w, the 32 bit value is not aligned.
-    int16_t             hSrc;               //!< in logical units (of src)
-    int16_t             wSrc;               //!< in logical units (of src)
-    int16_t             ySrc;               //!< in logical units (UL corner of src rect)
-    int16_t             xSrc;               //!< in logical units (UL corner of src rect)
+    int16_t             hSrc;               //!< in logical units (of Src)
+    int16_t             wSrc;               //!< in logical units (of Src)
+    int16_t             ySrc;               //!< in logical units (UL corner of Src rect)
+    int16_t             xSrc;               //!< in logical units (UL corner of Src rect)
     uint16_t            ignore;             //!< ignore
-    int16_t             hDst;               //!< in logical units (of dst)
-    int16_t             wDst;               //!< in logical units (of dst
-    int16_t             yDst;               //!< in logical units (UL corner of dst rect)
-    int16_t             xDst;               //!< in logical units (UL corner of dst rect)
+    int16_t             hDst;               //!< in logical units (of Dst)
+    int16_t             wDst;               //!< in logical units (of Dst)
+    int16_t             yDst;               //!< in logical units (UL corner of Dst rect)
+    int16_t             xDst;               //!< in logical units (UL corner of Dst rect)
 } U_WMRDIBSTRETCHBLT_NOPX, *PU_WMRDIBSTRETCHBLT_NOPX;
 
 typedef struct {
@@ -1579,14 +1588,14 @@ typedef struct {
     uint8_t             iType;              //!< RecordType enumeration
     uint8_t             xb;                 //!< Extra high order byte associated with record type
     uint16_t            rop3w[2];           //!< reassemble/store the Ternary raster operation rop3 value using rop3w, the 32 bit value is not aligned.
-    int16_t             hSrc;               //!< in logical units (of src)
-    int16_t             wSrc;               //!< in logical units (of src)
-    int16_t             ySrc;               //!< in logical units (UL corner of src rect)
-    int16_t             xSrc;               //!< in logical units (UL corner of src rect)
-    int16_t             hDst;               //!< in logical units (of dst)
-    int16_t             wDst;               //!< in logical units (of dst
-    int16_t             yDst;               //!< in logical units (UL corner of dst rect)
-    int16_t             xDst;               //!< in logical units (UL corner of dst rect)
+    int16_t             hSrc;               //!< in logical units (of Src)
+    int16_t             wSrc;               //!< in logical units (of Src)
+    int16_t             ySrc;               //!< in logical units (UL corner of Src rect)
+    int16_t             xSrc;               //!< in logical units (UL corner of Src rect)
+    int16_t             hDst;               //!< in logical units (of Dst)
+    int16_t             wDst;               //!< in logical units (of Dst)
+    int16_t             yDst;               //!< in logical units (UL corner of Dst rect)
+    int16_t             xDst;               //!< in logical units (UL corner of Dst rect)
     uint8_t             dib[1];             //!< DeviceIndependentBitmap object
 } U_WMRDIBSTRETCHBLT_PX, *PU_WMRDIBSTRETCHBLT_PX;
 
@@ -1597,8 +1606,8 @@ typedef struct {
   U_BS_SOLID                  like U_BS_DIBPATTERNPT
   U_BS_NULL                   like U_BS_DIBPATTERNPT
   U_BS_HATCHED                like U_BS_DIBPATTERNPT
-  U_BS_DIBPATTERNPT    ColorUsage enumer.    U_BS_DIBPATTERNPT brush from DIB in src
-  U_BS_PATTERN         ColorUsage enumer.    U_BS_PATTERN brush from Bitmap16 object in src
+  U_BS_DIBPATTERNPT    ColorUsage enumer.    U_BS_DIBPATTERNPT brush from DIB in Src
+  U_BS_PATTERN         ColorUsage enumer.    U_BS_PATTERN brush from Bitmap16 object in Src
 */
 typedef struct {
     uint16_t            Size16_4[2];        //!< Total number of 16bit words in record
@@ -1606,7 +1615,7 @@ typedef struct {
     uint8_t             xb;                 //!< Extra high order byte associated with record type
     uint16_t            Style;              //!< BrushStyle Enumeration
     uint16_t            cUsage;             //!< See table above
-    uint8_t             src[1];             //!< DeviceIndependentBitmap or Bitmap16 object
+    uint8_t             Src[1];             //!< DeviceIndependentBitmap or Bitmap16 object
 } U_WMRDIBCREATEPATTERNBRUSH, *PU_WMRDIBCREATEPATTERNBRUSH;
 
 /* Index 43 U_WMRSTRETCHDIB                 WMF PDF 2.3.1.6  */
@@ -1616,14 +1625,14 @@ typedef struct {
     uint8_t             xb;                 //!< Extra high order byte associated with record type
     uint16_t            rop3w[2];           //!< reassemble/store the Ternary raster operation rop3 value using rop3w, the 32 bit value is not aligned.
     uint16_t            cUsage;             //!< ColorUsage enumeration
-    int16_t             hSrc;               //!< in logical units (of src)
-    int16_t             wSrc;               //!< in logical units (of src)
-    int16_t             ySrc;               //!< in logical units (UL corner of src rect)
-    int16_t             xSrc;               //!< in logical units (UL corner of src rect)
-    int16_t             hDst;               //!< in logical units (of dst)
-    int16_t             wDst;               //!< in logical units (of dst
-    int16_t             yDst;               //!< in logical units (UL corner of dst rect)
-    int16_t             xDst;               //!< in logical units (UL corner of dst rect)
+    int16_t             hSrc;               //!< in logical units (of Src)
+    int16_t             wSrc;               //!< in logical units (of Src)
+    int16_t             ySrc;               //!< in logical units (UL corner of Src rect)
+    int16_t             xSrc;               //!< in logical units (UL corner of Src rect)
+    int16_t             hDst;               //!< in logical units (of Dst)
+    int16_t             wDst;               //!< in logical units (of Dst)
+    int16_t             yDst;               //!< in logical units (UL corner of Dst rect)
+    int16_t             xDst;               //!< in logical units (UL corner of Dst rect)
     uint8_t             dib[1];             //!< DeviceIndependentBitmap object
 } U_WMRSTRETCHDIB, *PU_WMRSTRETCHDIB;
 
@@ -1864,28 +1873,49 @@ typedef struct {
     uint32_t            sumObjects;         //!< Number of objects created  (used by WMF, not by EMF)
 } WMFTRACK;
 
-// ************************************************************************************************
-// Change some EMF to WMF definition names, but same structures
-
-#define WMFHANDLES EMFHANDLES
+/**
+  The various create functions need a place to put their handles, these are stored in the table below.
+  We don't actually do anything much with these handles, that is up to whatever program finally plays back the WMF, but
+  we do need to keep track of the numbers so that they are not accidentally reused. (Also WMF files have rules
+  about how object handles must be numbered, for instance, the lowest possible number must always be used. These
+  are different from EMF object handles.) This structure is used for staying in conformance with these rules.
+  
+  There are no stock objects in WMF files.
+*/
+typedef struct {
+    uint32_t           *table;              //!< Array Buffer for constructing the WMF in memory 
+    size_t              allocated;          //!< Slots in the buffer
+    size_t              chunk;              //!< Number to add if a realloc is required
+    uint32_t            lolimit;            //!< Lowest unoccupied table slot, may be a hole created by a deleteobject.
+    uint32_t            hilimit;            //!< Highest table slot occupied (currently)
+    uint32_t            peak;               //!< Highest table slot occupied (ever)
+} WMFHANDLES;
 
 // ************************************************************************************************
 // Prototypes (_set first, then _get)
-char        *wmr_dup(char *wmr);
+char        *wmr_dup(const char *wmr);
 int          wmf_start(const char *name, uint32_t initsize, uint32_t chunksize, WMFTRACK **wt);
 int          wmf_free(WMFTRACK **wt);
 int          wmf_finish(WMFTRACK *wt);
-int          wmf_append(U_METARECORD *rec, WMFTRACK *wt, int freerec);
-int          wmf_header_append(U_METARECORD *rec,WMFTRACK *et, int freerec);
+int          wmf_append(PU_METARECORD rec, WMFTRACK *wt, int freerec);
+int          wmf_header_append(PU_METARECORD rec,WMFTRACK *et, int freerec);
 int          wmf_readdata(const char *filename, char **contents, size_t*length);
 #define      wmf_fopen    emf_fopen
+int          wmf_htable_create(uint32_t initsize, uint32_t chunksize, WMFHANDLES **wht);
+int          wmf_htable_delete(uint32_t *ih, WMFHANDLES *wht);
+int          wmf_htable_insert(uint32_t *ih, WMFHANDLES *wht);
+int          wmf_htable_free(WMFHANDLES **wht);
 int16_t      U_16_checksum(int16_t *buf, int count);
 int16_t     *dx16_set( int32_t  height, uint32_t weight, uint32_t members);
+uint32_t     U_wmr_properties(uint32_t type);
 
-uint32_t     U_wmr_size(PU_METARECORD record);
+uint32_t     U_wmr_size(const U_METARECORD *record);
 uint32_t     U_wmr_values(int idx);
 char        *U_wmr_names(int idx);
 char        *U_wmr_escnames(int idx);
+
+void         U_sanerect16(U_RECT16 rc, double *left, double *top, double *right, double *bottom);
+
 
 PU_FONT      U_FONT_set(int16_t Height, int16_t Width, int16_t Escapement, int16_t Orientation,
                         int16_t Weight, uint8_t Italic, uint8_t Underline, uint8_t StrikeOut, 
@@ -1956,7 +1986,7 @@ char        *U_WMRPATBLT_set(U_POINT16 Dst, U_POINT16 cwh, uint32_t dwRop3);
 char        *U_WMRSAVEDC_set(void);
 char        *U_WMRSETPIXEL_set(U_COLORREF Color, U_POINT16 coord);
 char        *U_WMROFFSETCLIPRGN_set(U_POINT16 offset);
-char        *U_WMRTEXTOUT_set(U_POINT16 dst, char *string);
+char        *U_WMRTEXTOUT_set(U_POINT16 Dst, char *string);
 char        *U_WMRBITBLT_set(U_POINT16 Dst, U_POINT16 cwh, U_POINT16 Src,
                 uint32_t dwRop3, const PU_BITMAP16 Bm16);
 char        *U_WMRSTRETCHBLT_set(U_POINT16 Dst, U_POINT16 cDst, U_POINT16 Src,
@@ -1964,7 +1994,7 @@ char        *U_WMRSTRETCHBLT_set(U_POINT16 Dst, U_POINT16 cDst, U_POINT16 Src,
 char        *U_WMRPOLYGON_set(uint16_t Length, const PU_POINT16 Data);
 char        *U_WMRPOLYLINE_set(uint16_t Length, const PU_POINT16 Data);
 char        *U_WMRESCAPE_set(uint16_t Escape, uint16_t Length,  const void *Data);
-char        *U_WMRRESTOREDC_set(void);
+char        *U_WMRRESTOREDC_set(int16_t DC);
 char        *U_WMRFILLREGION_set(uint16_t Region, uint16_t Brush);
 char        *U_WMRFRAMEREGION_set(uint16_t Region, uint16_t Brush, int16_t Height, int16_t Width);
 char        *U_WMRINVERTREGION_set(uint16_t Region);
@@ -1975,7 +2005,7 @@ char        *U_WMRSETTEXTALIGN_set(uint16_t Mode);
 char        *U_WMRDRAWTEXT_set(void);  /* in Wine, not in WMF PDF. */
 char        *U_WMRCHORD_set(U_POINT16 Radial1, U_POINT16 Radial2, U_RECT16 rect);
 char        *U_WMRSETMAPPERFLAGS_set(uint32_t Mode);
-char        *U_WMREXTTEXTOUT_set(U_POINT16 dst, int16_t Length, uint16_t Opts, const char *string, int16_t *dx, U_RECT16 rect);
+char        *U_WMREXTTEXTOUT_set(U_POINT16 Dst, int16_t Length, uint16_t Opts, const char *string, int16_t *dx, U_RECT16 rect);
 char        *U_WMRSETDIBTODEV_set(void);
 char        *U_WMRSELECTPALETTE_set(uint16_t Palette);
 char        *U_WMRREALIZEPALETTE_set(void);
@@ -2187,81 +2217,89 @@ char        *U_WMRCREATEBITMAP_set(void);              /* in Wine, not in WMF PD
 char        *U_WMRCREATEREGION_set(PU_REGION region);
 
 int16_t     *dx16_get( int32_t height, uint32_t weight, uint32_t members);
-size_t       U_WMRRECSAFE_get(char *contents, char *blimit);
-int          wmfheader_get(char *contents, char *blimit, PU_WMRPLACEABLE Placeable, PU_WMRHEADER Header);
-int          U_WMREOF_get(char *contents);
-int          U_WMRSETBKCOLOR_get(char *contents, PU_COLORREF Color);
-int          U_WMRSETBKMODE_get(char *contents, uint16_t *Mode);
-int          U_WMRSETMAPMODE_get(char *contents, uint16_t *Mode);
-int          U_WMRSETROP2_get(char *contents, uint16_t *Mode);
-int          U_WMRSETRELABS_get(char *contents);
-int          U_WMRSETPOLYFILLMODE_get(char *contents, uint16_t *Mode);
-int          U_WMRSETSTRETCHBLTMODE_get(char *contents, uint16_t *Mode);
-int          U_WMRSETTEXTCHAREXTRA_get(char *contents, uint16_t *Mode);
-int          U_WMRSETTEXTCOLOR_get(char *contents, PU_COLORREF Color);
-int          U_WMRSETTEXTJUSTIFICATION_get(char *contents, uint16_t *Count, uint16_t *Extra);
-int          U_WMRSETWINDOWORG_get(char *contents, PU_POINT16 coord);
-int          U_WMRSETWINDOWEXT_get(char *contents, PU_POINT16 extent);
-int          U_WMRSETVIEWPORTORG_get(char *contents, PU_POINT16 coord);
-int          U_WMRSETVIEWPORTEXT_get(char *contents, PU_POINT16 extent);
-int          U_WMROFFSETWINDOWORG_get(char *contents, PU_POINT16 offset);
-int          U_WMRSCALEWINDOWEXT_get(char *contents, PU_POINT16 Denom, PU_POINT16 Num);
-int          U_WMROFFSETVIEWPORTORG_get(char *contents, PU_POINT16 offset);
-int          U_WMRSCALEVIEWPORTEXT_get(char *contents, PU_POINT16 Denom, PU_POINT16 Num);
-int          U_WMRLINETO_get(char *contents, PU_POINT16 coord);
-int          U_WMRMOVETO_get(char *contents, PU_POINT16 coord);
-int          U_WMREXCLUDECLIPRECT_get(char *contents, PU_RECT16 rect);
-int          U_WMRINTERSECTCLIPRECT_get(char *contents, PU_RECT16 rect);
-int          U_WMRARC_get(char *contents, PU_POINT16 StartArc, PU_POINT16 EndArc, PU_RECT16 rect);
-int          U_WMRELLIPSE_get(char *contents, PU_RECT16 rect);
-int          U_WMRFLOODFILL_get(char *contents, uint16_t *Mode, PU_COLORREF Color, PU_POINT16 coord);
-int          U_WMRPIE_get(char *contents, PU_POINT16 Radial1, PU_POINT16 Radial2, PU_RECT16 rect);
-int          U_WMRRECTANGLE_get(char *contents, PU_RECT16 rect);
-int          U_WMRROUNDRECT_get(char *contents, int16_t *Width, int16_t *Height, PU_RECT16 rect);
-int          U_WMRPATBLT_get(char *contents, PU_POINT16 Dst, PU_POINT16 cwh, uint32_t *dwRop3);
-int          U_WMRSAVEDC_get(char *contents);
-int          U_WMRSETPIXEL_get(char *contents, PU_COLORREF Color, PU_POINT16 coord);
-int          U_WMROFFSETCLIPRGN_get(char *contents, PU_POINT16 offset);
-int          U_WMRTEXTOUT_get(char *contents, PU_POINT16 dst, int16_t *Length, char **string);
-int          U_WMRBITBLT_get(char *contents, PU_POINT16 Dst, PU_POINT16 cwh, PU_POINT16 Src, uint32_t *dwRop3, PU_BITMAP16 Bm16, char **px);
-int          U_WMRSTRETCHBLT_get(char *contents, PU_POINT16 Dst, PU_POINT16 cDst, PU_POINT16 Src, PU_POINT16 cSrc, uint32_t *dwRop3, PU_BITMAP16 Bm16, char **px);
-int          U_WMRPOLYGON_get(char *contents, uint16_t *Length, char **Data);
-int          U_WMRPOLYLINE_get(char *contents, uint16_t *Length, char **Data);
-int          U_WMRESCAPE_get(char *contents, uint16_t *Escape, uint16_t *Length, char **Data);
-int          U_WMRRESTOREDC_get(char *contents);
-int          U_WMRFILLREGION_get(char *contents, uint16_t *Region, uint16_t *Brush);
-int          U_WMRFRAMEREGION_get(char *contents, uint16_t *Region, uint16_t *Brush, int16_t *Height, int16_t *Width);
-int          U_WMRINVERTREGION_get(char *contents, uint16_t *Region);
-int          U_WMRPAINTREGION_get(char *contents, uint16_t *Region);
-int          U_WMRSELECTCLIPREGION_get(char *contents, uint16_t *Region);
-int          U_WMRSELECTOBJECT_get(char *contents, uint16_t *Object);
-int          U_WMRSETTEXTALIGN_get(char *contents, uint16_t *Mode);
+size_t       U_WMRRECSAFE_get(const char *contents, const char *blimit);
+int          wmfheader_get(const char *contents, const char *blimit, PU_WMRPLACEABLE Placeable, PU_WMRHEADER Header);
+int          wmr_arc_points(U_RECT16 rclBox, U_POINT16 ArcStart, U_POINT16 ArcEnd, 
+                int *f1, int f2, PU_PAIRF center, PU_PAIRF start, PU_PAIRF end, PU_PAIRF size );
+void         U_BITMAPINFOHEADER_get(const char *Bmih, uint32_t *Size, int32_t *Width, int32_t *Height, 
+                uint32_t *Planes, uint32_t *BitCount, uint32_t *Compression, uint32_t *SizeImage, 
+                int32_t *XPelsPerMeter, int32_t *YPelsPerMeter, uint32_t *ClrUsed, uint32_t *ClrImportant);
+void         U_BITMAPCOREHEADER_get(const char *BmiCh, int32_t *Size, int32_t *Width, int32_t *Height, int32_t *BitCount);
+int          wget_DIB_params(const char *dib, const char **px, const U_RGBQUAD **ct, int32_t *numCt, 
+                int32_t *width, int32_t *height, int32_t *colortype, int32_t *invert);
+int          U_WMREOF_get(const char *contents);
+int          U_WMRSETBKCOLOR_get(const char *contents, PU_COLORREF Color);
+int          U_WMRSETBKMODE_get(const char *contents, uint16_t *Mode);
+int          U_WMRSETMAPMODE_get(const char *contents, uint16_t *Mode);
+int          U_WMRSETROP2_get(const char *contents, uint16_t *Mode);
+int          U_WMRSETRELABS_get(const char *contents);
+int          U_WMRSETPOLYFILLMODE_get(const char *contents, uint16_t *Mode);
+int          U_WMRSETSTRETCHBLTMODE_get(const char *contents, uint16_t *Mode);
+int          U_WMRSETTEXTCHAREXTRA_get(const char *contents, uint16_t *Mode);
+int          U_WMRSETTEXTCOLOR_get(const char *contents, PU_COLORREF Color);
+int          U_WMRSETTEXTJUSTIFICATION_get(const char *contents, uint16_t *Count, uint16_t *Extra);
+int          U_WMRSETWINDOWORG_get(const char *contents, PU_POINT16 coord);
+int          U_WMRSETWINDOWEXT_get(const char *contents, PU_POINT16 extent);
+int          U_WMRSETVIEWPORTORG_get(const char *contents, PU_POINT16 coord);
+int          U_WMRSETVIEWPORTEXT_get(const char *contents, PU_POINT16 extent);
+int          U_WMROFFSETWINDOWORG_get(const char *contents, PU_POINT16 offset);
+int          U_WMRSCALEWINDOWEXT_get(const char *contents, PU_POINT16 Denom, PU_POINT16 Num);
+int          U_WMROFFSETVIEWPORTORG_get(const char *contents, PU_POINT16 offset);
+int          U_WMRSCALEVIEWPORTEXT_get(const char *contents, PU_POINT16 Denom, PU_POINT16 Num);
+int          U_WMRLINETO_get(const char *contents, PU_POINT16 coord);
+int          U_WMRMOVETO_get(const char *contents, PU_POINT16 coord);
+int          U_WMREXCLUDECLIPRECT_get(const char *contents, PU_RECT16 rect);
+int          U_WMRINTERSECTCLIPRECT_get(const char *contents, PU_RECT16 rect);
+int          U_WMRARC_get(const char *contents, PU_POINT16 StartArc, PU_POINT16 EndArc, PU_RECT16 rect);
+int          U_WMRELLIPSE_get(const char *contents, PU_RECT16 rect);
+int          U_WMRFLOODFILL_get(const char *contents, uint16_t *Mode, PU_COLORREF Color, PU_POINT16 coord);
+int          U_WMRPIE_get(const char *contents, PU_POINT16 Radial1, PU_POINT16 Radial2, PU_RECT16 rect);
+int          U_WMRRECTANGLE_get(const char *contents, PU_RECT16 rect);
+int          U_WMRROUNDRECT_get(const char *contents, int16_t *Width, int16_t *Height, PU_RECT16 rect);
+int          U_WMRPATBLT_get(const char *contents, PU_POINT16 Dst, PU_POINT16 cwh, uint32_t *dwRop3);
+int          U_WMRSAVEDC_get(const char *contents);
+int          U_WMRSETPIXEL_get(const char *contents, PU_COLORREF Color, PU_POINT16 coord);
+int          U_WMROFFSETCLIPRGN_get(const char *contents, PU_POINT16 offset);
+int          U_WMRTEXTOUT_get(const char *contents, PU_POINT16 Dst, int16_t *Length, const char **string);
+int          U_WMRBITBLT_get(const char *contents, PU_POINT16 Dst, PU_POINT16 cwh, PU_POINT16 Src, uint32_t *dwRop3, PU_BITMAP16 Bm16, const char **px);
+int          U_WMRSTRETCHBLT_get(const char *contents, PU_POINT16 Dst, PU_POINT16 cDst, PU_POINT16 Src, PU_POINT16 cSrc, uint32_t *dwRop3, PU_BITMAP16 Bm16, const char **px);
+int          U_WMRPOLYGON_get(const char *contents, uint16_t *Length, const char **Data);
+int          U_WMRPOLYLINE_get(const char *contents, uint16_t *Length, const char **Data);
+int          U_WMRESCAPE_get(const char *contents, uint16_t *Escape, uint16_t *Length, const char **Data);
+int          U_WMRRESTOREDC_get(const char *contents, int16_t *DC);
+int          U_WMRFILLREGION_get(const char *contents, uint16_t *Region, uint16_t *Brush);
+int          U_WMRFRAMEREGION_get(const char *contents, uint16_t *Region, uint16_t *Brush, int16_t *Height, int16_t *Width);
+int          U_WMRINVERTREGION_get(const char *contents, uint16_t *Region);
+int          U_WMRPAINTREGION_get(const char *contents, uint16_t *Region);
+int          U_WMRSELECTCLIPREGION_get(const char *contents, uint16_t *Region);
+int          U_WMRSELECTOBJECT_get(const char *contents, uint16_t *Object);
+int          U_WMRSETTEXTALIGN_get(const char *contents, uint16_t *Mode);
 int          U_WMRDRAWTEXT_get(void); /* in Wine, not in WMF PDF. */
-int          U_WMRCHORD_get(char *contents, PU_POINT16 Radial1, PU_POINT16 Radial2, PU_RECT16 rect);
-int          U_WMRSETMAPPERFLAGS_get(char *contents, uint32_t *Mode);
-int          U_WMREXTTEXTOUT_get(char *contents, PU_POINT16 Dst, int16_t *Length, uint16_t *Opts, char **string, int16_t **dx, PU_RECT16 rect);
-int          U_WMRSETDIBTODEV_get(char *contents, PU_POINT16 Dst, PU_POINT16 cwh, PU_POINT16 Src, uint16_t *cUsage, uint16_t *ScanCount, uint16_t *StartScan, char **dib);
-int          U_WMRSELECTPALETTE_get(char *contents, uint16_t *Palette);
-int          U_WMRREALIZEPALETTE_get(char *contents);
-int          U_WMRANIMATEPALETTE_get(char *contents, PU_PALETTE Palette, char **PalEntries);
-int          U_WMRSETPALENTRIES_get(char *contents, PU_PALETTE Palette, char **PalEntries);
-int          U_WMRPOLYPOLYGON_get(char *contents, uint16_t *nPolys, uint16_t **aPolyCounts, char **Points);
-int          U_WMRRESIZEPALETTE_get(char *contents, uint16_t *Palette);
+int          U_WMRCHORD_get(const char *contents, PU_POINT16 Radial1, PU_POINT16 Radial2, PU_RECT16 rect);
+int          U_WMRSETMAPPERFLAGS_get(const char *contents, uint32_t *Mode);
+int          U_WMREXTTEXTOUT_get(const char *contents, PU_POINT16 Dst, int16_t *Length, uint16_t *Opts, const char **string, const int16_t **dx, PU_RECT16 rect);
+int          U_WMRSETDIBTODEV_get(const char *contents, PU_POINT16 Dst, PU_POINT16 cwh, PU_POINT16 Src, uint16_t *cUsage, uint16_t *ScanCount, uint16_t *StartScan, const char **dib);
+int          U_WMRSELECTPALETTE_get(const char *contents, uint16_t *Palette);
+int          U_WMRREALIZEPALETTE_get(const char *contents);
+int          U_WMRANIMATEPALETTE_get(const char *contents, PU_PALETTE Palette, const char **PalEntries);
+int          U_WMRSETPALENTRIES_get(const char *contents, PU_PALETTE Palette, const char **PalEntries);
+int          U_WMRPOLYPOLYGON_get(const char *contents, uint16_t *nPolys, const uint16_t **aPolyCounts, const char **Points);
+int          U_WMRRESIZEPALETTE_get(const char *contents, uint16_t *Palette);
 int          U_WMR3A_get(void);
 int          U_WMR3B_get(void);
 int          U_WMR3C_get(void);
 int          U_WMR3D_get(void);
 int          U_WMR3E_get(void);
 int          U_WMR3F_get(void);
-int          U_WMRDIBBITBLT_get(char *contents, PU_POINT16 Dst, PU_POINT16 cwh, PU_POINT16 Src, uint32_t *dwRop3, char **dib);
-int          U_WMRDIBSTRETCHBLT_get(char *contents, PU_POINT16 Dst, PU_POINT16 cDst, PU_POINT16 Src, PU_POINT16 cSrc, uint32_t *dwRop3, char **dib);
-int          U_WMRDIBCREATEPATTERNBRUSH_get(char *contents, uint16_t *Style, uint16_t *cUsage, char **Bm16, char **dib);
-int          U_WMRSTRETCHDIB_get(char *contents, PU_POINT16 Dst, PU_POINT16 cDst, PU_POINT16 Src, PU_POINT16 cSrc, uint16_t *cUsage, uint32_t *dwRop3, char **dib);
+int          U_WMRDIBBITBLT_get(const char *contents, PU_POINT16 Dst, PU_POINT16 cwh, PU_POINT16 Src, uint32_t *dwRop3, const char **dib);
+int          U_WMRDIBSTRETCHBLT_get(const char *contents, PU_POINT16 Dst, PU_POINT16 cDst, PU_POINT16 Src, PU_POINT16 cSrc, uint32_t *dwRop3, const char **dib);
+int          U_WMRDIBCREATEPATTERNBRUSH_get(const char *contents, uint16_t *Style, uint16_t *cUsage, const char **Bm16, const char **dib);
+int          U_WMRSTRETCHDIB_get(const char *contents, PU_POINT16 Dst, PU_POINT16 cDst, PU_POINT16 Src, PU_POINT16 cSrc, uint16_t *cUsage, uint32_t *dwRop3, const char **dib);
 int          U_WMR44_get(void);
 int          U_WMR45_get(void);
 int          U_WMR46_get(void);
 int          U_WMR47_get(void);
-int          U_WMREXTFLOODFILL_get(char *contents, uint16_t *Mode, PU_COLORREF Color, PU_POINT16 coord);
+int          U_WMREXTFLOODFILL_get(const char *contents, uint16_t *Mode, PU_COLORREF Color, PU_POINT16 coord);
 int          U_WMR49_get(void);
 int          U_WMR4A_get(void);
 int          U_WMR4B_get(void);
@@ -2429,22 +2467,22 @@ int          U_WMREC_get(void);
 int          U_WMRED_get(void);
 int          U_WMREE_get(void);
 int          U_WMREF_get(void);
-int          U_WMRDELETEOBJECT_get(char *contents, uint16_t *Object);
+int          U_WMRDELETEOBJECT_get(const char *contents, uint16_t *Object);
 int          U_WMRF1_get(void);
 int          U_WMRF2_get(void);
 int          U_WMRF3_get(void);
 int          U_WMRF4_get(void);
 int          U_WMRF5_get(void);
 int          U_WMRF6_get(void);
-int          U_WMRCREATEPALETTE_get(char *contents, PU_PALETTE Palette, char **PalEntries);
+int          U_WMRCREATEPALETTE_get(const char *contents, PU_PALETTE Palette, const char **PalEntries);
 int          U_WMRF8_get(void);
-int          U_WMRCREATEPATTERNBRUSH_get(char *contents, PU_BITMAP16 Bm16, int *pasize, char **Pattern);
-int          U_WMRCREATEPENINDIRECT_get(char *contents, PU_PEN pen);
-int          U_WMRCREATEFONTINDIRECT_get(char *contents, char **font);
-int          U_WMRCREATEBRUSHINDIRECT_get(char *contents, char **brush);
+int          U_WMRCREATEPATTERNBRUSH_get(const char *contents, PU_BITMAP16 Bm16, int *pasize, const char **Pattern);
+int          U_WMRCREATEPENINDIRECT_get(const char *contents, PU_PEN pen);
+int          U_WMRCREATEFONTINDIRECT_get(const char *contents, const char **font);
+int          U_WMRCREATEBRUSHINDIRECT_get(const char *contents, const char **brush);
 int          U_WMRCREATEBITMAPINDIRECT_get(void);
 int          U_WMRCREATEBITMAP_get(void);
-int          U_WMRCREATEREGION_get(char *contents, char **Region);
+int          U_WMRCREATEREGION_get(const char *contents, const char **Region);
 
 
 #ifdef __cplusplus

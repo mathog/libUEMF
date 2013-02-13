@@ -17,8 +17,8 @@
 
 /*
 File:      uwmf.c
-Version:   0.0.5
-Date:      04-FEB-2013
+Version:   0.0.9
+Date:      20-FEB-2013
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2013 David Mathog and California Institute of Technology (Caltech)
@@ -669,6 +669,59 @@ char *U_wmr_escnames(int idx){
 not in uemf.h or uwmf_endian.h */
 void U_swap2(void *ul, unsigned int count);
 
+/**
+    \brief Derive from bounding box and start and end arc, for WMF arc, chord, or pie records, the center, start, and end points, and the bounding rectangle.
+    
+    \return 0 on success, other values on errors.
+    \param rclBox     Bounding box of Arc
+    \param ArcStart   Coordinates for Start of Arc
+    \param ArcEnd     Coordinates for End of Arc
+    \param f1         1 if rotation angle >= 180, else 0
+    \param f2         Rotation direction, 1 if counter clockwise, else 0
+    \param center     Center coordinates
+    \param start      Start coordinates (point on the ellipse defined by rect)
+    \param end        End coordinates (point on the ellipse defined by rect)
+    \param size       W,H of the x,y axes of the bounding rectangle.
+*/
+int wmr_arc_points(
+       U_RECT16          rclBox16,
+       U_POINT16         ArcStart16,
+       U_POINT16         ArcEnd16,
+       int              *f1,
+       int               f2,
+       PU_PAIRF          center,
+       PU_PAIRF          start,
+       PU_PAIRF          end,
+       PU_PAIRF          size
+    ){
+    U_RECTL rclBox;
+    U_POINTL ArcStart,ArcEnd;
+    rclBox.left   = rclBox16.left;
+    rclBox.top    = rclBox16.top;
+    rclBox.right  = rclBox16.right;
+    rclBox.bottom = rclBox16.bottom;
+    ArcStart.x    = ArcStart16.x;
+    ArcStart.y    = ArcStart16.y;
+    ArcEnd.x      = ArcEnd16.x;
+    ArcEnd.y      = ArcEnd16.y;
+    return emr_arc_points_common(&rclBox, &ArcStart, &ArcEnd, f1, f2, center, start, end, size);
+}
+
+/**
+    \brief A U_RECT16 may have its values swapped, L<->R and T<->B, this extracts the leftmost as left, and so forth.
+    \param rc         U_RECT156 binary contents of an WMF file
+    \param left       the leftmost  of rc.left and rc.right
+    \param top        the topmost of rc.top and rc.bottom
+    \param right      the rightmost of rc.left and rc.right
+    \param bottom     the bottommost of rc.top and rc.bottom
+*/
+void U_sanerect16(U_RECT16 rc, double *left, double *top, double *right, double *bottom){
+     if(rc.left < rc.right) { *left = rc.left;     *right  = rc.right;  }
+     else {                   *left = rc.right;    *right  = rc.left;   }
+     if(rc.top  < rc.bottom){ *top  = rc.top;      *bottom = rc.bottom; }
+     else{                    *top  = rc.bottom;   *bottom = rc.top;    }
+}
+
 /* **********************************************************************************************
 These definitions are for code pieces that are used many times in the following implementation.  These
 definitions are not needed in end user code, so they are here rather than in uwmf.h.
@@ -678,7 +731,7 @@ definitions are not needed in end user code, so they are here rather than in uwm
     \brief Get record size in bytes from U_WMR* record, which may not be aligned
     \return number of bytes in record.
 */
-uint32_t U_wmr_size(PU_METARECORD record){
+uint32_t U_wmr_size(const U_METARECORD *record){
    uint32_t Size16;
    memcpy(&Size16,record, 4);
    return(2*Size16); 
@@ -689,7 +742,7 @@ uint32_t U_wmr_size(PU_METARECORD record){
      if(!B)return(NULL);  /* size is derived from U_BITMAPINFO, but NOT from its size field, go figure*/ \
      C = F;\
      D = UP4(C);          /*  pixel array might not be a multiples of 4 bytes*/ \
-     E    = sizeof(U_BITMAPINFOHEADER) +  4 * get_real_color_count(&(B->bmiHeader));  /*  bmiheader + colortable*/ \
+     E    = U_SIZE_BITMAPINFOHEADER +  4 * get_real_color_count((char *)&(B->bmiHeader));  /*  bmiheader + colortable*/ \
    }\
    else { C = 0; D = 0; E=0; }
 
@@ -972,7 +1025,7 @@ PU_PAIRF U_PAIRF_set(
       float  x,              //!< x value
       float  y               //!< y value
    ){
-   PU_PAIRF pf=malloc(sizeof(U_PAIRF));
+   PU_PAIRF pf=malloc(U_SIZE_PAIRF);
    if(pf){
       pf->x = x;
       pf->y = y;
@@ -1000,6 +1053,27 @@ int16_t U_16_checksum(int16_t *buf, int count){
    return(result);
 }
 
+/**
+    \brief Dump a WMFHANDLES structure.  Not for use in production code.
+    \param string  Text to output before dumping eht structure
+    \param handle  Handle
+    \param wht     WMFHANDLES structure to dump
+*/
+void dumpwht(
+     char         *string, 
+     unsigned int *handle,
+     WMFHANDLES   *wht
+  ){
+  uint32_t i;
+  printf("%s\n",string);
+  printf("lo: %d hi: %d peak: %d\n", wht->lolimit, wht->hilimit, wht->peak);
+  if(handle){
+    printf("handle: %d \n",*handle);
+  }
+  for(i=0;i<=5;i++){
+     printf("table[%d]: %d\n",i,wht->table[i]);
+  }
+}
 
 /**
     \brief Make up an approximate dx array to pass to U_WMREXTTEXTOUT_set(), based on character height and weight.
@@ -1036,277 +1110,277 @@ int16_t *dx16_set(
     \param type WMR record type.  If U_WMR_INVALID release memory. (There is no U_WMR_INVALID WMR record type)
     
 */
-uint32_t wmr_properties(uint32_t type){
+uint32_t U_wmr_properties(uint32_t type){
    static uint32_t *table=NULL;
    uint32_t result = U_WMR_INVALID;  // initialized to indicate an error (on a lookup) or nothing (on a memory release) 
    if(type == U_WMR_INVALID){
       if(table)free(table);
       table=NULL;
    }
-   else if(type>=1 && type<U_WMR_MAX){
+   else if(type<=U_WMR_MAX){ // type is uint so always >=0, no need to test U_WMR_MIN, which is 0.
       if(!table){
          table = (uint32_t *) malloc(sizeof(uint32_t)*(1 + U_WMR_MAX));
          if(!table)return(result); 
-   //                                                              0x100  0x80 0x40 0x20 0x10 0x08 0x04 0x02 0x01
-   //                      properties (U_DRAW_*)                          TEXT      ALTERS    ONLYTO    VISIBLE   
-   //                                                              OBJECT      PATH      FORCE     CLOSED    NOTEMPTY
+   //                                                              0x200  0x100  0x80 0x40 0x20 0x10 0x08 0x04 0x02 0x01
+   //                      properties (U_DRAW_*)                                 TEXT      ALTERS    ONLYTO    VISIBLE   
+   //                                                              NOFILL OBJECT      PATH      FORCE     CLOSED    NOTEMPTY
    //                               Record Type
-         table[0x00] = 0x000;    // U_WMREOF                        0      0    0    0    0    0    0    0    0                 
-         table[0x01] = 0x000;    // U_WMRSETBKCOLOR                 0      0    0    0    0    0    0    0    0
-         table[0x02] = 0x000;    // U_WMRSETBKMODE                  0      0    0    0    0    0    0    0    0
-         table[0x03] = 0x000;    // U_WMRSETMAPMODE                 0      0    0    0    0    0    0    0    0
-         table[0x04] = 0x000;    // U_WMRSETROP2                    0      0    0    0    0    0    0    0    0
-         table[0x05] = 0x000;    // U_WMRSETRELABS                  0      0    0    0    0    0    0    0    0
-         table[0x06] = 0x000;    // U_WMRSETPOLYFILLMODE            0      0    0    0    0    0    0    0    0
-         table[0x07] = 0x000;    // U_WMRSETSTRETCHBLTMODE          0      0    0    0    0    0    0    0    0
-         table[0x08] = 0x000;    // U_WMRSETTEXTCHAREXTRA           0      0    0    0    0    0    0    0    0
-         table[0x09] = 0x000;    // U_WMRSETTEXTCOLOR               0      0    0    0    0    0    0    0    0
-         table[0x0A] = 0x000;    // U_WMRSETTEXTJUSTIFICATION       0      0    0    0    0    0    0    0    0
-         table[0x0B] = 0x000;    // U_WMRSETWINDOWORG               0      0    0    0    0    0    0    0    0
-         table[0x0C] = 0x000;    // U_WMRSETWINDOWEXT               0      0    0    0    0    0    0    0    0
-         table[0x0D] = 0x000;    // U_WMRSETVIEWPORTORG             0      0    0    0    0    0    0    0    0
-         table[0x0E] = 0x000;    // U_WMRSETVIEWPORTEXT             0      0    0    0    0    0    0    0    0
-         table[0x0F] = 0x000;    // U_WMROFFSETWINDOWORG            0      0    0    0    0    0    0    0    0
-         table[0x10] = 0x000;    // U_WMRSCALEWINDOWEXT             0      0    0    0    0    0    0    0    0
-         table[0x11] = 0x000;    // U_WMROFFSETVIEWPORTORG          0      0    0    0    0    0    0    0    0
-         table[0x12] = 0x000;    // U_WMRSCALEVIEWPORTEXT           0      0    0    0    0    0    0    0    0
-         table[0x13] = 0x000;    // U_WMRLINETO                     0      0    0    0    0    0    0    0    0
-         table[0x14] = 0x000;    // U_WMRMOVETO                     0      0    0    0    0    0    0    0    0
-         table[0x15] = 0x000;    // U_WMREXCLUDECLIPRECT            0      0    0    0    0    0    0    0    0
-         table[0x16] = 0x000;    // U_WMRINTERSECTCLIPRECT          0      0    0    0    0    0    0    0    0
-         table[0x17] = 0x000;    // U_WMRARC                        0      0    0    0    0    0    0    0    0
-         table[0x18] = 0x000;    // U_WMRELLIPSE                    0      0    0    0    0    0    0    0    0
-         table[0x19] = 0x000;    // U_WMRFLOODFILL                  0      0    0    0    0    0    0    0    0
-         table[0x1A] = 0x000;    // U_WMRPIE                        0      0    0    0    0    0    0    0    0
-         table[0x1B] = 0x000;    // U_WMRRECTANGLE                  0      0    0    0    0    0    0    0    0
-         table[0x1C] = 0x000;    // U_WMRROUNDRECT                  0      0    0    0    0    0    0    0    0
-         table[0x1D] = 0x000;    // U_WMRPATBLT                     0      0    0    0    0    0    0    0    0
-         table[0x1E] = 0x000;    // U_WMRSAVEDC                     0      0    0    0    0    0    0    0    0
-         table[0x1F] = 0x000;    // U_WMRSETPIXEL                   0      0    0    0    0    0    0    0    0
-         table[0x20] = 0x000;    // U_WMROFFSETCLIPRGN              0      0    0    0    0    0    0    0    0
-         table[0x21] = 0x000;    // U_WMRTEXTOUT                    0      0    0    0    0    0    0    0    0
-         table[0x22] = 0x000;    // U_WMRBITBLT                     0      0    0    0    0    0    0    0    0
-         table[0x23] = 0x000;    // U_WMRSTRETCHBLT                 0      0    0    0    0    0    0    0    0
-         table[0x24] = 0x000;    // U_WMRPOLYGON                    0      0    0    0    0    0    0    0    0
-         table[0x25] = 0x000;    // U_WMRPOLYLINE                   0      0    0    0    0    0    0    0    0
-         table[0x26] = 0x000;    // U_WMRESCAPE                     0      0    0    0    0    0    0    0    0
-         table[0x27] = 0x000;    // U_WMRRESTOREDC                  0      0    0    0    0    0    0    0    0
-         table[0x28] = 0x000;    // U_WMRFILLREGION                 0      0    0    0    0    0    0    0    0
-         table[0x29] = 0x000;    // U_WMRFRAMEREGION                0      0    0    0    0    0    0    0    0
-         table[0x2A] = 0x000;    // U_WMRINVERTREGION               0      0    0    0    0    0    0    0    0
-         table[0x2B] = 0x000;    // U_WMRPAINTREGION                0      0    0    0    0    0    0    0    0
-         table[0x2C] = 0x000;    // U_WMRSELECTCLIPREGION           0      0    0    0    0    0    0    0    0
-         table[0x2D] = 0x000;    // U_WMRSELECTOBJECT               0      0    0    0    0    0    0    0    0
-         table[0x2E] = 0x000;    // U_WMRSETTEXTALIGN               0      0    0    0    0    0    0    0    0
-         table[0x2F] = 0x000;    // U_WMRDRAWTEXT                   0      0    0    0    0    0    0    0    0
-         table[0x30] = 0x000;    // U_WMRCHORD                      0      0    0    0    0    0    0    0    0
-         table[0x31] = 0x000;    // U_WMRSETMAPPERFLAGS             0      0    0    0    0    0    0    0    0
-         table[0x32] = 0x000;    // U_WMREXTTEXTOUT                 0      0    0    0    0    0    0    0    0
-         table[0x33] = 0x000;    // U_WMRSETDIBTODEV                0      0    0    0    0    0    0    0    0
-         table[0x34] = 0x000;    // U_WMRSELECTPALETTE              0      0    0    0    0    0    0    0    0
-         table[0x35] = 0x000;    // U_WMRREALIZEPALETTE             0      0    0    0    0    0    0    0    0
-         table[0x36] = 0x000;    // U_WMRANIMATEPALETTE             0      0    0    0    0    0    0    0    0
-         table[0x37] = 0x000;    // U_WMRSETPALENTRIES              0      0    0    0    0    0    0    0    0
-         table[0x38] = 0x000;    // U_WMRPOLYPOLYGON                0      0    0    0    0    0    0    0    0
-         table[0x39] = 0x000;    // U_WMRRESIZEPALETTE              0      0    0    0    0    0    0    0    0
-         table[0x3A] = 0x000;    // U_WMR3A                         0      0    0    0    0    0    0    0    0
-         table[0x3B] = 0x000;    // U_WMR3B                         0      0    0    0    0    0    0    0    0
-         table[0x3C] = 0x000;    // U_WMR3C                         0      0    0    0    0    0    0    0    0
-         table[0x3D] = 0x000;    // U_WMR3D                         0      0    0    0    0    0    0    0    0
-         table[0x3E] = 0x000;    // U_WMR3E                         0      0    0    0    0    0    0    0    0
-         table[0x3F] = 0x000;    // U_WMR3F                         0      0    0    0    0    0    0    0    0
-         table[0x40] = 0x000;    // U_WMRDIBBITBLT                  0      0    0    0    0    0    0    0    0
-         table[0x41] = 0x000;    // U_WMRDIBSTRETCHBLT              0      0    0    0    0    0    0    0    0
-         table[0x42] = 0x000;    // U_WMRDIBCREATEPATTERNBRUSH      0      0    0    0    0    0    0    0    0
-         table[0x43] = 0x000;    // U_WMRSTRETCHDIB                 0      0    0    0    0    0    0    0    0
-         table[0x44] = 0x000;    // U_WMR44                         0      0    0    0    0    0    0    0    0
-         table[0x45] = 0x000;    // U_WMR45                         0      0    0    0    0    0    0    0    0
-         table[0x46] = 0x000;    // U_WMR46                         0      0    0    0    0    0    0    0    0
-         table[0x47] = 0x000;    // U_WMR47                         0      0    0    0    0    0    0    0    0
-         table[0x48] = 0x000;    // U_WMREXTFLOODFILL               0      0    0    0    0    0    0    0    0
-         table[0x49] = 0x000;    // U_WMR49                         0      0    0    0    0    0    0    0    0
-         table[0x4A] = 0x000;    // U_WMR4A                         0      0    0    0    0    0    0    0    0
-         table[0x4B] = 0x000;    // U_WMR4B                         0      0    0    0    0    0    0    0    0
-         table[0x4C] = 0x000;    // U_WMR4C                         0      0    0    0    0    0    0    0    0
-         table[0x4D] = 0x000;    // U_WMR4D                         0      0    0    0    0    0    0    0    0
-         table[0x4E] = 0x000;    // U_WMR4E                         0      0    0    0    0    0    0    0    0
-         table[0x4F] = 0x000;    // U_WMR4F                         0      0    0    0    0    0    0    0    0
-         table[0x50] = 0x000;    // U_WMR50                         0      0    0    0    0    0    0    0    0
-         table[0x51] = 0x000;    // U_WMR51                         0      0    0    0    0    0    0    0    0
-         table[0x52] = 0x000;    // U_WMR52                         0      0    0    0    0    0    0    0    0
-         table[0x53] = 0x000;    // U_WMR53                         0      0    0    0    0    0    0    0    0
-         table[0x54] = 0x000;    // U_WMR54                         0      0    0    0    0    0    0    0    0
-         table[0x55] = 0x000;    // U_WMR55                         0      0    0    0    0    0    0    0    0
-         table[0x56] = 0x000;    // U_WMR56                         0      0    0    0    0    0    0    0    0
-         table[0x57] = 0x000;    // U_WMR57                         0      0    0    0    0    0    0    0    0
-         table[0x58] = 0x000;    // U_WMR58                         0      0    0    0    0    0    0    0    0
-         table[0x59] = 0x000;    // U_WMR59                         0      0    0    0    0    0    0    0    0
-         table[0x5A] = 0x000;    // U_WMR5A                         0      0    0    0    0    0    0    0    0
-         table[0x5B] = 0x000;    // U_WMR5B                         0      0    0    0    0    0    0    0    0
-         table[0x5C] = 0x000;    // U_WMR5C                         0      0    0    0    0    0    0    0    0
-         table[0x5D] = 0x000;    // U_WMR5D                         0      0    0    0    0    0    0    0    0
-         table[0x5E] = 0x000;    // U_WMR5E                         0      0    0    0    0    0    0    0    0
-         table[0x5F] = 0x000;    // U_WMR5F                         0      0    0    0    0    0    0    0    0
-         table[0x60] = 0x000;    // U_WMR60                         0      0    0    0    0    0    0    0    0
-         table[0x61] = 0x000;    // U_WMR61                         0      0    0    0    0    0    0    0    0
-         table[0x62] = 0x000;    // U_WMR62                         0      0    0    0    0    0    0    0    0
-         table[0x63] = 0x000;    // U_WMR63                         0      0    0    0    0    0    0    0    0
-         table[0x64] = 0x000;    // U_WMR64                         0      0    0    0    0    0    0    0    0
-         table[0x65] = 0x000;    // U_WMR65                         0      0    0    0    0    0    0    0    0
-         table[0x66] = 0x000;    // U_WMR66                         0      0    0    0    0    0    0    0    0
-         table[0x67] = 0x000;    // U_WMR67                         0      0    0    0    0    0    0    0    0
-         table[0x68] = 0x000;    // U_WMR68                         0      0    0    0    0    0    0    0    0
-         table[0x69] = 0x000;    // U_WMR69                         0      0    0    0    0    0    0    0    0
-         table[0x6A] = 0x000;    // U_WMR6A                         0      0    0    0    0    0    0    0    0
-         table[0x6B] = 0x000;    // U_WMR6B                         0      0    0    0    0    0    0    0    0
-         table[0x6C] = 0x000;    // U_WMR6C                         0      0    0    0    0    0    0    0    0
-         table[0x6D] = 0x000;    // U_WMR6D                         0      0    0    0    0    0    0    0    0
-         table[0x6E] = 0x000;    // U_WMR6E                         0      0    0    0    0    0    0    0    0
-         table[0x6F] = 0x000;    // U_WMR6F                         0      0    0    0    0    0    0    0    0
-         table[0x70] = 0x000;    // U_WMR70                         0      0    0    0    0    0    0    0    0
-         table[0x71] = 0x000;    // U_WMR71                         0      0    0    0    0    0    0    0    0
-         table[0x72] = 0x000;    // U_WMR72                         0      0    0    0    0    0    0    0    0
-         table[0x73] = 0x000;    // U_WMR73                         0      0    0    0    0    0    0    0    0
-         table[0x74] = 0x000;    // U_WMR74                         0      0    0    0    0    0    0    0    0
-         table[0x75] = 0x000;    // U_WMR75                         0      0    0    0    0    0    0    0    0
-         table[0x76] = 0x000;    // U_WMR76                         0      0    0    0    0    0    0    0    0
-         table[0x77] = 0x000;    // U_WMR77                         0      0    0    0    0    0    0    0    0
-         table[0x78] = 0x000;    // U_WMR78                         0      0    0    0    0    0    0    0    0
-         table[0x79] = 0x000;    // U_WMR79                         0      0    0    0    0    0    0    0    0
-         table[0x7A] = 0x000;    // U_WMR7A                         0      0    0    0    0    0    0    0    0
-         table[0x7B] = 0x000;    // U_WMR7B                         0      0    0    0    0    0    0    0    0
-         table[0x7C] = 0x000;    // U_WMR7C                         0      0    0    0    0    0    0    0    0
-         table[0x7D] = 0x000;    // U_WMR7D                         0      0    0    0    0    0    0    0    0
-         table[0x7E] = 0x000;    // U_WMR7E                         0      0    0    0    0    0    0    0    0
-         table[0x7F] = 0x000;    // U_WMR7F                         0      0    0    0    0    0    0    0    0
-         table[0x80] = 0x000;    // U_WMR80                         0      0    0    0    0    0    0    0    0
-         table[0x81] = 0x000;    // U_WMR81                         0      0    0    0    0    0    0    0    0
-         table[0x82] = 0x000;    // U_WMR82                         0      0    0    0    0    0    0    0    0
-         table[0x83] = 0x000;    // U_WMR83                         0      0    0    0    0    0    0    0    0
-         table[0x84] = 0x000;    // U_WMR84                         0      0    0    0    0    0    0    0    0
-         table[0x85] = 0x000;    // U_WMR85                         0      0    0    0    0    0    0    0    0
-         table[0x86] = 0x000;    // U_WMR86                         0      0    0    0    0    0    0    0    0
-         table[0x87] = 0x000;    // U_WMR87                         0      0    0    0    0    0    0    0    0
-         table[0x88] = 0x000;    // U_WMR88                         0      0    0    0    0    0    0    0    0
-         table[0x89] = 0x000;    // U_WMR89                         0      0    0    0    0    0    0    0    0
-         table[0x8A] = 0x000;    // U_WMR8A                         0      0    0    0    0    0    0    0    0
-         table[0x8B] = 0x000;    // U_WMR8B                         0      0    0    0    0    0    0    0    0
-         table[0x8C] = 0x000;    // U_WMR8C                         0      0    0    0    0    0    0    0    0
-         table[0x8D] = 0x000;    // U_WMR8D                         0      0    0    0    0    0    0    0    0
-         table[0x8E] = 0x000;    // U_WMR8E                         0      0    0    0    0    0    0    0    0
-         table[0x8F] = 0x000;    // U_WMR8F                         0      0    0    0    0    0    0    0    0
-         table[0x90] = 0x000;    // U_WMR90                         0      0    0    0    0    0    0    0    0
-         table[0x91] = 0x000;    // U_WMR91                         0      0    0    0    0    0    0    0    0
-         table[0x92] = 0x000;    // U_WMR92                         0      0    0    0    0    0    0    0    0
-         table[0x93] = 0x000;    // U_WMR93                         0      0    0    0    0    0    0    0    0
-         table[0x94] = 0x000;    // U_WMR94                         0      0    0    0    0    0    0    0    0
-         table[0x95] = 0x000;    // U_WMR95                         0      0    0    0    0    0    0    0    0
-         table[0x96] = 0x000;    // U_WMR96                         0      0    0    0    0    0    0    0    0
-         table[0x97] = 0x000;    // U_WMR97                         0      0    0    0    0    0    0    0    0
-         table[0x98] = 0x000;    // U_WMR98                         0      0    0    0    0    0    0    0    0
-         table[0x99] = 0x000;    // U_WMR99                         0      0    0    0    0    0    0    0    0
-         table[0x9A] = 0x000;    // U_WMR9A                         0      0    0    0    0    0    0    0    0
-         table[0x9B] = 0x000;    // U_WMR9B                         0      0    0    0    0    0    0    0    0
-         table[0x9C] = 0x000;    // U_WMR9C                         0      0    0    0    0    0    0    0    0
-         table[0x9D] = 0x000;    // U_WMR9D                         0      0    0    0    0    0    0    0    0
-         table[0x9E] = 0x000;    // U_WMR9E                         0      0    0    0    0    0    0    0    0
-         table[0x9F] = 0x000;    // U_WMR9F                         0      0    0    0    0    0    0    0    0
-         table[0xA0] = 0x000;    // U_WMRA0                         0      0    0    0    0    0    0    0    0
-         table[0xA1] = 0x000;    // U_WMRA1                         0      0    0    0    0    0    0    0    0
-         table[0xA2] = 0x000;    // U_WMRA2                         0      0    0    0    0    0    0    0    0
-         table[0xA3] = 0x000;    // U_WMRA3                         0      0    0    0    0    0    0    0    0
-         table[0xA4] = 0x000;    // U_WMRA4                         0      0    0    0    0    0    0    0    0
-         table[0xA5] = 0x000;    // U_WMRA5                         0      0    0    0    0    0    0    0    0
-         table[0xA6] = 0x000;    // U_WMRA6                         0      0    0    0    0    0    0    0    0
-         table[0xA7] = 0x000;    // U_WMRA7                         0      0    0    0    0    0    0    0    0
-         table[0xA8] = 0x000;    // U_WMRA8                         0      0    0    0    0    0    0    0    0
-         table[0xA9] = 0x000;    // U_WMRA9                         0      0    0    0    0    0    0    0    0
-         table[0xAA] = 0x000;    // U_WMRAA                         0      0    0    0    0    0    0    0    0
-         table[0xAB] = 0x000;    // U_WMRAB                         0      0    0    0    0    0    0    0    0
-         table[0xAC] = 0x000;    // U_WMRAC                         0      0    0    0    0    0    0    0    0
-         table[0xAD] = 0x000;    // U_WMRAD                         0      0    0    0    0    0    0    0    0
-         table[0xAE] = 0x000;    // U_WMRAE                         0      0    0    0    0    0    0    0    0
-         table[0xAF] = 0x000;    // U_WMRAF                         0      0    0    0    0    0    0    0    0
-         table[0xB0] = 0x000;    // U_WMRB0                         0      0    0    0    0    0    0    0    0
-         table[0xB1] = 0x000;    // U_WMRB1                         0      0    0    0    0    0    0    0    0
-         table[0xB2] = 0x000;    // U_WMRB2                         0      0    0    0    0    0    0    0    0
-         table[0xB3] = 0x000;    // U_WMRB3                         0      0    0    0    0    0    0    0    0
-         table[0xB4] = 0x000;    // U_WMRB4                         0      0    0    0    0    0    0    0    0
-         table[0xB5] = 0x000;    // U_WMRB5                         0      0    0    0    0    0    0    0    0
-         table[0xB6] = 0x000;    // U_WMRB6                         0      0    0    0    0    0    0    0    0
-         table[0xB7] = 0x000;    // U_WMRB7                         0      0    0    0    0    0    0    0    0
-         table[0xB8] = 0x000;    // U_WMRB8                         0      0    0    0    0    0    0    0    0
-         table[0xB9] = 0x000;    // U_WMRB9                         0      0    0    0    0    0    0    0    0
-         table[0xBA] = 0x000;    // U_WMRBA                         0      0    0    0    0    0    0    0    0
-         table[0xBB] = 0x000;    // U_WMRBB                         0      0    0    0    0    0    0    0    0
-         table[0xBC] = 0x000;    // U_WMRBC                         0      0    0    0    0    0    0    0    0
-         table[0xBD] = 0x000;    // U_WMRBD                         0      0    0    0    0    0    0    0    0
-         table[0xBE] = 0x000;    // U_WMRBE                         0      0    0    0    0    0    0    0    0
-         table[0xBF] = 0x000;    // U_WMRBF                         0      0    0    0    0    0    0    0    0
-         table[0xC0] = 0x000;    // U_WMRC0                         0      0    0    0    0    0    0    0    0
-         table[0xC1] = 0x000;    // U_WMRC1                         0      0    0    0    0    0    0    0    0
-         table[0xC2] = 0x000;    // U_WMRC2                         0      0    0    0    0    0    0    0    0
-         table[0xC3] = 0x000;    // U_WMRC3                         0      0    0    0    0    0    0    0    0
-         table[0xC4] = 0x000;    // U_WMRC4                         0      0    0    0    0    0    0    0    0
-         table[0xC5] = 0x000;    // U_WMRC5                         0      0    0    0    0    0    0    0    0
-         table[0xC6] = 0x000;    // U_WMRC6                         0      0    0    0    0    0    0    0    0
-         table[0xC7] = 0x000;    // U_WMRC7                         0      0    0    0    0    0    0    0    0
-         table[0xC8] = 0x000;    // U_WMRC8                         0      0    0    0    0    0    0    0    0
-         table[0xC9] = 0x000;    // U_WMRC9                         0      0    0    0    0    0    0    0    0
-         table[0xCA] = 0x000;    // U_WMRCA                         0      0    0    0    0    0    0    0    0
-         table[0xCB] = 0x000;    // U_WMRCB                         0      0    0    0    0    0    0    0    0
-         table[0xCC] = 0x000;    // U_WMRCC                         0      0    0    0    0    0    0    0    0
-         table[0xCD] = 0x000;    // U_WMRCD                         0      0    0    0    0    0    0    0    0
-         table[0xCE] = 0x000;    // U_WMRCE                         0      0    0    0    0    0    0    0    0
-         table[0xCF] = 0x000;    // U_WMRCF                         0      0    0    0    0    0    0    0    0
-         table[0xD0] = 0x000;    // U_WMRD0                         0      0    0    0    0    0    0    0    0
-         table[0xD1] = 0x000;    // U_WMRD1                         0      0    0    0    0    0    0    0    0
-         table[0xD2] = 0x000;    // U_WMRD2                         0      0    0    0    0    0    0    0    0
-         table[0xD3] = 0x000;    // U_WMRD3                         0      0    0    0    0    0    0    0    0
-         table[0xD4] = 0x000;    // U_WMRD4                         0      0    0    0    0    0    0    0    0
-         table[0xD5] = 0x000;    // U_WMRD5                         0      0    0    0    0    0    0    0    0
-         table[0xD6] = 0x000;    // U_WMRD6                         0      0    0    0    0    0    0    0    0
-         table[0xD7] = 0x000;    // U_WMRD7                         0      0    0    0    0    0    0    0    0
-         table[0xD8] = 0x000;    // U_WMRD8                         0      0    0    0    0    0    0    0    0
-         table[0xD9] = 0x000;    // U_WMRD9                         0      0    0    0    0    0    0    0    0
-         table[0xDA] = 0x000;    // U_WMRDA                         0      0    0    0    0    0    0    0    0
-         table[0xDB] = 0x000;    // U_WMRDB                         0      0    0    0    0    0    0    0    0
-         table[0xDC] = 0x000;    // U_WMRDC                         0      0    0    0    0    0    0    0    0
-         table[0xDD] = 0x000;    // U_WMRDD                         0      0    0    0    0    0    0    0    0
-         table[0xDE] = 0x000;    // U_WMRDE                         0      0    0    0    0    0    0    0    0
-         table[0xDF] = 0x000;    // U_WMRDF                         0      0    0    0    0    0    0    0    0
-         table[0xE0] = 0x000;    // U_WMRE0                         0      0    0    0    0    0    0    0    0
-         table[0xE1] = 0x000;    // U_WMRE1                         0      0    0    0    0    0    0    0    0
-         table[0xE2] = 0x000;    // U_WMRE2                         0      0    0    0    0    0    0    0    0
-         table[0xE3] = 0x000;    // U_WMRE3                         0      0    0    0    0    0    0    0    0
-         table[0xE4] = 0x000;    // U_WMRE4                         0      0    0    0    0    0    0    0    0
-         table[0xE5] = 0x000;    // U_WMRE5                         0      0    0    0    0    0    0    0    0
-         table[0xE6] = 0x000;    // U_WMRE6                         0      0    0    0    0    0    0    0    0
-         table[0xE7] = 0x000;    // U_WMRE7                         0      0    0    0    0    0    0    0    0
-         table[0xE8] = 0x000;    // U_WMRE8                         0      0    0    0    0    0    0    0    0
-         table[0xE9] = 0x000;    // U_WMRE9                         0      0    0    0    0    0    0    0    0
-         table[0xEA] = 0x000;    // U_WMREA                         0      0    0    0    0    0    0    0    0
-         table[0xEB] = 0x000;    // U_WMREB                         0      0    0    0    0    0    0    0    0
-         table[0xEC] = 0x000;    // U_WMREC                         0      0    0    0    0    0    0    0    0
-         table[0xED] = 0x000;    // U_WMRED                         0      0    0    0    0    0    0    0    0
-         table[0xEE] = 0x000;    // U_WMREE                         0      0    0    0    0    0    0    0    0
-         table[0xEF] = 0x000;    // U_WMREF                         0      0    0    0    0    0    0    0    0
-         table[0xF0] = 0x000;    // U_WMRDELETEOBJECT               0      0    0    0    0    0    0    0    0
-         table[0xF1] = 0x000;    // U_WMRF1                         0      0    0    0    0    0    0    0    0
-         table[0xF2] = 0x000;    // U_WMRF2                         0      0    0    0    0    0    0    0    0
-         table[0xF3] = 0x000;    // U_WMRF3                         0      0    0    0    0    0    0    0    0
-         table[0xF4] = 0x000;    // U_WMRF4                         0      0    0    0    0    0    0    0    0
-         table[0xF5] = 0x000;    // U_WMRF5                         0      0    0    0    0    0    0    0    0
-         table[0xF6] = 0x000;    // U_WMRF6                         0      0    0    0    0    0    0    0    0
-         table[0xF7] = 0x100;    // U_WMRCREATEPALETTE              1      0    0    0    0    0    0    0    0
-         table[0xF8] = 0x100;    // U_WMRCREATEBRUSH                1      0    0    0    0    0    0    0    0
-         table[0xF9] = 0x100;    // U_WMRCREATEPATTERNBRUSH         1      0    0    0    0    0    0    0    0
-         table[0xFA] = 0x100;    // U_WMRCREATEPENINDIRECT          1      0    0    0    0    0    0    0    0
-         table[0xFB] = 0x100;    // U_WMRCREATEFONTINDIRECT         1      0    0    0    0    0    0    0    0
-         table[0xFC] = 0x100;    // U_WMRCREATEBRUSHINDIRECT        1      0    0    0    0    0    0    0    0
-         table[0xFD] = 0x000;    // U_WMRCREATEBITMAPINDIRECT       0      0    0    0    0    0    0    0    0
-         table[0xFE] = 0x000;    // U_WMRCREATEBITMAP               0      0    0    0    0    0    0    0    0
-         table[0xFF] = 0x100;    // U_WMRCREATEREGION               1      0    0    0    0    0    0    0    0
+         table[0x00] = 0x0A0;    // U_WMREOF                        0      0      1    0    1    0    0    0    0    0  Force out any pending draw
+         table[0x01] = 0x020;    // U_WMRSETBKCOLOR                 0      0      0    0    1    0    0    0    0    0
+         table[0x02] = 0x020;    // U_WMRSETBKMODE                  0      0      0    0    1    0    0    0    0    0
+         table[0x03] = 0x0A0;    // U_WMRSETMAPMODE                 0      0      1    0    1    0    0    0    0    0
+         table[0x04] = 0x0A0;    // U_WMRSETROP2                    0      0      1    0    1    0    0    0    0    0
+         table[0x05] = 0x000;    // U_WMRSETRELABS                  0      0      0    0    0    0    0    0    0    0  No idea what this is supposed to do
+         table[0x06] = 0x0A0;    // U_WMRSETPOLYFILLMODE            0      0      1    0    1    0    0    0    0    0
+         table[0x07] = 0x0A0;    // U_WMRSETSTRETCHBLTMODE          0      0      1    0    1    0    0    0    0    0
+         table[0x08] = 0x000;    // U_WMRSETTEXTCHAREXTRA           0      0      0    0    0    0    0    0    0    0
+         table[0x09] = 0x020;    // U_WMRSETTEXTCOLOR               0      0      0    0    1    0    0    0    0    0
+         table[0x0A] = 0x020;    // U_WMRSETTEXTJUSTIFICATION       0      0      0    0    1    0    0    0    0    0
+         table[0x0B] = 0x0A0;    // U_WMRSETWINDOWORG               0      0      1    0    1    0    0    0    0    0
+         table[0x0C] = 0x0A0;    // U_WMRSETWINDOWEXT               0      0      1    0    1    0    0    0    0    0
+         table[0x0D] = 0x0A0;    // U_WMRSETVIEWPORTORG             0      0      1    0    1    0    0    0    0    0
+         table[0x0E] = 0x0A0;    // U_WMRSETVIEWPORTEXT             0      0      1    0    1    0    0    0    0    0
+         table[0x0F] = 0x000;    // U_WMROFFSETWINDOWORG            0      0      0    0    0    0    0    0    0    0
+         table[0x10] = 0x000;    // U_WMRSCALEWINDOWEXT             0      0      0    0    0    0    0    0    0    0
+         table[0x11] = 0x0A0;    // U_WMROFFSETVIEWPORTORG          0      0      1    0    1    0    0    0    0    0
+         table[0x12] = 0x0A0;    // U_WMRSCALEVIEWPORTEXT           0      0      1    0    1    0    0    0    0    0
+         table[0x13] = 0x28B;    // U_WMRLINETO                     1      0      1    0    0    0    1    0    1    1
+         table[0x14] = 0x289;    // U_WMRMOVETO                     1      0      1    0    0    0    1    0    0    1
+         table[0x15] = 0x0A0;    // U_WMREXCLUDECLIPRECT            0      0      1    0    1    0    0    0    0    0
+         table[0x16] = 0x0A0;    // U_WMRINTERSECTCLIPRECT          0      0      1    0    1    0    0    0    0    0
+         table[0x17] = 0x283;    // U_WMRARC                        1      0      1    0    0    0    0    0    1    1
+         table[0x18] = 0x087;    // U_WMRELLIPSE                    0      0      1    0    0    0    0    1    1    1
+         table[0x19] = 0x082;    // U_WMRFLOODFILL                  0      0      1    0    0    0    0    0    1    0
+         table[0x1A] = 0x087;    // U_WMRPIE                        0      0      1    0    0    0    0    1    1    1
+         table[0x1B] = 0x087;    // U_WMRRECTANGLE                  0      0      1    0    0    0    0    1    1    1
+         table[0x1C] = 0x087;    // U_WMRROUNDRECT                  0      0      1    0    0    0    0    1    1    1
+         table[0x1D] = 0x000;    // U_WMRPATBLT                     0      0      1    0    0    0    0    1    1    1
+         table[0x1E] = 0x0A0;    // U_WMRSAVEDC                     0      0      1    0    1    0    0    0    0    0
+         table[0x1F] = 0x082;    // U_WMRSETPIXEL                   0      0      1    0    0    0    0    0    1    0
+         table[0x20] = 0x0A0;    // U_WMROFFSETCLIPRGN              0      0      1    0    1    0    0    0    0    0
+         table[0x21] = 0x002;    // U_WMRTEXTOUT                    0      0      0    0    0    0    0    0    1    0
+         table[0x22] = 0x082;    // U_WMRBITBLT                     0      0      1    0    0    0    0    0    1    0
+         table[0x23] = 0x082;    // U_WMRSTRETCHBLT                 0      0      1    0    0    0    0    0    1    0
+         table[0x24] = 0x083;    // U_WMRPOLYGON                    0      0      1    0    0    0    0    0    1    1
+         table[0x25] = 0x283;    // U_WMRPOLYLINE                   1      0      1    0    0    0    0    0    1    1
+         table[0x26] = 0x0A0;    // U_WMRESCAPE                     0      0      1    0    1    0    0    0    0    0
+         table[0x27] = 0x0A0;    // U_WMRRESTOREDC                  0      0      1    0    1    0    0    0    0    0
+         table[0x28] = 0x082;    // U_WMRFILLREGION                 0      0      1    0    0    0    0    0    1    0
+         table[0x29] = 0x082;    // U_WMRFRAMEREGION                0      0      1    0    0    0    0    0    1    0
+         table[0x2A] = 0x082;    // U_WMRINVERTREGION               0      0      1    0    0    0    0    0    1    0
+         table[0x2B] = 0x082;    // U_WMRPAINTREGION                0      0      1    0    0    0    0    0    1    0
+         table[0x2C] = 0x0A0;    // U_WMRSELECTCLIPREGION           0      0      1    0    1    0    0    0    0    0
+         table[0x2D] = 0x020;    // U_WMRSELECTOBJECT               0      0      0    0    1    0    0    0    0    0
+         table[0x2E] = 0x020;    // U_WMRSETTEXTALIGN               0      0      0    0    1    0    0    0    0    0
+         table[0x2F] = 0x002;    // U_WMRDRAWTEXT                   0      0      0    0    0    0    0    0    1    0 no idea what this is supposed to do
+         table[0x30] = 0x087;    // U_WMRCHORD                      0      0      1    0    0    0    0    1    1    1
+         table[0x31] = 0x0A0;    // U_WMRSETMAPPERFLAGS             0      0      1    0    1    0    0    0    0    0
+         table[0x32] = 0x002;    // U_WMREXTTEXTOUT                 0      0      0    0    0    0    0    0    1    0
+         table[0x33] = 0x000;    // U_WMRSETDIBTODEV                0      0      0    0    0    0    0    0    0    0
+         table[0x34] = 0x0A0;    // U_WMRSELECTPALETTE              0      0      1    0    1    0    0    0    0    0
+         table[0x35] = 0x0A0;    // U_WMRREALIZEPALETTE             0      0      1    0    1    0    0    0    0    0
+         table[0x36] = 0x0A0;    // U_WMRANIMATEPALETTE             0      0      1    0    1    0    0    0    0    0
+         table[0x37] = 0x0A0;    // U_WMRSETPALENTRIES              0      0      1    0    1    0    0    0    0    0
+         table[0x38] = 0x087;    // U_WMRPOLYPOLYGON                0      0      1    0    0    0    0    1    1    1
+         table[0x39] = 0x0A0;    // U_WMRRESIZEPALETTE              0      0      1    0    1    0    0    0    0    0
+         table[0x3A] = 0x000;    // U_WMR3A                         0      0      0    0    0    0    0    0    0    0
+         table[0x3B] = 0x000;    // U_WMR3B                         0      0      0    0    0    0    0    0    0    0
+         table[0x3C] = 0x000;    // U_WMR3C                         0      0      0    0    0    0    0    0    0    0
+         table[0x3D] = 0x000;    // U_WMR3D                         0      0      0    0    0    0    0    0    0    0
+         table[0x3E] = 0x000;    // U_WMR3E                         0      0      0    0    0    0    0    0    0    0
+         table[0x3F] = 0x000;    // U_WMR3F                         0      0      0    0    0    0    0    0    0    0
+         table[0x40] = 0x0A0;    // U_WMRDIBBITBLT                  0      0      1    0    1    0    0    0    0    0
+         table[0x41] = 0x0A0;    // U_WMRDIBSTRETCHBLT              0      0      1    0    1    0    0    0    0    0
+         table[0x42] = 0x080;    // U_WMRDIBCREATEPATTERNBRUSH      0      0      1    0    0    0    0    0    0    0  Not selected yet, so no change in drawing conditions
+         table[0x43] = 0x0A0;    // U_WMRSTRETCHDIB                 0      0      1    0    1    0    0    0    0    0
+         table[0x44] = 0x000;    // U_WMR44                         0      0      0    0    0    0    0    0    0    0
+         table[0x45] = 0x000;    // U_WMR45                         0      0      0    0    0    0    0    0    0    0
+         table[0x46] = 0x000;    // U_WMR46                         0      0      0    0    0    0    0    0    0    0
+         table[0x47] = 0x000;    // U_WMR47                         0      0      0    0    0    0    0    0    0    0
+         table[0x48] = 0x082;    // U_WMREXTFLOODFILL               0      0      1    0    0    0    0    0    1    0
+         table[0x49] = 0x000;    // U_WMR49                         0      0      0    0    0    0    0    0    0    0
+         table[0x4A] = 0x000;    // U_WMR4A                         0      0      0    0    0    0    0    0    0    0
+         table[0x4B] = 0x000;    // U_WMR4B                         0      0      0    0    0    0    0    0    0    0
+         table[0x4C] = 0x000;    // U_WMR4C                         0      0      0    0    0    0    0    0    0    0
+         table[0x4D] = 0x000;    // U_WMR4D                         0      0      0    0    0    0    0    0    0    0
+         table[0x4E] = 0x000;    // U_WMR4E                         0      0      0    0    0    0    0    0    0    0
+         table[0x4F] = 0x000;    // U_WMR4F                         0      0      0    0    0    0    0    0    0    0
+         table[0x50] = 0x000;    // U_WMR50                         0      0      0    0    0    0    0    0    0    0
+         table[0x51] = 0x000;    // U_WMR51                         0      0      0    0    0    0    0    0    0    0
+         table[0x52] = 0x000;    // U_WMR52                         0      0      0    0    0    0    0    0    0    0
+         table[0x53] = 0x000;    // U_WMR53                         0      0      0    0    0    0    0    0    0    0
+         table[0x54] = 0x000;    // U_WMR54                         0      0      0    0    0    0    0    0    0    0
+         table[0x55] = 0x000;    // U_WMR55                         0      0      0    0    0    0    0    0    0    0
+         table[0x56] = 0x000;    // U_WMR56                         0      0      0    0    0    0    0    0    0    0
+         table[0x57] = 0x000;    // U_WMR57                         0      0      0    0    0    0    0    0    0    0
+         table[0x58] = 0x000;    // U_WMR58                         0      0      0    0    0    0    0    0    0    0
+         table[0x59] = 0x000;    // U_WMR59                         0      0      0    0    0    0    0    0    0    0
+         table[0x5A] = 0x000;    // U_WMR5A                         0      0      0    0    0    0    0    0    0    0
+         table[0x5B] = 0x000;    // U_WMR5B                         0      0      0    0    0    0    0    0    0    0
+         table[0x5C] = 0x000;    // U_WMR5C                         0      0      0    0    0    0    0    0    0    0
+         table[0x5D] = 0x000;    // U_WMR5D                         0      0      0    0    0    0    0    0    0    0
+         table[0x5E] = 0x000;    // U_WMR5E                         0      0      0    0    0    0    0    0    0    0
+         table[0x5F] = 0x000;    // U_WMR5F                         0      0      0    0    0    0    0    0    0    0
+         table[0x60] = 0x000;    // U_WMR60                         0      0      0    0    0    0    0    0    0    0
+         table[0x61] = 0x000;    // U_WMR61                         0      0      0    0    0    0    0    0    0    0
+         table[0x62] = 0x000;    // U_WMR62                         0      0      0    0    0    0    0    0    0    0
+         table[0x63] = 0x000;    // U_WMR63                         0      0      0    0    0    0    0    0    0    0
+         table[0x64] = 0x000;    // U_WMR64                         0      0      0    0    0    0    0    0    0    0
+         table[0x65] = 0x000;    // U_WMR65                         0      0      0    0    0    0    0    0    0    0
+         table[0x66] = 0x000;    // U_WMR66                         0      0      0    0    0    0    0    0    0    0
+         table[0x67] = 0x000;    // U_WMR67                         0      0      0    0    0    0    0    0    0    0
+         table[0x68] = 0x000;    // U_WMR68                         0      0      0    0    0    0    0    0    0    0
+         table[0x69] = 0x000;    // U_WMR69                         0      0      0    0    0    0    0    0    0    0
+         table[0x6A] = 0x000;    // U_WMR6A                         0      0      0    0    0    0    0    0    0    0
+         table[0x6B] = 0x000;    // U_WMR6B                         0      0      0    0    0    0    0    0    0    0
+         table[0x6C] = 0x000;    // U_WMR6C                         0      0      0    0    0    0    0    0    0    0
+         table[0x6D] = 0x000;    // U_WMR6D                         0      0      0    0    0    0    0    0    0    0
+         table[0x6E] = 0x000;    // U_WMR6E                         0      0      0    0    0    0    0    0    0    0
+         table[0x6F] = 0x000;    // U_WMR6F                         0      0      0    0    0    0    0    0    0    0
+         table[0x70] = 0x000;    // U_WMR70                         0      0      0    0    0    0    0    0    0    0
+         table[0x71] = 0x000;    // U_WMR71                         0      0      0    0    0    0    0    0    0    0
+         table[0x72] = 0x000;    // U_WMR72                         0      0      0    0    0    0    0    0    0    0
+         table[0x73] = 0x000;    // U_WMR73                         0      0      0    0    0    0    0    0    0    0
+         table[0x74] = 0x000;    // U_WMR74                         0      0      0    0    0    0    0    0    0    0
+         table[0x75] = 0x000;    // U_WMR75                         0      0      0    0    0    0    0    0    0    0
+         table[0x76] = 0x000;    // U_WMR76                         0      0      0    0    0    0    0    0    0    0
+         table[0x77] = 0x000;    // U_WMR77                         0      0      0    0    0    0    0    0    0    0
+         table[0x78] = 0x000;    // U_WMR78                         0      0      0    0    0    0    0    0    0    0
+         table[0x79] = 0x000;    // U_WMR79                         0      0      0    0    0    0    0    0    0    0
+         table[0x7A] = 0x000;    // U_WMR7A                         0      0      0    0    0    0    0    0    0    0
+         table[0x7B] = 0x000;    // U_WMR7B                         0      0      0    0    0    0    0    0    0    0
+         table[0x7C] = 0x000;    // U_WMR7C                         0      0      0    0    0    0    0    0    0    0
+         table[0x7D] = 0x000;    // U_WMR7D                         0      0      0    0    0    0    0    0    0    0
+         table[0x7E] = 0x000;    // U_WMR7E                         0      0      0    0    0    0    0    0    0    0
+         table[0x7F] = 0x000;    // U_WMR7F                         0      0      0    0    0    0    0    0    0    0
+         table[0x80] = 0x000;    // U_WMR80                         0      0      0    0    0    0    0    0    0    0
+         table[0x81] = 0x000;    // U_WMR81                         0      0      0    0    0    0    0    0    0    0
+         table[0x82] = 0x000;    // U_WMR82                         0      0      0    0    0    0    0    0    0    0
+         table[0x83] = 0x000;    // U_WMR83                         0      0      0    0    0    0    0    0    0    0
+         table[0x84] = 0x000;    // U_WMR84                         0      0      0    0    0    0    0    0    0    0
+         table[0x85] = 0x000;    // U_WMR85                         0      0      0    0    0    0    0    0    0    0
+         table[0x86] = 0x000;    // U_WMR86                         0      0      0    0    0    0    0    0    0    0
+         table[0x87] = 0x000;    // U_WMR87                         0      0      0    0    0    0    0    0    0    0
+         table[0x88] = 0x000;    // U_WMR88                         0      0      0    0    0    0    0    0    0    0
+         table[0x89] = 0x000;    // U_WMR89                         0      0      0    0    0    0    0    0    0    0
+         table[0x8A] = 0x000;    // U_WMR8A                         0      0      0    0    0    0    0    0    0    0
+         table[0x8B] = 0x000;    // U_WMR8B                         0      0      0    0    0    0    0    0    0    0
+         table[0x8C] = 0x000;    // U_WMR8C                         0      0      0    0    0    0    0    0    0    0
+         table[0x8D] = 0x000;    // U_WMR8D                         0      0      0    0    0    0    0    0    0    0
+         table[0x8E] = 0x000;    // U_WMR8E                         0      0      0    0    0    0    0    0    0    0
+         table[0x8F] = 0x000;    // U_WMR8F                         0      0      0    0    0    0    0    0    0    0
+         table[0x90] = 0x000;    // U_WMR90                         0      0      0    0    0    0    0    0    0    0
+         table[0x91] = 0x000;    // U_WMR91                         0      0      0    0    0    0    0    0    0    0
+         table[0x92] = 0x000;    // U_WMR92                         0      0      0    0    0    0    0    0    0    0
+         table[0x93] = 0x000;    // U_WMR93                         0      0      0    0    0    0    0    0    0    0
+         table[0x94] = 0x000;    // U_WMR94                         0      0      0    0    0    0    0    0    0    0
+         table[0x95] = 0x000;    // U_WMR95                         0      0      0    0    0    0    0    0    0    0
+         table[0x96] = 0x000;    // U_WMR96                         0      0      0    0    0    0    0    0    0    0
+         table[0x97] = 0x000;    // U_WMR97                         0      0      0    0    0    0    0    0    0    0
+         table[0x98] = 0x000;    // U_WMR98                         0      0      0    0    0    0    0    0    0    0
+         table[0x99] = 0x000;    // U_WMR99                         0      0      0    0    0    0    0    0    0    0
+         table[0x9A] = 0x000;    // U_WMR9A                         0      0      0    0    0    0    0    0    0    0
+         table[0x9B] = 0x000;    // U_WMR9B                         0      0      0    0    0    0    0    0    0    0
+         table[0x9C] = 0x000;    // U_WMR9C                         0      0      0    0    0    0    0    0    0    0
+         table[0x9D] = 0x000;    // U_WMR9D                         0      0      0    0    0    0    0    0    0    0
+         table[0x9E] = 0x000;    // U_WMR9E                         0      0      0    0    0    0    0    0    0    0
+         table[0x9F] = 0x000;    // U_WMR9F                         0      0      0    0    0    0    0    0    0    0
+         table[0xA0] = 0x000;    // U_WMRA0                         0      0      0    0    0    0    0    0    0    0
+         table[0xA1] = 0x000;    // U_WMRA1                         0      0      0    0    0    0    0    0    0    0
+         table[0xA2] = 0x000;    // U_WMRA2                         0      0      0    0    0    0    0    0    0    0
+         table[0xA3] = 0x000;    // U_WMRA3                         0      0      0    0    0    0    0    0    0    0
+         table[0xA4] = 0x000;    // U_WMRA4                         0      0      0    0    0    0    0    0    0    0
+         table[0xA5] = 0x000;    // U_WMRA5                         0      0      0    0    0    0    0    0    0    0
+         table[0xA6] = 0x000;    // U_WMRA6                         0      0      0    0    0    0    0    0    0    0
+         table[0xA7] = 0x000;    // U_WMRA7                         0      0      0    0    0    0    0    0    0    0
+         table[0xA8] = 0x000;    // U_WMRA8                         0      0      0    0    0    0    0    0    0    0
+         table[0xA9] = 0x000;    // U_WMRA9                         0      0      0    0    0    0    0    0    0    0
+         table[0xAA] = 0x000;    // U_WMRAA                         0      0      0    0    0    0    0    0    0    0
+         table[0xAB] = 0x000;    // U_WMRAB                         0      0      0    0    0    0    0    0    0    0
+         table[0xAC] = 0x000;    // U_WMRAC                         0      0      0    0    0    0    0    0    0    0
+         table[0xAD] = 0x000;    // U_WMRAD                         0      0      0    0    0    0    0    0    0    0
+         table[0xAE] = 0x000;    // U_WMRAE                         0      0      0    0    0    0    0    0    0    0
+         table[0xAF] = 0x000;    // U_WMRAF                         0      0      0    0    0    0    0    0    0    0
+         table[0xB0] = 0x000;    // U_WMRB0                         0      0      0    0    0    0    0    0    0    0
+         table[0xB1] = 0x000;    // U_WMRB1                         0      0      0    0    0    0    0    0    0    0
+         table[0xB2] = 0x000;    // U_WMRB2                         0      0      0    0    0    0    0    0    0    0
+         table[0xB3] = 0x000;    // U_WMRB3                         0      0      0    0    0    0    0    0    0    0
+         table[0xB4] = 0x000;    // U_WMRB4                         0      0      0    0    0    0    0    0    0    0
+         table[0xB5] = 0x000;    // U_WMRB5                         0      0      0    0    0    0    0    0    0    0
+         table[0xB6] = 0x000;    // U_WMRB6                         0      0      0    0    0    0    0    0    0    0
+         table[0xB7] = 0x000;    // U_WMRB7                         0      0      0    0    0    0    0    0    0    0
+         table[0xB8] = 0x000;    // U_WMRB8                         0      0      0    0    0    0    0    0    0    0
+         table[0xB9] = 0x000;    // U_WMRB9                         0      0      0    0    0    0    0    0    0    0
+         table[0xBA] = 0x000;    // U_WMRBA                         0      0      0    0    0    0    0    0    0    0
+         table[0xBB] = 0x000;    // U_WMRBB                         0      0      0    0    0    0    0    0    0    0
+         table[0xBC] = 0x000;    // U_WMRBC                         0      0      0    0    0    0    0    0    0    0
+         table[0xBD] = 0x000;    // U_WMRBD                         0      0      0    0    0    0    0    0    0    0
+         table[0xBE] = 0x000;    // U_WMRBE                         0      0      0    0    0    0    0    0    0    0
+         table[0xBF] = 0x000;    // U_WMRBF                         0      0      0    0    0    0    0    0    0    0
+         table[0xC0] = 0x000;    // U_WMRC0                         0      0      0    0    0    0    0    0    0    0
+         table[0xC1] = 0x000;    // U_WMRC1                         0      0      0    0    0    0    0    0    0    0
+         table[0xC2] = 0x000;    // U_WMRC2                         0      0      0    0    0    0    0    0    0    0
+         table[0xC3] = 0x000;    // U_WMRC3                         0      0      0    0    0    0    0    0    0    0
+         table[0xC4] = 0x000;    // U_WMRC4                         0      0      0    0    0    0    0    0    0    0
+         table[0xC5] = 0x000;    // U_WMRC5                         0      0      0    0    0    0    0    0    0    0
+         table[0xC6] = 0x000;    // U_WMRC6                         0      0      0    0    0    0    0    0    0    0
+         table[0xC7] = 0x000;    // U_WMRC7                         0      0      0    0    0    0    0    0    0    0
+         table[0xC8] = 0x000;    // U_WMRC8                         0      0      0    0    0    0    0    0    0    0
+         table[0xC9] = 0x000;    // U_WMRC9                         0      0      0    0    0    0    0    0    0    0
+         table[0xCA] = 0x000;    // U_WMRCA                         0      0      0    0    0    0    0    0    0    0
+         table[0xCB] = 0x000;    // U_WMRCB                         0      0      0    0    0    0    0    0    0    0
+         table[0xCC] = 0x000;    // U_WMRCC                         0      0      0    0    0    0    0    0    0    0
+         table[0xCD] = 0x000;    // U_WMRCD                         0      0      0    0    0    0    0    0    0    0
+         table[0xCE] = 0x000;    // U_WMRCE                         0      0      0    0    0    0    0    0    0    0
+         table[0xCF] = 0x000;    // U_WMRCF                         0      0      0    0    0    0    0    0    0    0
+         table[0xD0] = 0x000;    // U_WMRD0                         0      0      0    0    0    0    0    0    0    0
+         table[0xD1] = 0x000;    // U_WMRD1                         0      0      0    0    0    0    0    0    0    0
+         table[0xD2] = 0x000;    // U_WMRD2                         0      0      0    0    0    0    0    0    0    0
+         table[0xD3] = 0x000;    // U_WMRD3                         0      0      0    0    0    0    0    0    0    0
+         table[0xD4] = 0x000;    // U_WMRD4                         0      0      0    0    0    0    0    0    0    0
+         table[0xD5] = 0x000;    // U_WMRD5                         0      0      0    0    0    0    0    0    0    0
+         table[0xD6] = 0x000;    // U_WMRD6                         0      0      0    0    0    0    0    0    0    0
+         table[0xD7] = 0x000;    // U_WMRD7                         0      0      0    0    0    0    0    0    0    0
+         table[0xD8] = 0x000;    // U_WMRD8                         0      0      0    0    0    0    0    0    0    0
+         table[0xD9] = 0x000;    // U_WMRD9                         0      0      0    0    0    0    0    0    0    0
+         table[0xDA] = 0x000;    // U_WMRDA                         0      0      0    0    0    0    0    0    0    0
+         table[0xDB] = 0x000;    // U_WMRDB                         0      0      0    0    0    0    0    0    0    0
+         table[0xDC] = 0x000;    // U_WMRDC                         0      0      0    0    0    0    0    0    0    0
+         table[0xDD] = 0x000;    // U_WMRDD                         0      0      0    0    0    0    0    0    0    0
+         table[0xDE] = 0x000;    // U_WMRDE                         0      0      0    0    0    0    0    0    0    0
+         table[0xDF] = 0x000;    // U_WMRDF                         0      0      0    0    0    0    0    0    0    0
+         table[0xE0] = 0x000;    // U_WMRE0                         0      0      0    0    0    0    0    0    0    0
+         table[0xE1] = 0x000;    // U_WMRE1                         0      0      0    0    0    0    0    0    0    0
+         table[0xE2] = 0x000;    // U_WMRE2                         0      0      0    0    0    0    0    0    0    0
+         table[0xE3] = 0x000;    // U_WMRE3                         0      0      0    0    0    0    0    0    0    0
+         table[0xE4] = 0x000;    // U_WMRE4                         0      0      0    0    0    0    0    0    0    0
+         table[0xE5] = 0x000;    // U_WMRE5                         0      0      0    0    0    0    0    0    0    0
+         table[0xE6] = 0x000;    // U_WMRE6                         0      0      0    0    0    0    0    0    0    0
+         table[0xE7] = 0x000;    // U_WMRE7                         0      0      0    0    0    0    0    0    0    0
+         table[0xE8] = 0x000;    // U_WMRE8                         0      0      0    0    0    0    0    0    0    0
+         table[0xE9] = 0x000;    // U_WMRE9                         0      0      0    0    0    0    0    0    0    0
+         table[0xEA] = 0x000;    // U_WMREA                         0      0      0    0    0    0    0    0    0    0
+         table[0xEB] = 0x000;    // U_WMREB                         0      0      0    0    0    0    0    0    0    0
+         table[0xEC] = 0x000;    // U_WMREC                         0      0      0    0    0    0    0    0    0    0
+         table[0xED] = 0x000;    // U_WMRED                         0      0      0    0    0    0    0    0    0    0
+         table[0xEE] = 0x000;    // U_WMREE                         0      0      0    0    0    0    0    0    0    0
+         table[0xEF] = 0x000;    // U_WMREF                         0      0      0    0    0    0    0    0    0    0
+         table[0xF0] = 0x020;    // U_WMRDELETEOBJECT               0      0      0    0    1    0    0    0    0    0
+         table[0xF1] = 0x000;    // U_WMRF1                         0      0      0    0    0    0    0    0    0    0
+         table[0xF2] = 0x000;    // U_WMRF2                         0      0      0    0    0    0    0    0    0    0
+         table[0xF3] = 0x000;    // U_WMRF3                         0      0      0    0    0    0    0    0    0    0
+         table[0xF4] = 0x000;    // U_WMRF4                         0      0      0    0    0    0    0    0    0    0
+         table[0xF5] = 0x000;    // U_WMRF5                         0      0      0    0    0    0    0    0    0    0
+         table[0xF6] = 0x000;    // U_WMRF6                         0      0      0    0    0    0    0    0    0    0
+         table[0xF7] = 0x120;    // U_WMRCREATEPALETTE              0      1      0    0    1    0    0    0    0    0 Not selected yet, so no change in drawing conditions
+         table[0xF8] = 0x120;    // U_WMRCREATEBRUSH                0      1      0    0    1    0    0    0    0    0 "
+         table[0xF9] = 0x120;    // U_WMRCREATEPATTERNBRUSH         0      1      0    0    1    0    0    0    0    0 "
+         table[0xFA] = 0x120;    // U_WMRCREATEPENINDIRECT          0      1      0    0    1    0    0    0    0    0 "
+         table[0xFB] = 0x120;    // U_WMRCREATEFONTINDIRECT         0      1      0    0    1    0    0    0    0    0 "
+         table[0xFC] = 0x120;    // U_WMRCREATEBRUSHINDIRECT        0      1      0    0    1    0    0    0    0    0 "
+         table[0xFD] = 0x020;    // U_WMRCREATEBITMAPINDIRECT       0      0      0    0    1    0    0    0    0    0 "
+         table[0xFE] = 0x020;    // U_WMRCREATEBITMAP               0      0      0    0    1    0    0    0    0    0 "
+         table[0xFF] = 0x120;    // U_WMRCREATEREGION               0      1      0    0    1    0    0    0    0    0 "
       }
       result = table[type];
    }
@@ -1323,7 +1397,7 @@ writing the final data structure out to a file.
     \param wmr record to duplicate
 */
 char *wmr_dup(
-      char *wmr
+      const char *wmr
    ){
    char *dup;
    uint32_t  irecsize;
@@ -1439,7 +1513,7 @@ int  wmf_finish(
     U_wmf_endian(wt->buf,wt->used,1); 
 #endif
 
-   (void) wmr_properties(U_WMR_INVALID);     /* force the release of the lookup table memory, returned value is irrelevant */
+   (void) U_wmr_properties(U_WMR_INVALID);     /* force the release of the lookup table memory, returned value is irrelevant */
    if(1 != fwrite(wt->buf,wt->used,1,wt->fp))return(2);
    (void) fclose(wt->fp);
    wt->fp=NULL;
@@ -1528,7 +1602,7 @@ int  wmf_append(
    if(wt->largest < size)wt->largest=size;
    /* does the record create an object: brush, font, palette, pen, or region ? 
       Following EOF properties comes back as U_WMR_INVALID */
-   wp = wmr_properties(U_WMRTYPE(rec));
+   wp = U_wmr_properties(U_WMRTYPE(rec));
    if((wp !=  U_WMR_INVALID) && (U_DRAW_OBJECT & wp))wt->sumObjects++;
    if(freerec){ free(rec); }
    return(0);
@@ -1543,7 +1617,7 @@ int  wmf_append(
     \param freerec If true, free rec after append    
 */
 int  wmf_header_append(
-      U_METARECORD     *rec,
+      PU_METARECORD     rec,
       WMFTRACK         *wt,
       int               freerec
    ){
@@ -1574,8 +1648,116 @@ int  wmf_header_append(
    return(0);
 }
 
+/**
+    \brief Create a handle table. Entries filled with 0 are empty, entries >0 hold a handle.
+    \return 0 for success, >=1 for failure.
+    \param initsize Initialize with space for this number of handles
+    \param chunksize When needed increase space by this number of handles
+    \param wht WMF handle table    
+*/
+int wmf_htable_create(
+      uint32_t     initsize,
+      uint32_t     chunksize,
+      WMFHANDLES **wht
+   ){
+   WMFHANDLES *whtl;
+   
+   if(initsize<1)return(1);
+   if(chunksize<1)return(2);
+   whtl = (WMFHANDLES *) malloc(sizeof(WMFHANDLES));
+   if(!whtl)return(3);
+   whtl->table = malloc(initsize * sizeof(uint32_t));
+   if(!whtl->table){
+      free(whtl);
+      return(4);
+   }
+   memset(whtl->table , 0, initsize * sizeof(uint32_t));  // zero all slots in the table
+   whtl->allocated = initsize;
+   whtl->chunk     = chunksize;
+   whtl->table[0]  = 0;         // This slot isn't actually ever used
+   whtl->lolimit   = 1;         // first available table entry
+   whtl->hilimit   = 0;         // no entries in the table yet.
+   whtl->peak      = 0;         // no entries in the table ever
+   *wht            = whtl;
+   return(0);
+}
 
-/* htable functions, use the ones from uemf.c */
+/**
+    \brief Delete an entry from the handle table. Move it back onto the stack. The specified slot is filled with a 0.
+    \return 0 for success, >=1 for failure.
+    \param ih  handle
+    \param wht WMF handle table
+    
+*/
+int wmf_htable_delete(
+      uint32_t    *ih,
+      WMFHANDLES  *wht
+   ){
+   if(!wht)return(1);
+   if(!wht->table)return(2);
+   if(*ih < 1)return(4);           // invalid handle
+   if(!wht->table[*ih])return(5);  // requested table position was not in use
+   wht->table[*ih]=0;              // remove handle from table
+   while(wht->hilimit>0 && !wht->table[wht->hilimit]){  // adjust hilimit
+     wht->hilimit--;
+   }
+   if(*ih < wht->lolimit)wht->lolimit = *ih;  // adjust lolimit
+   *ih=0;                                     // invalidate handle variable, so a second delete will of it is not possible
+   return(0);
+}
+
+/**
+    \brief Returns the index of the first free slot.  
+    Call realloc() if needed.  The slot is set to handle (indicates occupied) and the peak value is adjusted.
+    \return 0 for success, >=1 for failure.
+    \param ih  handle
+    \param wht WMF handle table
+*/
+int wmf_htable_insert(
+      uint32_t   *ih,
+      WMFHANDLES *wht
+   ){
+   size_t newsize;
+
+   if(!wht)return(1);
+   if(!wht->table)return(2);
+   if(!ih)return(4);
+   if(wht->lolimit >= wht->allocated - 1){  // need to reallocate
+     newsize=wht->allocated + wht->chunk;
+     wht->table = realloc(wht->table,newsize * sizeof(uint32_t));
+     if(!wht->table)return(5);
+     memset(&wht->table[wht->allocated] , 0, wht->chunk * sizeof(uint32_t));  // zero all NEW slots in the table
+     wht->allocated = newsize;
+   }
+   *ih = wht->lolimit;              // handle that is inserted in first available slot
+   wht->table[*ih] = *ih;           // handle goes into preexisting (but zero) slot in table, handle number is the same as the slot number
+   if(*ih > wht->hilimit){    wht->hilimit = *ih;  }
+   if(*ih > wht->peak){       wht->peak    = *ih;  }
+   /* Find the next available slot, it will be at least one higher than the present position, and will have a zero in it. */
+   wht->lolimit++;
+   while(wht->lolimit<= wht->hilimit && wht->table[wht->lolimit]){ wht->lolimit++; }
+   return(0);
+}
+
+/**
+    \brief Free all memory in an htable.  Sets the pointer to NULL.
+    \return 0 for success, >=1 for failure.
+    \param wht  WMF handle table
+*/
+int wmf_htable_free(
+      WMFHANDLES **wht
+   ){
+   WMFHANDLES *whtl;
+   if(!wht)return(1);
+   whtl = *wht;
+   if(!whtl)return(2);
+   if(!whtl->table)return(3);
+   free(whtl->table);
+   free(whtl);
+   *wht=NULL;
+   return(0);
+}
+
 
 /* **********************************************************************************************
 These functions create standard structures used in the WMR records.
@@ -1634,7 +1816,7 @@ char *U_WMRCORE_1U16_CRF_2U16_set(
 ){
    char *record=NULL;
    uint32_t  irecsize,off;
-   irecsize  = U_SIZE_METARECORD + sizeof(U_COLORREF);
+   irecsize  = U_SIZE_METARECORD + U_SIZE_COLORREF;
    if(arg1)irecsize+=2;
    if(arg2)irecsize+=2;
    if(arg3)irecsize+=2;
@@ -1879,12 +2061,11 @@ char *wdeleteobject_set(
       uint32_t    *ihObject,
       WMFHANDLES  *wht
    ){
-   if(U_MFT_MISMATCH(wht,U_MFT_WMF))return(NULL);  // something not WMF calling WMF function
-   uint32_t saveObject=*ihObject;
-   *ihObject += 1; /* 0->N --> 1->N+1 */
-   if(htable_delete(ihObject,wht))return(NULL);  // invalid handle or other problem, cannot be deleted
-   *ihObject = 0xFFFFFFFF;  /* EMF would have set to 0, but 0 is an allowed index in WMF */
-   return(U_WMRDELETEOBJECT_set(saveObject));
+   uint32_t saveObject=*ihObject;                   /* caller 0->N */
+   *ihObject += 1;                                  /* caller 0->N --> 1->N+1 table*/
+   if(wmf_htable_delete(ihObject,wht))return(NULL); /* invalid handle or other problem, cannot be deleted */
+   *ihObject = 0xFFFFFFFF;                          /* EMF would have set to 0, but 0 is an allowed index in WMF */
+   return(U_WMRDELETEOBJECT_set(saveObject));       /* caller 0->N */
 }
 
 /**
@@ -1900,7 +2081,10 @@ char *wselectobject_set(
       WMFHANDLES *wht
    ){
    /* WMF has no stock objects! */
-   if(U_MFT_MISMATCH(wht,U_MFT_WMF))return(NULL);  // something not WMF calling WMF function
+   if(ihObject > wht->hilimit)return(NULL);   // handle this high is not in the table
+   /* caller uses 0->N, table uses 1->N+1 */
+   if(!wht->table[ihObject+1])return(NULL);   // handle is not in the table, so cannot be selected
+   /* file uses 0->N */
    return(U_WMRSELECTOBJECT_set(ihObject));
 }
 
@@ -1918,8 +2102,7 @@ char *wcreatepenindirect_set(
       WMFHANDLES *wht,
       U_PEN       pen
    ){
-   if(U_MFT_MISMATCH(wht,U_MFT_WMF))return(NULL);  // something not WMF calling WMF function
-   if(htable_insert(ihPen, wht))return(NULL);
+   if(wmf_htable_insert(ihPen, wht))return(NULL);
    *ihPen -= 1;  /* 1->N+1 --> 0->N */
    return(U_WMRCREATEPENINDIRECT_set(pen));
 }
@@ -1938,8 +2121,7 @@ char *wcreatebrushindirect_set(
       WMFHANDLES  *wht,
       U_WLOGBRUSH   lb
    ){
-   if(U_MFT_MISMATCH(wht,U_MFT_WMF))return(NULL);  // something not WMF calling WMF function
-   if(htable_insert(ihBrush, wht))return(NULL);
+   if(wmf_htable_insert(ihBrush, wht))return(NULL);
    *ihBrush -= 1;  /* 1->N+1 --> 0->N */
    return(U_WMRCREATEBRUSHINDIRECT_set(lb));
 }
@@ -1964,8 +2146,7 @@ char *wcreatedibpatternbrush_srcdib_set(
       const char          *Px
       
    ){
-   if(U_MFT_MISMATCH(wht,U_MFT_WMF))return(NULL);  // something not WMF calling WMF function
-   if(htable_insert(ihBrush, wht))return(NULL);
+   if(wmf_htable_insert(ihBrush, wht))return(NULL);
    *ihBrush -= 1;  /* 1->N+1 --> 0->N */
    return(U_WMRDIBCREATEPATTERNBRUSH_set(U_BS_DIBPATTERNPT, iUsage, Bmi, cbPx, Px,NULL));
 }
@@ -1985,8 +2166,7 @@ char *wcreatedibpatternbrush_srcbm16_set(
       const uint32_t       iUsage, 
       PU_BITMAP16          Bm16
    ){
-   if(U_MFT_MISMATCH(wht,U_MFT_WMF))return(NULL);  // something not WMF calling WMF function
-   if(htable_insert(ihBrush, wht))return(NULL);
+   if(wmf_htable_insert(ihBrush, wht))return(NULL);
    *ihBrush -= 1;  /* 1->N+1 --> 0->N */
    return(U_WMRDIBCREATEPATTERNBRUSH_set(U_BS_PATTERN, iUsage, NULL, 0, NULL, Bm16));
 }
@@ -2007,8 +2187,7 @@ char *wcreatepatternbrush_set(
       PU_BITMAP16          Bm16,
       char                *Pattern       
    ){
-   if(U_MFT_MISMATCH(wht,U_MFT_WMF))return(NULL);  // something not WMF calling WMF function
-   if(htable_insert(ihBrush, wht))return(NULL);
+   if(wmf_htable_insert(ihBrush, wht))return(NULL);
    *ihBrush -= 1;  /* 1->N+1 --> 0->N */
    return(U_WMRCREATEPATTERNBRUSH_set(Bm16, Pattern));
 }
@@ -2027,8 +2206,7 @@ char *wcreatefontindirect_set(
       WMFHANDLES *wht,
       PU_FONT     uf
    ){
-   if(U_MFT_MISMATCH(wht,U_MFT_WMF))return(NULL);  // something not WMF calling WMF function
-   if(htable_insert(ihFont, wht))return(NULL);
+   if(wmf_htable_insert(ihFont, wht))return(NULL);
    *ihFont -= 1;  /* 1->N+1 --> 0->N */
    return(U_WMRCREATEFONTINDIRECT_set(uf));
 }
@@ -2047,8 +2225,7 @@ char *wcreatepalette_set(
       WMFHANDLES   *wht,
       PU_PALETTE   up
    ){
-   if(U_MFT_MISMATCH(wht,U_MFT_WMF))return(NULL);  // something not WMF calling WMF function
-   if(htable_insert(ihPal, wht))return(NULL);
+   if(wmf_htable_insert(ihPal, wht))return(NULL);
    *ihPal -= 1;  /* 1->N+1 --> 0->N */
    return(U_WMRCREATEPALETTE_set(up));
 }
@@ -2067,8 +2244,7 @@ char *wsetpaletteentries_set(
       WMFHANDLES             *wht,
       const PU_PALETTE       Palettes
    ){
-   if(U_MFT_MISMATCH(wht,U_MFT_WMF))return(NULL);  // something not WMF calling WMF function
-   if(htable_insert(ihPal, wht))return(NULL);
+   if(wmf_htable_insert(ihPal, wht))return(NULL);
    *ihPal -= 1;  /* 1->N+1 --> 0->N */
    return(U_WMRSETPALENTRIES_set(Palettes));
 }
@@ -2087,8 +2263,7 @@ char *wcreateregion_set(
       WMFHANDLES             *wht,
       const PU_REGION         Region
    ){
-   if(U_MFT_MISMATCH(wht,U_MFT_WMF))return(NULL);  // something not WMF calling WMF function
-   if(htable_insert(ihReg, wht))return(NULL);
+   if(wmf_htable_insert(ihReg, wht))return(NULL);
    *ihReg -= 1;  /* 1->N+1 --> 0->N */
    return(U_WMRCREATEREGION_set(Region));
 }
@@ -2197,10 +2372,10 @@ char *U_WMRHEADER_set(
          ym16 = ymax;
          ((PU_WMRPLACEABLE) record)->Key         = 0x9AC6CDD7;
          ((PU_WMRPLACEABLE) record)->HWmf        = 0;  /* Manual says number of 16 bit words in record, but all WMF examples had it as 0 */
-         ((PU_WMRPLACEABLE) record)->dst.left    = 0;
-         ((PU_WMRPLACEABLE) record)->dst.top     = 0;
-         ((PU_WMRPLACEABLE) record)->dst.right   = xm16;
-         ((PU_WMRPLACEABLE) record)->dst.bottom  = ym16;
+         ((PU_WMRPLACEABLE) record)->Dst.left    = 0;
+         ((PU_WMRPLACEABLE) record)->Dst.top     = 0;
+         ((PU_WMRPLACEABLE) record)->Dst.right   = xm16;
+         ((PU_WMRPLACEABLE) record)->Dst.bottom  = ym16;
          ((PU_WMRPLACEABLE) record)->Inch        = dpi;
          ((PU_WMRPLACEABLE) record)->Reserved    = 0;
          ((PU_WMRPLACEABLE) record)->Checksum    = U_16_checksum((int16_t *)record,10);
@@ -2626,7 +2801,7 @@ char *U_WMRTEXTOUT_set(U_POINT16 Dst, char *string){
 
 /**
     \brief Allocate and construct a U_WMRBITBLT record.
-     Note that unlike U_EMRBITBLT there is no scaling available - the src and dst
+     Note that unlike U_EMRBITBLT there is no scaling available - the Src and Dst
       rectangles must be the same size.
     \return pointer to the U_WMRBITBLT record, or NULL on error.
     \param Dst       Destination UL corner in logical units
@@ -2794,9 +2969,10 @@ char *U_WMRESCAPE_set(uint16_t Escape, uint16_t Length, const void *Data){
 /**
     \brief Allocate and construct a U_WMRRESTOREDC record
     \return pointer to the U_WMRRESTOREDC record, or NULL on error.
+    \param  DC  Drawing Context to restore.  (negative is relative to current, positive is absolute)
 */
-char *U_WMRRESTOREDC_set(void){
-   return U_WMRCORE_NOARGS_set(U_WMR_RESTOREDC);
+char *U_WMRRESTOREDC_set(int16_t DC){
+   return U_WMRCORE_1U16_set(U_WMR_SETMAPMODE, DC);
 }
 
 /**
@@ -2904,14 +3080,14 @@ char *U_WMRSETMAPPERFLAGS_set(uint32_t Mode){
 /**
     \brief Allocate and construct a U_WMREXTTEXTOUT record.
     \return pointer to the U_WMREXTTEXTOUT record, or NULL on error.
-    \param dst     {X,Y} coordinates where the string is to be written.
+    \param Dst     {X,Y} coordinates where the string is to be written.
     \param Length  Stringlength in bytes
     \param Opts    ExtTextOutOptions Flags
     \param string  String to write (Latin1 encoding)
     \param dx      Kerning information.  Must have same number of entries as Length.
     \param rect    Used when when U_ETO_OPAQUE or U_ETO_CLIPPED bits are set in Opts
 */
-char *U_WMREXTTEXTOUT_set(U_POINT16 dst, int16_t Length, uint16_t Opts, 
+char *U_WMREXTTEXTOUT_set(U_POINT16 Dst, int16_t Length, uint16_t Opts, 
    const char *string, int16_t *dx, U_RECT16 rect){
 
    char *record=NULL;
@@ -2922,14 +3098,14 @@ char *U_WMREXTTEXTOUT_set(U_POINT16 dst, int16_t Length, uint16_t Opts,
    irecsize += slen;
    if(dx)irecsize += 2*Length;
    if(Opts & (U_ETO_OPAQUE | U_ETO_CLIPPED)){
-      irecsize += sizeof(U_RECT16);
+      irecsize += U_SIZE_RECT16;
    }
    record = malloc(irecsize);
    if(record){
       U_WMRCORE_SETRECHEAD(record,irecsize,U_WMR_EXTTEXTOUT);
       off = U_SIZE_METARECORD;
-         memcpy(record+off,&dst.y,2);              off+=2;
-         memcpy(record+off,&dst.x,2);              off+=2;
+         memcpy(record+off,&Dst.y,2);              off+=2;
+         memcpy(record+off,&Dst.x,2);              off+=2;
          memcpy(record+off,&Length,2);             off+=2;
          memcpy(record+off,&Opts,2);               off+=2;
       if(Opts & (U_ETO_OPAQUE | U_ETO_CLIPPED)){
@@ -3009,7 +3185,7 @@ char *U_WMRPOLYPOLYGON_set(
    int        i,cbPolys,cbPoints,off;
    
    cbPolys = sizeof(uint16_t)*nPolys;
-   for(i=cbPoints=0; i<nPolys; i++){ cbPoints += sizeof(U_POINT16)*aPolyCounts[i]; }
+   for(i=cbPoints=0; i<nPolys; i++){ cbPoints += U_SIZE_POINT16*aPolyCounts[i]; }
    
    if(nPolys==0 || cbPoints==0)return(NULL);
    
@@ -4195,9 +4371,9 @@ int16_t *dx16_get(
     \param  blimit     one byte past the last WMF record in memory.
 */
 size_t U_WMRRECSAFE_get(
-      char       *contents, 
-      char       *blimit
-){
+      const char *contents, 
+      const char *blimit
+   ){
    size_t size=0;
    uint32_t Size16;
    memcpy(&Size16, contents + offsetof(U_METARECORD,Size16_4), 4);
@@ -4208,7 +4384,6 @@ size_t U_WMRRECSAFE_get(
       contents + size - 1 <  contents)size=0;
    return(size);
 }
-
 
 
 /* **********************************************************************************************
@@ -4232,7 +4407,7 @@ int U_WMRCORENONE_get(char *string){
     Use U_WMRRECSAFE_get() to check if the record extends too far in memory.
 */
 int U_WMRCORE_RECSAFE_get(
-      char       *contents, 
+      const char *contents, 
       int         minsize
 ){
    int size=0;
@@ -4246,16 +4421,16 @@ int U_WMRCORE_RECSAFE_get(
 
 /* records like U_WMRFLOODFILL and others. all args are optional, Color is not */
 int U_WMRCORE_1U16_CRF_2U16_get(
-      char         *contents,
-      int           minsize,
-      uint16_t     *arg1,
-      PU_COLORREF   Color,
-      uint16_t     *arg2,
-      uint16_t     *arg3
+      const char *contents,
+      int         minsize,
+      uint16_t   *arg1,
+      PU_COLORREF Color,
+      uint16_t   *arg2,
+      uint16_t   *arg3
    ){
    int  size = U_WMRCORE_RECSAFE_get(contents, minsize);
    int  irecsize,off;
-   irecsize  = U_SIZE_METARECORD + sizeof(U_COLORREF);
+   irecsize  = U_SIZE_METARECORD + U_SIZE_COLORREF;
    if(arg1)irecsize+=2;
    if(arg2)irecsize+=2;
    if(arg3)irecsize+=2;
@@ -4270,7 +4445,7 @@ int U_WMRCORE_1U16_CRF_2U16_get(
 /* records that have a single uint16_t argument like PU_WMRSETMAPMODE
    May also be used with int16_t with appropriate casts */
 int U_WMRCORE_1U16_get(
-      char       *contents, 
+      const char *contents, 
       int         minsize,
       uint16_t   *arg1
    ){
@@ -4284,7 +4459,7 @@ int U_WMRCORE_1U16_get(
 /* records that have two uint16_t arguments like U_WMRSETBKMODE 
    May also be used with int16_t with appropriate casts */
 int U_WMRCORE_2U16_get(
-      char       *contents, 
+      const char *contents, 
       int         minsize,
       uint16_t   *arg1,
       uint16_t   *arg2
@@ -4299,7 +4474,7 @@ int U_WMRCORE_2U16_get(
 /* records that have four uint16_t arguments like U_WMRSCALEWINDOWEXT
    May also be used with int16_t with appropriate casts  */
 int U_WMRCORE_4U16_get(
-      char       *contents,
+      const char *contents,
       int         minsize,
       uint16_t   *arg1,
       uint16_t   *arg2,
@@ -4319,7 +4494,7 @@ int U_WMRCORE_4U16_get(
 /* records that have five uint16_t arguments like U_WMRCREATEPENINDIRECT
    May also be used with int16_t with appropriate casts  */
 int U_WMRCORE_5U16_get(
-      char       *contents,
+      const char *contents,
       int         minsize,
       uint16_t   *arg1,
       uint16_t   *arg2,
@@ -4341,7 +4516,7 @@ int U_WMRCORE_5U16_get(
 /* records that have six uint16_t arguments like U_ROUNDREC
    May also be used with int16_t with appropriate casts  */
 int U_WMRCORE_6U16_get(
-      char       *contents,
+      const char *contents,
       int         minsize,
       uint16_t   *arg1,
       uint16_t   *arg2,
@@ -4365,7 +4540,7 @@ int U_WMRCORE_6U16_get(
 /* records that have eight uint16_t arguments like U_WMRARC
    May also be used with int16_t with appropriate casts  */
 int U_WMRCORE_8U16_get(
-      char       *contents,
+      const char *contents,
       int         minsize,
       uint16_t   *arg1,
       uint16_t   *arg2,
@@ -4398,11 +4573,11 @@ int U_WMRCORE_8U16_get(
   like U_WMRCREATEBRUSHINDIRECT with arg1=arg2=NULL
 */
 int U_WMRCORE_2U16_N16_get(
-      char       *contents,
+      const char *contents,
       int         minsize,
       uint16_t   *arg1,
       uint16_t   *arg2,
-      char      **array
+      const char **array
    ){
    int  size = U_WMRCORE_RECSAFE_get(contents, minsize);
    int  off  = U_SIZE_METARECORD;
@@ -4419,10 +4594,10 @@ int U_WMRCORE_2U16_N16_get(
    returns a separateepointer to the PalEntries[] array.  This pointer is most likely not aligned with the data.
  */
 int U_WMRCORE_PALETTE_get(
-      char       *contents,
+      const char *contents,
       int         minsize,
       PU_PALETTE  Palette,
-      char      **PalEntries 
+      const char **PalEntries 
    ){
    int  size = U_WMRCORE_RECSAFE_get(contents, minsize);
    if(!size)return(0);
@@ -4434,6 +4609,140 @@ int U_WMRCORE_PALETTE_get(
 }
 
 //! @endcond
+
+/**
+    \brief Return parameters from a bitmapcoreheader.
+    All are returned as 32 bit integers, regardless of their internal representation.
+    
+    \param BmiCh       char * pointer to a U_BITMAPCOREHEADER.    Note, data may not be properly aligned.
+    \param Size_4      size of the coreheader in bytes
+    \param Width;      Width of pixel array
+    \param Height;     Height of pixel array
+    \param BitCount    Pixel Format (BitCount Enumeration)
+*/
+void U_BITMAPCOREHEADER_get(
+       const char *BmiCh,
+       int32_t    *Size,
+       int32_t    *Width,
+       int32_t    *Height,
+       int32_t    *BitCount
+    ){
+    uint32_t utmp4;
+    uint16_t utmp2;
+    memcpy(&utmp4,   BmiCh + offsetof(U_BITMAPCOREHEADER,Size_4),   4); *Size      = utmp4;   
+    memcpy(&utmp2,   BmiCh + offsetof(U_BITMAPCOREHEADER,Width),    2); *Width     = utmp2;   
+    memcpy(&utmp2,   BmiCh + offsetof(U_BITMAPCOREHEADER,Height),   2); *Height    = utmp2;  
+    memcpy(&utmp2,   BmiCh + offsetof(U_BITMAPCOREHEADER,BitCount), 2); *BitCount  = utmp2;
+}
+
+/**
+    \brief Return parameters from a bitinfoheader.
+    All are returned as 32 bit integers, regardless of their internal representation.
+    
+    \param Bmih             char * pointer to a U_BITMAPINFOHEADER.    Note, data may not be properly aligned.
+    \param Size             Structure size in bytes
+    \param Width            Bitmap width in pixels
+    \param Height           Bitmap height in pixels, may be negative.
+    \param Planes           Planes (must be 1)
+    \param BitCount         BitCount Enumeration (determines number of RBG colors)
+    \param Compression      BI_Compression Enumeration
+    \param SizeImage        Image size in bytes or 0 = "default size (calculated from geometry?)"
+    \param XPelsPerMeter    X Resolution in pixels/meter
+    \param YPelsPerMeter    Y Resolution in pixels/meter
+    \param ClrUsed          Number of bmciColors in U_BITMAPINFO/U_BITMAPCOREINFO that are used by the bitmap
+    \param ClrImportant     Number of bmciColors needed (0 means all).
+
+
+*/
+void U_BITMAPINFOHEADER_get(
+       const char *Bmih,
+       uint32_t   *Size,          
+       int32_t    *Width,         
+       int32_t    *Height,        
+       uint32_t   *Planes,        
+       uint32_t   *BitCount,      
+       uint32_t   *Compression,   
+       uint32_t   *SizeImage,     
+       int32_t    *XPelsPerMeter, 
+       int32_t    *YPelsPerMeter, 
+       uint32_t   *ClrUsed,       
+       uint32_t   *ClrImportant  
+    ){
+    int32_t   tmp4;
+    uint32_t utmp4;
+    uint16_t utmp2;
+    
+    memcpy(&utmp4,  Bmih + offsetof(U_BITMAPINFOHEADER,biSize         ),   4);   *Size          = utmp4;
+    memcpy( &tmp4,  Bmih + offsetof(U_BITMAPINFOHEADER,biWidth        ),   4);   *Width         =  tmp4;
+    memcpy( &tmp4,  Bmih + offsetof(U_BITMAPINFOHEADER,biHeight       ),   4);   *Height        =  tmp4;
+    memcpy(&utmp2,  Bmih + offsetof(U_BITMAPINFOHEADER,biPlanes       ),   2);   *Planes        = utmp2;
+    memcpy(&utmp2,  Bmih + offsetof(U_BITMAPINFOHEADER,biBitCount     ),   2);   *BitCount      = utmp2;
+    memcpy(&utmp4,  Bmih + offsetof(U_BITMAPINFOHEADER,biCompression  ),   4);   *Compression   = utmp4;
+    memcpy(&utmp4,  Bmih + offsetof(U_BITMAPINFOHEADER,biSizeImage    ),   4);   *SizeImage     = utmp4;
+    memcpy( &tmp4,  Bmih + offsetof(U_BITMAPINFOHEADER,biXPelsPerMeter),   4);   *XPelsPerMeter =  tmp4;
+    memcpy( &tmp4,  Bmih + offsetof(U_BITMAPINFOHEADER,biYPelsPerMeter),   4);   *YPelsPerMeter =  tmp4;
+    memcpy(&utmp4,  Bmih + offsetof(U_BITMAPINFOHEADER,biClrUsed      ),   4);   *ClrUsed       = utmp4;
+    memcpy(&utmp4,  Bmih + offsetof(U_BITMAPINFOHEADER,biClrImportant ),   4);   *ClrImportant  = utmp4;
+}
+
+/**
+    \brief Assume a packed DIB and get the parameters from it, use by DBI_to_RGBA()
+    
+    \return BI_Compression Enumeration.  For anything other than U_BI_RGB values other than px may not be valid.
+    \param dib         pointer to the start of the DIB in the record
+    \param px          pointer to DIB pixel array
+    \param ct          pointer to DIB color table
+    \param numCt       DIB color table number of entries, for PNG or JPG returns the number of bytes in the image
+    \param width       Width of pixel array
+    \param height      Height of pixel array (always returned as a positive number)
+    \param colortype   DIB BitCount Enumeration
+    \param invert      If DIB rows are in opposite order from RGBA rows
+*/
+int wget_DIB_params(
+       const char   *dib,
+       const char  **px,
+       const U_RGBQUAD **ct,
+       int32_t      *numCt,
+       int32_t      *width,
+       int32_t      *height,
+       int32_t      *colortype,
+       int32_t      *invert
+   ){
+   uint32_t bic;
+   int32_t Size;
+   bic = U_BI_RGB;  // this information is not in the coreheader;
+   U_BITMAPCOREHEADER_get(dib, &Size, width, height, colortype);
+   if(Size != 0xC ){ //BitmapCoreHeader
+       /* if biCompression is not U_BI_RGB some or all of the following might not hold real values.
+       Ignore most of the information returned from the bitmapinfoheader.
+       */
+       uint32_t uig4;
+       int32_t  ig4;
+       U_BITMAPINFOHEADER_get(dib, &uig4, width, height,&uig4, (uint32_t *) colortype, &bic, &uig4, &ig4, &ig4,&uig4, &uig4);
+   }
+   if(*height < 0){
+      *height = -*height;
+      *invert = 1;
+   }
+   else {
+      *invert = 0;
+   }
+   *px = dib + U_SIZE_BITMAPINFOHEADER;
+   if(bic == U_BI_RGB){
+      *numCt     = get_real_color_count(dib);
+      if(*numCt){ 
+         *ct = (PU_RGBQUAD) (dib + U_SIZE_BITMAPINFOHEADER); 
+         *px += U_SIZE_COLORREF * (*numCt);
+      }
+      else {      *ct = NULL;                                            }
+   }
+   else {
+      memcpy(numCt,  dib + offsetof(U_BITMAPINFOHEADER,biSizeImage),    4);
+      *ct        = NULL;
+   }
+   return(bic);
+}
+
 
 
 /* **********************************************************************************************
@@ -4451,13 +4760,13 @@ They are listed in order by the corresponding U_WMR_* index number.
     \brief Get data from a (placeable) WMR_HEADER.  
     \return size of the record in bytes, 0 on failure
     \param  contents   record to extract data from
+    \param  blimit     one byte past the last WMF record in memory.
     \param  Placeable  U_WMRPLACEABLE data, if any
     \param  Header     U_WMRHEADER data, if any
-    \param  blimit     one byte past the last WMF record in memory.
 */
 int wmfheader_get(
-      char            *contents, 
-      char            *blimit,
+      const char      *contents, 
+      const char      *blimit,
       PU_WMRPLACEABLE  Placeable,
       PU_WMRHEADER     Header
    ){
@@ -4488,7 +4797,7 @@ int wmfheader_get(
     \param  contents   record to extract data from
 */
 int U_WMREOF_get(
-      char       *contents
+      const char *contents
    ){
    return(U_WMRCORE_RECSAFE_get(contents, (U_SIZE_WMREOF)));
 }                            
@@ -4500,12 +4809,12 @@ int U_WMREOF_get(
     \param  Color Background Color.
 */
 int U_WMRSETBKCOLOR_get(
-      char        *contents, 
+      const char  *contents, 
       PU_COLORREF  Color
    ){
    int size = U_WMRCORE_RECSAFE_get(contents, (U_SIZE_WMRSETBKCOLOR));
    if(!size)return(0);
-   memcpy(Color,contents + offsetof(U_WMRSETBKCOLOR,Color),sizeof(U_COLORREF));
+   memcpy(Color,contents + offsetof(U_WMRSETBKCOLOR,Color),U_SIZE_COLORREF);
    return(size);
 }
 
@@ -4516,7 +4825,7 @@ int U_WMRSETBKCOLOR_get(
     \param  Mode MixMode Enumeration
 */
 int U_WMRSETBKMODE_get(
-      char       *contents, 
+      const char *contents, 
       uint16_t   *Mode
    ){
    return(U_WMRCORE_1U16_get(contents, (U_SIZE_WMRSETBKMODE), Mode));
@@ -4529,7 +4838,7 @@ int U_WMRSETBKMODE_get(
     \param  Mode MapMode Enumeration
 */
 int U_WMRSETMAPMODE_get(
-      char       *contents, 
+      const char *contents, 
       uint16_t   *Mode
    ){
    return(U_WMRCORE_1U16_get(contents, (U_SIZE_WMRSETMAPMODE), Mode));
@@ -4542,7 +4851,7 @@ int U_WMRSETMAPMODE_get(
     \param  Mode Binary Raster Operation Enumeration
 */
 int U_WMRSETROP2_get(
-      char       *contents, 
+      const char *contents, 
       uint16_t   *Mode
    ){
    return(U_WMRCORE_1U16_get(contents, (U_SIZE_WMRSETROP2), Mode));
@@ -4554,7 +4863,7 @@ int U_WMRSETROP2_get(
     \param  contents   record to extract data from
 */
 int U_WMRSETRELABS_get(
-      char       *contents 
+      const char *contents 
    ){
    return(U_WMRCORE_RECSAFE_get(contents, (U_SIZE_WMRSETRELABS)));
 }                            
@@ -4566,7 +4875,7 @@ int U_WMRSETRELABS_get(
     \param  Mode PolyFillMode Enumeration
 */
 int U_WMRSETPOLYFILLMODE_get(
-      char       *contents, 
+      const char *contents, 
       uint16_t   *Mode
    ){
    return(U_WMRCORE_1U16_get(contents, (U_SIZE_WMRSETPOLYFILLMODE), Mode));
@@ -4579,7 +4888,7 @@ int U_WMRSETPOLYFILLMODE_get(
     \param  Mode StretchMode Enumeration
 */
 int U_WMRSETSTRETCHBLTMODE_get(
-      char       *contents, 
+      const char *contents, 
       uint16_t   *Mode
    ){
    return(U_WMRCORE_1U16_get(contents, (U_SIZE_WMRSETSTRETCHBLTMODE), Mode));
@@ -4592,7 +4901,7 @@ int U_WMRSETSTRETCHBLTMODE_get(
     \param  Mode Extra space in logical units to add to each character
 */
 int U_WMRSETTEXTCHAREXTRA_get(
-      char       *contents, 
+      const char *contents, 
       uint16_t   *Mode
    ){
    return(U_WMRCORE_1U16_get(contents, (U_SIZE_WMRSETTEXTCHAREXTRA), Mode));
@@ -4605,12 +4914,12 @@ int U_WMRSETTEXTCHAREXTRA_get(
     \param  Color Text Color.
 */
 int U_WMRSETTEXTCOLOR_get(
-      char        *contents, 
+      const char  *contents, 
       PU_COLORREF  Color
    ){
    int size = U_WMRCORE_RECSAFE_get(contents, (U_SIZE_WMRSETTEXTCOLOR));
    if(!size)return(0);
-   memcpy(Color,contents + offsetof(U_WMRSETTEXTCOLOR,Color),sizeof(U_COLORREF));
+   memcpy(Color,contents + offsetof(U_WMRSETTEXTCOLOR,Color),U_SIZE_COLORREF);
    return(size);
 }
 
@@ -4622,7 +4931,7 @@ int U_WMRSETTEXTCOLOR_get(
     \param  Extra Number of extra space characters to add to the line.
 */
 int U_WMRSETTEXTJUSTIFICATION_get(
-      char       *contents, 
+      const char *contents, 
       uint16_t   *Count,
       uint16_t   *Extra
    ){
@@ -4636,7 +4945,7 @@ int U_WMRSETTEXTJUSTIFICATION_get(
     \param  coord Window Origin.
 */
 int U_WMRSETWINDOWORG_get(
-      char       *contents, 
+      const char *contents, 
       PU_POINT16  coord
    ){
    return(U_WMRCORE_2U16_get(contents, (U_SIZE_WMRSETWINDOWORG), U_P16(coord->y), U_P16(coord->x)));
@@ -4649,7 +4958,7 @@ int U_WMRSETWINDOWORG_get(
     \param  extent     Window Extent.
 */
 int U_WMRSETWINDOWEXT_get(
-      char       *contents, 
+      const char *contents, 
       PU_POINT16  extent
    ){
    return(U_WMRCORE_2U16_get(contents, (U_SIZE_WMRSETWINDOWEXT), U_P16(extent->y), U_P16(extent->x)));
@@ -4662,7 +4971,7 @@ int U_WMRSETWINDOWEXT_get(
     \param  coord Viewport Origin.
 */
 int U_WMRSETVIEWPORTORG_get(
-      char       *contents, 
+      const char *contents, 
       PU_POINT16  coord
    ){
    return(U_WMRCORE_2U16_get(contents, (U_SIZE_WMRSETVIEWPORTORG), U_P16(coord->y), U_P16(coord->x)));
@@ -4676,7 +4985,7 @@ int U_WMRSETVIEWPORTORG_get(
     \param  extent     Viewport Extent.
 */
 int U_WMRSETVIEWPORTEXT_get(
-      char       *contents, 
+      const char *contents, 
       PU_POINT16  extent
    ){
    return(U_WMRCORE_2U16_get(contents, (U_SIZE_WMRSETVIEWPORTEXT), U_P16(extent->y), U_P16(extent->x)));
@@ -4689,7 +4998,7 @@ int U_WMRSETVIEWPORTEXT_get(
     \param  offset Window offset in device units.
 */
 int U_WMROFFSETWINDOWORG_get(
-      char       *contents, 
+      const char *contents, 
       PU_POINT16  offset
    ){
    return(U_WMRCORE_2U16_get(contents, (U_SIZE_WMROFFSETWINDOWORG), U_P16(offset->y), U_P16(offset->x)));
@@ -4703,7 +5012,7 @@ int U_WMROFFSETWINDOWORG_get(
     \param  Num   {X,Y} numerators.
 */
 int U_WMRSCALEWINDOWEXT_get(
-      char       *contents, 
+      const char *contents, 
      PU_POINT16   Denom, 
      PU_POINT16   Num
    ){
@@ -4717,7 +5026,7 @@ int U_WMRSCALEWINDOWEXT_get(
     \param  offset Viewport offset in device units.
 */
 int U_WMROFFSETVIEWPORTORG_get(
-      char       *contents,
+      const char *contents,
       PU_POINT16  offset
    ){
    return(U_WMRCORE_2U16_get(contents, (U_SIZE_WMROFFSETVIEWPORTORG), U_P16(offset->y), U_P16(offset->x)));
@@ -4731,7 +5040,7 @@ int U_WMROFFSETVIEWPORTORG_get(
     \param  Num   {X,Y} numerators.
 */
 int U_WMRSCALEVIEWPORTEXT_get(
-      char       *contents, 
+      const char *contents, 
      PU_POINT16   Denom, 
      PU_POINT16   Num
    ){
@@ -4745,7 +5054,7 @@ int U_WMRSCALEVIEWPORTEXT_get(
     \param  coord Draw line to {X,Y}.
 */
 int U_WMRLINETO_get(
-      char       *contents, 
+      const char *contents, 
       PU_POINT16  coord
    ){
    return(U_WMRCORE_2U16_get(contents, (U_SIZE_WMRLINETO), U_P16(coord->y), U_P16(coord->x)));
@@ -4758,7 +5067,7 @@ int U_WMRLINETO_get(
     \param  coord Move to {X,Y}.
 */
 int U_WMRMOVETO_get(
-      char       *contents, 
+      const char *contents, 
       PU_POINT16  coord
    ){
    return(U_WMRCORE_2U16_get(contents, (U_SIZE_WMRMOVETO), U_P16(coord->y), U_P16(coord->x)));
@@ -4771,7 +5080,7 @@ int U_WMRMOVETO_get(
     \param  rect Exclude rect from clipping region.
 */
 int U_WMREXCLUDECLIPRECT_get(
-      char       *contents,
+      const char *contents,
       PU_RECT16   rect
    ){
    return(U_WMRCORE_4U16_get(contents, (U_SIZE_WMREXCLUDECLIPRECT), U_P16(rect->bottom), U_P16(rect->right), U_P16(rect->top), U_P16(rect->left)));
@@ -4784,7 +5093,7 @@ int U_WMREXCLUDECLIPRECT_get(
     \param  rect Clipping region is intersection of existing clipping region with rect.
 */
 int U_WMRINTERSECTCLIPRECT_get(
-      char       *contents, 
+      const char *contents, 
       PU_RECT16   rect
    ){
    return(U_WMRCORE_4U16_get(contents, (U_SIZE_WMRINTERSECTCLIPRECT), U_P16(rect->bottom), U_P16(rect->right), U_P16(rect->top), U_P16(rect->left)));
@@ -4799,7 +5108,7 @@ int U_WMRINTERSECTCLIPRECT_get(
     \param  rect       Bounding rectangle.
 */
 int U_WMRARC_get(
-      char       *contents, 
+      const char *contents, 
       PU_POINT16  StartArc,
       PU_POINT16  EndArc,
       PU_RECT16   rect
@@ -4825,7 +5134,7 @@ int U_WMRARC_get(
     \param  rect Bounding rectangle for Ellipse.
 */
 int U_WMRELLIPSE_get(
-      char       *contents,
+      const char *contents,
       PU_RECT16   rect
    ){
    return U_WMRCORE_4U16_get(
@@ -4847,7 +5156,7 @@ int U_WMRELLIPSE_get(
     \param  coord  Location to start fill.
 */
 int U_WMRFLOODFILL_get(
-      char       *contents,
+      const char *contents,
       uint16_t   *Mode, 
       PU_COLORREF Color, 
       PU_POINT16  coord
@@ -4871,7 +5180,7 @@ int U_WMRFLOODFILL_get(
     \param  rect       Bounding rectangle.
 */
 int U_WMRPIE_get(
-      char       *contents,
+      const char *contents,
       PU_POINT16 Radial1,
       PU_POINT16 Radial2,
       PU_RECT16 rect
@@ -4897,7 +5206,7 @@ int U_WMRPIE_get(
     \param  rect       Boundaries.
 */
 int U_WMRRECTANGLE_get(
-      char       *contents,
+      const char *contents,
       PU_RECT16   rect
    ){
    return U_WMRCORE_4U16_get(
@@ -4919,7 +5228,7 @@ int U_WMRRECTANGLE_get(
     \param  rect       Boundaries.
 */
 int U_WMRROUNDRECT_get(
-      char       *contents,
+      const char *contents,
       int16_t    *Width, 
       int16_t    *Height,
       PU_RECT16   rect
@@ -4945,7 +5254,7 @@ int U_WMRROUNDRECT_get(
     \param  dwRop3    RasterOPeration Enumeration
 */
 int U_WMRPATBLT_get(
-      char           *contents,
+      const char     *contents,
       PU_POINT16      Dst,
       PU_POINT16      cwh,
       uint32_t       *dwRop3
@@ -4966,13 +5275,13 @@ int U_WMRPATBLT_get(
     \param  contents   record to extract data from
 */
 int U_WMRSAVEDC_get(
-      char       *contents
+      const char *contents
    ){
    return(U_WMRCORE_RECSAFE_get(contents, (U_SIZE_WMRSAVEDC)));
 }
 
 int U_WMRSETPIXEL_get(
-      char       *contents,
+      const char *contents,
       PU_COLORREF Color, 
       PU_POINT16  coord){
    return  U_WMRCORE_1U16_CRF_2U16_get(
@@ -4986,7 +5295,7 @@ int U_WMRSETPIXEL_get(
 }
 
 int U_WMROFFSETCLIPRGN_get(
-      char       *contents,
+      const char *contents,
       PU_POINT16 offset
    ){
    return U_WMRCORE_2U16_get(contents, (U_SIZE_WMROFFSETCLIPRGN), U_P16(offset->y), U_P16(offset->x));
@@ -4996,30 +5305,33 @@ int U_WMROFFSETCLIPRGN_get(
     \brief Get data from a  U_WMRTEXTOUT record
     \return length of the U_WMRTEXTOUT record in bytes, or 0 on error
     \param  contents   record to extract data from
-    \param  dst        coordinates where text will be written
+    \param  Dst        coordinates where text will be written
     \param  Length     Number of characters in string.
     \param  string     Pointer to string in WMF buffer in memory.  This text is generally NOT null terminated!!!
 */
 int U_WMRTEXTOUT_get(
-      char       *contents,
-      PU_POINT16  dst, 
-      int16_t    *Length,
-      char      **string
+      const char  *contents,
+      PU_POINT16   Dst, 
+      int16_t     *Length,
+      const char **string
    ){
    int16_t L2;
+   int  off;
    int  size = U_WMRCORE_RECSAFE_get(contents, (U_SIZE_WMRPATBLT));
    if(!size)return(0);
    *Length = *(int16_t *)(contents + offsetof(U_WMRTEXTOUT, Length));
+   *string = contents + offsetof(U_WMRTEXTOUT, String);  /* May not be null terminated!!! */
    L2 = *Length;
    if(L2 & 1)L2++;
-   memcpy(dst, contents + U_SIZE_METARECORD + 2 + L2, sizeof(U_POINT16));
-   *string = contents + offsetof(U_WMRTEXTOUT, String);  /* May not be null terminated!!! */
+   off = U_SIZE_METARECORD + 2 + L2;
+   memcpy(&Dst->y, contents + off, 2); off+=2;
+   memcpy(&Dst->x, contents + off, 2); off+=2;
    return(size);
 }
 
 /**
     \brief Get data from a  U_WMRBITBLT record.
-     Note that unlike U_EMRBITBLT there is no scaling available - the src and dst
+     Note that unlike U_EMRBITBLT there is no scaling available - the Src and Dst
       rectangles must be the same size.
     \return length of the U_WMRBITBLT record in bytes, or 0 on error
     \param  contents   record to extract data from
@@ -5031,13 +5343,13 @@ int U_WMRTEXTOUT_get(
     \param  px         pointer to bitmap in memory, or NULL if not used
 */
 int U_WMRBITBLT_get(
-      char        *contents,
+      const char  *contents,
       PU_POINT16   Dst,
       PU_POINT16   cwh,
       PU_POINT16   Src,
       uint32_t    *dwRop3,
       PU_BITMAP16  Bm16,
-      char       **px
+      const char **px
    ){
    uint8_t   xb;
    uint32_t  size = U_WMRCORE_RECSAFE_get(contents, (U_SIZE_WMRBITBLT_NOPX));
@@ -5072,23 +5384,23 @@ int U_WMRBITBLT_get(
     \brief Get data from a  U_WMRSTRETCHBLT record.
     \return length of the U_WMRSTRETCHBLT record in bytes, or 0 on error
     \param  contents   record to extract data from
-    \param  Dst       Destination UL corner in logical units
-    \param  cDst      Destination W & H in logical units
-    \param  Src       Source UL corner in logical units
-    \param  cSrc      Source W & H in logical units
-    \param  dwRop3    RasterOPeration Enumeration
-    \param  Bm16       bitmap16 object (fields in it are all 0 if no bitmap is used)
+    \param  Dst        Destination UL corner in logical units
+    \param  cDst       Destination W & H in logical units
+    \param  Src        Source UL corner in logical units
+    \param  cSrc       Source W & H in logical units
+    \param  dwRop3     RasterOPeration Enumeration
+    \param  Bm16        bitmap16 object (fields in it are all 0 if no bitmap is used)
     \param  px         pointer to bitmap in memory, or NULL if not used
 */
 int U_WMRSTRETCHBLT_get(
-      char        *contents,
+      const char  *contents,
       PU_POINT16   Dst,
       PU_POINT16   cDst,
       PU_POINT16   Src,
       PU_POINT16   cSrc,
       uint32_t    *dwRop3,
       PU_BITMAP16  Bm16,
-      char       **px
+      const char **px
    ){
    uint8_t   xb;
    uint32_t  size = U_WMRCORE_RECSAFE_get(contents, (U_SIZE_WMRSTRETCHBLT_NOPX));
@@ -5131,9 +5443,9 @@ int U_WMRSTRETCHBLT_get(
     \param  Data       pointer to array of U_POINT16 in memory.  Pointer may not be aligned properly for structures.
 */
 int U_WMRPOLYGON_get(
-      char       *contents,
-      uint16_t   *Length, 
-      char      **Data
+      const char   *contents,
+      uint16_t     *Length, 
+      const char  **Data
     ){
     return U_WMRCORE_2U16_N16_get(contents, (U_SIZE_WMRPOLYGON), NULL, Length, Data);
 }
@@ -5146,9 +5458,9 @@ int U_WMRPOLYGON_get(
     \param  Data       pointer to array of U_POINT16 in memory.  Pointer may not be aligned properly for structures.
 */
 int U_WMRPOLYLINE_get(
-      char       *contents,
-      uint16_t   *Length, 
-      char      **Data
+      const char  *contents,
+      uint16_t    *Length, 
+      const char **Data
     ){
     return U_WMRCORE_2U16_N16_get(contents, (U_SIZE_WMRPOLYLINE), NULL, Length, Data);
 }
@@ -5168,10 +5480,10 @@ int U_WMRPOLYLINE_get(
     \param  Data      Array of Length bytes
 */
 int U_WMRESCAPE_get(
-      char       *contents,
-      uint16_t   *Escape, 
-      uint16_t   *Length, 
-      char      **Data
+      const char  *contents,
+      uint16_t    *Escape, 
+      uint16_t    *Length, 
+      const char **Data
    ){
    return U_WMRCORE_2U16_N16_get(contents, (U_SIZE_WMRESCAPE), Escape, Length, Data);
 }
@@ -5180,11 +5492,13 @@ int U_WMRESCAPE_get(
     \brief Get data from a  U_WMRRESTOREDC record
     \return length of the U_WMRRESTOREDC record in bytes, or 0 on error
     \param  contents   record to extract data from
+    \param  DC         DC to restore (relative if negative, absolute if positive)
 */
 int U_WMRRESTOREDC_get(
-      char       *contents
+      const char *contents,
+      int16_t    *DC
    ){
-   return(U_WMRCORE_RECSAFE_get(contents, (U_SIZE_WMRRESTOREDC)));
+   return U_WMRCORE_1U16_get(contents, (U_SIZE_WMRRESTOREDC), (uint16_t *)DC); // signed, but it is just a memcpy, so this works
 }
 
 /**
@@ -5195,7 +5509,7 @@ int U_WMRRESTOREDC_get(
     \param  Brush     Brush to fill with
 */
 int U_WMRFILLREGION_get(
-      char       *contents,
+      const char *contents,
       uint16_t   *Region, 
       uint16_t   *Brush
    ){
@@ -5212,7 +5526,7 @@ int U_WMRFILLREGION_get(
     \param  Width   in logical units (of frame)
 */
 int U_WMRFRAMEREGION_get(
-      char       *contents,
+      const char *contents,
       uint16_t   *Region,
       uint16_t   *Brush,
       int16_t    *Height,
@@ -5228,7 +5542,7 @@ int U_WMRFRAMEREGION_get(
     \param  Region  Index of region to invert.
 */
 int U_WMRINVERTREGION_get(
-      char       *contents,
+      const char *contents,
       uint16_t   *Region
    ){
    return U_WMRCORE_1U16_get(contents, (U_SIZE_WMRINVERTREGION), Region);
@@ -5241,7 +5555,7 @@ int U_WMRINVERTREGION_get(
     \param  Region  Index of region to paint with the current Brush.
 */
 int U_WMRPAINTREGION_get(
-      char       *contents,
+      const char *contents,
       uint16_t   *Region
    ){
    return U_WMRCORE_1U16_get(contents, (U_SIZE_WMRPAINTREGION), Region);
@@ -5254,7 +5568,7 @@ int U_WMRPAINTREGION_get(
     \param  Region  Index of region to become clipping region..
 */
 int U_WMRSELECTCLIPREGION_get(
-      char       *contents, 
+      const char *contents, 
       uint16_t   *Region
    ){
    return U_WMRCORE_1U16_get(contents, (U_SIZE_WMRSELECTCLIPREGION), Region);
@@ -5268,7 +5582,7 @@ int U_WMRSELECTCLIPREGION_get(
     \param  Object  Index of object which is made active.
 */
 int U_WMRSELECTOBJECT_get(
-      char       *contents,
+      const char *contents,
       uint16_t   *Object
    ){
    return U_WMRCORE_1U16_get(contents, (U_SIZE_WMRSELECTOBJECT), Object);
@@ -5281,7 +5595,7 @@ int U_WMRSELECTOBJECT_get(
     \param  Mode  TextAlignment Enumeration.
 */
 int U_WMRSETTEXTALIGN_get(
-      char       *contents,
+      const char *contents,
       uint16_t   *Mode
    ){
    return U_WMRCORE_1U16_get(contents, (U_SIZE_WMRSETTEXTALIGN), Mode);
@@ -5301,7 +5615,7 @@ int U_WMRDRAWTEXT_get(void){  /* in Wine, not in WMF PDF. */
     \param  rect       Bounding rectangle.
 */
 int U_WMRCHORD_get(
-      char       *contents,
+      const char *contents,
       PU_POINT16  Radial1, 
       PU_POINT16  Radial2, 
       PU_RECT16   rect
@@ -5327,7 +5641,7 @@ int U_WMRCHORD_get(
     \param  Mode  If 1 bit set font mapper selects only matching aspect fonts.
 */
 int U_WMRSETMAPPERFLAGS_get(
-      char       *contents, 
+      const char *contents, 
       uint32_t   *Mode
    ){
    int size = U_WMRCORE_RECSAFE_get(contents, (U_SIZE_WMRSETMAPPERFLAGS));
@@ -5348,13 +5662,13 @@ int U_WMRSETMAPPERFLAGS_get(
     \param  rect       Used when when U_ETO_OPAQUE or U_ETO_CLIPPED bits are set in Opts
 */
 int U_WMREXTTEXTOUT_get(
-      char       *contents, 
-      PU_POINT16  Dst,
-      int16_t    *Length,
-      uint16_t   *Opts, 
-      char      **string, 
-      int16_t   **dx, 
-      PU_RECT16   rect
+      const char      *contents, 
+      PU_POINT16       Dst,
+      int16_t         *Length,
+      uint16_t        *Opts, 
+      const char     **string, 
+      const int16_t  **dx, 
+      PU_RECT16        rect
    ){
    int  size = U_WMRCORE_RECSAFE_get(contents, (U_SIZE_WMREXTTEXTOUT));
    int  off  = U_SIZE_METARECORD;
@@ -5364,8 +5678,8 @@ int U_WMREXTTEXTOUT_get(
    *Length  = *(int16_t *)( contents + offsetof(U_WMREXTTEXTOUT, Length ));
    *Opts    = *(uint16_t *)(contents + offsetof(U_WMREXTTEXTOUT, Opts   ));
    off      = U_SIZE_WMREXTTEXTOUT;
-   if(*Opts & (U_ETO_OPAQUE | U_ETO_CLIPPED)){   memcpy(rect, (contents + off), sizeof(U_RECT16)); off += sizeof(U_RECT16); }
-   else {                                        memset(rect, 0,                sizeof(U_RECT16));                          }
+   if(*Opts & (U_ETO_OPAQUE | U_ETO_CLIPPED)){   memcpy(rect, (contents + off), U_SIZE_RECT16); off += U_SIZE_RECT16; }
+   else {                                        memset(rect, 0,                U_SIZE_RECT16);                          }
    *string = (contents + off);
    off  += 2*((*Length +1)/2);
    if(*Length){    *dx = (int16_t *)(contents  + off); }
@@ -5377,23 +5691,23 @@ int U_WMREXTTEXTOUT_get(
     \brief Get data from a  U_WMRSETDIBTODEV record
     \return length of the U_WMRSETDIBTODEV record in bytes, or 0 on error
     \param  contents   record to extract data from
-    \param  Dst        UL corner of dst rect in logical units
+    \param  Dst        UL corner of Dst rect in logical units
     \param  cwh        Width and Height in logical units
-    \param  Src        UL corner of src rect in logical units
+    \param  Src        UL corner of Src rect in logical units
     \param  cUsage     ColorUsage enumeration
-    \param  ScanCount  Number of scan lines in src
-    \param  StartScan  First Scan line in src
+    \param  ScanCount  Number of scan lines in Src
+    \param  StartScan  First Scan line in Src
     \param  dib        DeviceIndependentBitmap object
 */
 int U_WMRSETDIBTODEV_get(
-      char        *contents, 
+      const char  *contents, 
       PU_POINT16   Dst,
       PU_POINT16   cwh,
       PU_POINT16   Src,
       uint16_t    *cUsage,
       uint16_t    *ScanCount,
       uint16_t    *StartScan,
-      char       **dib
+      const char **dib
    ){
    int  size = U_WMRCORE_RECSAFE_get(contents, (U_SIZE_WMRSETDIBTODEV));
    if(!size)return(0);
@@ -5417,7 +5731,7 @@ int U_WMRSETDIBTODEV_get(
     \param  Palette  Index of Palette to make active.
 */
 int U_WMRSELECTPALETTE_get(
-      char        *contents, 
+      const char  *contents, 
       uint16_t    *Palette
    ){
    return U_WMRCORE_1U16_get(contents, (U_SIZE_WMRSELECTPALETTE), Palette);
@@ -5429,7 +5743,7 @@ int U_WMRSELECTPALETTE_get(
     \param  contents   record to extract data from
 */
 int U_WMRREALIZEPALETTE_get(
-      char        *contents
+      const char  *contents
    ){
    return U_WMRCORE_RECSAFE_get(contents, (U_SIZE_WMRREALIZEPALETTE));
 }
@@ -5442,9 +5756,9 @@ int U_WMRREALIZEPALETTE_get(
     \param  PalEntries Array of Palette Entries
 */
 int U_WMRANIMATEPALETTE_get(
-      char       *contents,
-      PU_PALETTE  Palette,
-      char      **PalEntries 
+      const char  *contents,
+      PU_PALETTE   Palette,
+      const char **PalEntries 
    ){
    return U_WMRCORE_PALETTE_get(contents, (U_SIZE_WMRANIMATEPALETTE), Palette, PalEntries);
 }
@@ -5457,9 +5771,9 @@ int U_WMRANIMATEPALETTE_get(
     \param  PalEntries Array of Palette Entries
 */
 int U_WMRSETPALENTRIES_get(
-      char       *contents, 
-      PU_PALETTE  Palette,
-      char      **PalEntries 
+      const char  *contents, 
+      PU_PALETTE   Palette,
+      const char **PalEntries 
    ){
    return U_WMRCORE_PALETTE_get(contents, (U_SIZE_WMRSETPALENTRIES), Palette, PalEntries);
 }
@@ -5473,10 +5787,10 @@ int U_WMRSETPALENTRIES_get(
     \param  Points       pointer to array of U_POINT16 in memory.  Probably not aligned.
 */
 int U_WMRPOLYPOLYGON_get(
-      char        *contents, 
-      uint16_t    *nPolys,
-      uint16_t   **aPolyCounts,
-      char       **Points
+      const char        *contents, 
+      uint16_t          *nPolys,
+      const uint16_t   **aPolyCounts,
+      const char       **Points
    ){
    int        size = U_WMRCORE_RECSAFE_get(contents, (U_SIZE_WMRPOLYPOLYGON));
    if(!size)return(0);
@@ -5494,7 +5808,7 @@ int U_WMRPOLYPOLYGON_get(
     \param  Palette  Changes the size of the currently active Palette.
 */
 int U_WMRRESIZEPALETTE_get(
-      char        *contents, 
+      const char  *contents, 
       uint16_t    *Palette
    ){
    return U_WMRCORE_1U16_get(contents, (U_SIZE_WMRRESIZEPALETTE), Palette);
@@ -5536,12 +5850,12 @@ int U_WMR3F_get(void){
     \param  dib       pointer to dib in WMF in memory.  Most likely not aligned.
 */
 int U_WMRDIBBITBLT_get(
-      char        *contents, 
+      const char  *contents, 
       PU_POINT16   Dst,
       PU_POINT16   cwh,
       PU_POINT16   Src,
       uint32_t    *dwRop3,
-      char       **dib
+      const char **dib
    ){
    uint8_t  xb;
    uint32_t size = U_WMRCORE_RECSAFE_get(contents, (U_SIZE_WMRDIBBITBLT_NOPX));
@@ -5582,13 +5896,13 @@ int U_WMRDIBBITBLT_get(
     \param  dib       pointer to dib in WMF in memory.  Most likely not aligned.
 */
 int U_WMRDIBSTRETCHBLT_get(
-      char        *contents, 
+      const char  *contents, 
       PU_POINT16   Dst,
       PU_POINT16   cDst,
       PU_POINT16   Src,
       PU_POINT16   cSrc,
       uint32_t    *dwRop3,
-      char       **dib
+      const char **dib
    ){
    uint8_t  xb;
    uint32_t size = U_WMRCORE_RECSAFE_get(contents, (U_SIZE_WMRDIBSTRETCHBLT_NOPX));
@@ -5632,11 +5946,11 @@ int U_WMRDIBSTRETCHBLT_get(
     \param  dib        pointer to a dib        in WMF in memory.  Most likely not aligned.  NULL if Bm16 is used instead.
  */
 int U_WMRDIBCREATEPATTERNBRUSH_get(
-      char        *contents, 
+      const char  *contents, 
       uint16_t    *Style, 
       uint16_t    *cUsage,
-      char       **Bm16,
-      char       **dib
+      const char **Bm16,
+      const char **dib
    ){
    int  size = U_WMRCORE_RECSAFE_get(contents, (U_SIZE_WMRDIBCREATEPATTERNBRUSH));
    if(!size)return(0);
@@ -5644,12 +5958,12 @@ int U_WMRDIBCREATEPATTERNBRUSH_get(
    *Style   = *(uint16_t *)(contents + offsetof(U_WMRDIBCREATEPATTERNBRUSH, Style  ));
    *cUsage  = *(uint16_t *)(contents + offsetof(U_WMRDIBCREATEPATTERNBRUSH, cUsage ));
    if(*Style == U_BS_PATTERN){
-      *Bm16 = (contents + offsetof(U_WMRDIBCREATEPATTERNBRUSH, src));
+      *Bm16 = (contents + offsetof(U_WMRDIBCREATEPATTERNBRUSH, Src));
       *dib  = NULL;
    }
    else { /* from DIB */
       *Bm16 = NULL;
-      *dib  = (contents + offsetof(U_WMRDIBCREATEPATTERNBRUSH, src));
+      *dib  = (contents + offsetof(U_WMRDIBCREATEPATTERNBRUSH, Src));
    }
    return(size);
 }
@@ -5667,14 +5981,14 @@ int U_WMRDIBCREATEPATTERNBRUSH_get(
     \param  dib       (Optional) device independent bitmap
 */
 int U_WMRSTRETCHDIB_get(
-      char        *contents, 
+      const char  *contents, 
       PU_POINT16   Dst,
       PU_POINT16   cDst,
       PU_POINT16   Src,
       PU_POINT16   cSrc,
       uint16_t    *cUsage,
       uint32_t    *dwRop3,
-      char       **dib
+      const char **dib
    ){
    int  size = U_WMRCORE_RECSAFE_get(contents, (U_SIZE_WMRSTRETCHDIB));
    if(!size)return(0);
@@ -5718,7 +6032,7 @@ int U_WMR47_get(void){
     \param  coord      Location to start fill.
 */
 int U_WMREXTFLOODFILL_get(
-      char        *contents, 
+      const char  *contents, 
       uint16_t    *Mode, 
       PU_COLORREF  Color, 
       PU_POINT16   coord
@@ -6408,7 +6722,7 @@ int U_WMREF_get(void){
     \param  Object  Index of object which is made active.
 */
 int U_WMRDELETEOBJECT_get(
-      char       *contents,
+      const char *contents,
       uint16_t   *Object
    ){
    return U_WMRCORE_1U16_get(contents, (U_SIZE_WMRDELETEOBJECT), Object);
@@ -6446,9 +6760,9 @@ int U_WMRF6_get(void){
     \param  PalEntries Array of Palette Entries
 */
 int U_WMRCREATEPALETTE_get(
-      char       *contents,
-      PU_PALETTE  Palette,
-      char      **PalEntries 
+      const char  *contents,
+      PU_PALETTE   Palette,
+      const char **PalEntries 
    ){
    return U_WMRCORE_PALETTE_get(contents, (U_SIZE_WMRCREATEPALETTE), Palette, PalEntries);
 }
@@ -6467,10 +6781,10 @@ int U_WMRF8_get(void){
     \param  Pattern      byte array pattern, described by Bm16, for brush
 */
 int U_WMRCREATEPATTERNBRUSH_get(
-      char         *contents,
+      const char   *contents,
       PU_BITMAP16   Bm16,
       int          *pasize,
-      char        **Pattern
+      const char  **Pattern
    ){
    int off = U_SIZE_METARECORD;
    int  size = U_WMRCORE_RECSAFE_get(contents, (U_SIZE_WMRSETDIBTODEV));
@@ -6490,7 +6804,7 @@ int U_WMRCREATEPATTERNBRUSH_get(
     \param  pen        pointer to a U_PEN object to fill.
 */
 int U_WMRCREATEPENINDIRECT_get(
-      char         *contents,
+      const char   *contents,
       PU_PEN        pen
    ){
    int  size = U_WMRCORE_RECSAFE_get(contents, (U_SIZE_WMRCREATEPENINDIRECT));
@@ -6506,8 +6820,8 @@ int U_WMRCREATEPENINDIRECT_get(
     \param  font      pointer to array of U_FONT structure in memory.  Pointer may not be aligned properly for structure.
 */
 int U_WMRCREATEFONTINDIRECT_get(
-      char         *contents,
-      char        **font
+      const char   *contents,
+      const char  **font
    ){
    return U_WMRCORE_2U16_N16_get(contents, (U_SIZE_WMRCREATEFONTINDIRECT), NULL, NULL, font);
 }
@@ -6519,8 +6833,8 @@ int U_WMRCREATEFONTINDIRECT_get(
     \param  brush      pointer to U_WLOGBRUSH structure in memory.  Pointer may not be aligned properly for structure.
 */
 int U_WMRCREATEBRUSHINDIRECT_get(
-      char         *contents,
-      char        **brush
+      const char   *contents,
+      const char  **brush
     ){
     return U_WMRCORE_2U16_N16_get(contents, (U_SIZE_WMRCREATEBRUSHINDIRECT), NULL, NULL, brush);
 }
@@ -6542,8 +6856,8 @@ int U_WMRCREATEBITMAP_get(void){
     \param  Region     pointer to U_REGION structure in memory.  Pointer may not be aligned properly for structure.
 */
 int U_WMRCREATEREGION_get(
-      char         *contents,
-      char        **Region
+      const char   *contents,
+      const char  **Region
     ){
     return U_WMRCORE_2U16_N16_get(contents, (U_SIZE_WMRCREATEREGION), NULL, NULL, Region);
 }

@@ -4,8 +4,8 @@
 
 /*
 File:      uwmf_endian.c
-Version:   0.1.1
-Date:      22-JAN-2013
+Version:   0.1.2
+Date:      18-FEB-2013
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2012 David Mathog and California Institute of Technology (Caltech)
@@ -253,7 +253,7 @@ int wmfheader_swap(
     if(Key == 0x9AC6CDD7){
        U_swap4(contents + offsetof(U_WMRPLACEABLE,Key     ),1);
        U_swap2(contents + offsetof(U_WMRPLACEABLE,HWmf    ),1);
-       U_swap2(contents + offsetof(U_WMRPLACEABLE,dst     ),4);
+       U_swap2(contents + offsetof(U_WMRPLACEABLE,Dst     ),4);
        U_swap2(contents + offsetof(U_WMRPLACEABLE,Inch    ),1);
        U_swap4(contents + offsetof(U_WMRPLACEABLE,Reserved),1);
        U_swap2(contents + offsetof(U_WMRPLACEABLE,Checksum),1);
@@ -695,10 +695,10 @@ void U_WMRDIBCREATEPATTERNBRUSH_swap(char *record, int torev){
    U_WMRCORE_N16_swap(record,2,torev); /* Style and cUsage */
    if(!torev){ Style  = *(uint16_t *)(record + offsetof(U_WMRDIBCREATEPATTERNBRUSH,Style));  }
    if(Style == U_BS_PATTERN){
-      bitmap16_swap(record + offsetof(U_WMRDIBCREATEPATTERNBRUSH,src));
+      bitmap16_swap(record + offsetof(U_WMRDIBCREATEPATTERNBRUSH,Src));
    }
    else {
-      dibheader_swap(record + offsetof(U_WMRDIBCREATEPATTERNBRUSH,src), torev);
+      dibheader_swap(record + offsetof(U_WMRDIBCREATEPATTERNBRUSH,Src), torev);
    }
 }
 
