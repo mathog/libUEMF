@@ -195,6 +195,22 @@ void spintext(uint32_t x, uint32_t y, uint32_t textalign, WMFTRACK *wt, WMFHANDL
     free(string);
 }
     
+void draw_textrect(int xul, int yul, int width, int height, char *string, int size, WMFTRACK *wt){
+    char                *rec;
+    int                  slen;
+    int16_t             *dx16;
+    U_RECT16             rclBox;
+
+    rclBox = U_RECT16_set(point16_set(xul,yul),point16_set(xul + width, yul + height));
+    rec = U_WMRRECTANGLE_set(rclBox);                  taf(rec,wt,"U_WMRRECTANGLE_set");
+
+    slen=strlen(string);
+    dx16 = dx16_set(-size,  U_FW_NORMAL, slen);
+    rec = U_WMREXTTEXTOUT_set(point16_set(xul+width/2,yul + height/2), slen, U_ETO_NONE, string, dx16, U_RCL16_DEF);
+    taf(rec,wt,"U_WMREXTTEXTOUT_set");
+    free(dx16);
+}   
+
 void textlabel(uint32_t size, const char *string, uint32_t x, uint32_t y, uint32_t font, WMFTRACK *wt, WMFHANDLES *wht){
     char               *rec;
     int                 slen;
@@ -337,6 +353,7 @@ int main(int argc, char *argv[]){
     int                  pen_darkred_200;
     int                  pen_null;
     int                  font_courier_400;
+    int                  font_courier_60;
     int                  font_courier_40;
     int                  font_courier_30;
     int                  font_arial_300;
@@ -382,6 +399,7 @@ int main(int argc, char *argv[]){
     int                  mode = 0;   // conditional for some tests
     unsigned int         umode;
     int                  cap, join, miter;
+    char                 cbuf[132];
     uint8_t pngarray[138]= {
        0x89,0x50,0x4E,0x47,0x0D,0x0A,0x1A,0x0A,0x00,0x00,
        0x00,0x0D,0x49,0x48,0x44,0x52,0x00,0x00,0x00,0x0A,
@@ -605,6 +623,14 @@ int main(int argc, char *argv[]){
     free(puf);
     font_courier_40=font;
     
+    puf = U_FONT_set(  -60, 0, 0, 0, 
+                      U_FW_NORMAL, U_FW_NOITALIC, U_FW_NOUNDERLINE, U_FW_NOSTRIKEOUT,
+                      U_ANSI_CHARSET, U_OUT_DEFAULT_PRECIS, U_CLIP_DEFAULT_PRECIS, 
+                      U_DEFAULT_QUALITY, U_DEFAULT_PITCH, "Courier New");
+    rec  = wcreatefontindirect_set( &font, wht, puf); taf(rec,wt,"wextcreatefontindirect_set");
+    free(puf);
+    font_courier_60=font;
+    
     puf = U_FONT_set(  -30, 0, 0, 0, 
                       U_FW_NORMAL, U_FW_NOITALIC, U_FW_NOUNDERLINE, U_FW_NOSTRIKEOUT,
                       U_ANSI_CHARSET, U_OUT_DEFAULT_PRECIS, U_CLIP_DEFAULT_PRECIS, 
@@ -630,8 +656,8 @@ int main(int argc, char *argv[]){
 
     /* label the drawing */
     
-    textlabel(400, "libUEMF v0.1.5",       9700, 200, font_courier_400, wt, wht);
-    textlabel(400, "February 14, 2013",    9700, 500, font_courier_400, wt, wht);
+    textlabel(400, "libUEMF v0.1.6",       9700, 200, font_courier_400, wt, wht);
+    textlabel(400, "March 15, 2013",       9700, 500, font_courier_400, wt, wht);
     rec = malloc(128);
     (void)sprintf(rec,"WMF test: %2.2X",mode);
     textlabel(400, rec,                    9700, 800, font_courier_400, wt, wht);
@@ -1478,7 +1504,7 @@ int main(int argc, char *argv[]){
   lr = point16_set(100,100);
   rclBox = U_RECT16_set(ul,lr);
   for (i=0; i<5; i++){
-    point16 = point16_transform((PU_POINT16) &rclBox, 2, xform_alt_set(1.0, 1.0, 0.0, 0.0, 8000+i*330, 5000));
+    point16 = point16_transform((PU_POINT16) &rclBox, 2, xform_alt_set(1.0, 1.0, 0.0, 0.0, 200+i*330, 7000));
     rec = U_WMRRECTANGLE_set(*(PU_RECT16)point16); taf(rec,wt,"U_WMRRECTANGLE_set");
     free(point16);
   }
@@ -1488,31 +1514,31 @@ int main(int argc, char *argv[]){
 /*
   Broken in XP Preview, does not fill the rectangle.  
 */
-  rec = U_WMRFLOODFILL_set(U_FLOODFILLBORDER,      colorref_set(0,0,0),         point16_set(8020+0*330, 5020));//limited by black edge
+  rec = U_WMRFLOODFILL_set(U_FLOODFILLBORDER,      colorref_set(0,0,0),         point16_set(220+0*330, 7020));//limited by black edge
   taf(rec,wt,"U_WMRFLOODFILL_set");
-  rec = U_WMREXTFLOODFILL_set(U_FLOODFILLBORDER,   colorref_set(0,0,0),         point16_set(8020+1*330, 5020));//limited by black edge
+  rec = U_WMREXTFLOODFILL_set(U_FLOODFILLBORDER,   colorref_set(0,0,0),         point16_set(220+1*330, 7020));//limited by black edge
   taf(rec,wt,"U_WMREXTFLOODFILL_set");
 /*
   Broken in XP Preview, fills entire window.  
-  rec = U_WMRFLOODFILL_set(U_FLOODFILLSURFACE,     colorref_set(196, 127, 255), point16_set(8020+2*330, 5020));//limited to purple center
+  rec = U_WMRFLOODFILL_set(U_FLOODFILLSURFACE,     colorref_set(196, 127, 255), point16_set(220+2*330, 7020));//limited to purple center
   taf(rec,wt,"U_WMRFLOODFILL_set");
 */
-  rec = U_WMREXTFLOODFILL_set(U_FLOODFILLSURFACE,  colorref_set(196, 127, 255), point16_set(8020+3*330, 5020));//limited to purple center
+  rec = U_WMREXTFLOODFILL_set(U_FLOODFILLSURFACE,  colorref_set(196, 127, 255), point16_set(220+3*330, 7020));//limited to purple center
   taf(rec,wt,"U_WMREXTFLOODFILL_set");
 
-  rec = U_WMRSETPIXEL_set(colorref_set(0, 1, 2), point16_set(8020+4*330, 5020));
+  rec = U_WMRSETPIXEL_set(colorref_set(0, 1, 2), point16_set(220+4*330, 7020));
   taf(rec,wt,"U_WMRSETPIXEL_set");
   
   /* create a region, fill it
      Windows XP preview shows nothing for this.
   */
-  for(i=0; i<50; i++){ ScanLines[i] = point16_set(8000 -i*2, 8000+i*2); }
-  scans  = U_SCAN_set(50,5000,5099,(uint16_t *)ScanLines);
+  for(i=0; i<50; i++){ ScanLines[i] = point16_set(200 -i*2, 200+i*2); }
+  scans  = U_SCAN_set(50,7000,7099,(uint16_t *)ScanLines);
   Region = U_REGION_set(
        U_SIZE_REGION + 50*2*2, //!< aScans in bytes + regions size in bytes (size of this header plus all U_SCAN objects?)
        1,             //!< number of scan objects in region (docs say scanlines, but then no way to add sizes)
        10000,          //!< ???? largest number of points in any scan, what is a "point" here?
-       U_RECT16_set(point16_set(8000,5000),point16_set(10000,6000)),  //!< bounding rectangle
+       U_RECT16_set(point16_set(200,7000),point16_set(2200,8000)),  //!< bounding rectangle
        (uint16_t *)scans              //!< series of U_SCAN objects to append. This is also an array of uint16_t, but should be handled as a bunch of U_SCAN objects tightly packed into the buffer.
    );   
    rec = wcreateregion_set(&reg,  wht, Region);   taf(rec,wt,"wcreateregion_set");
@@ -1520,6 +1546,60 @@ int main(int argc, char *argv[]){
    free(scans);
    free(Region);
    rec = U_WMRFILLREGION_set(reg_1, brush_gray);   taf(rec,wt,"U_WMRFILLREGION_set");
+
+    /* ***************    test background variants with combined fill, stroke, text  *************** */
+    
+    lb  = U_WLOGBRUSH_set(U_BS_HATCHED, colorref_set(63, 127, 255), U_HS_CROSS);
+    rec = wcreatebrushindirect_set(&brush, wht,lb);   taf(rec,wt,"wcreatebrushindirect_set");
+    rec = wselectobject_set(brush, wht);              taf(rec,wt,"wselectobject_set");
+
+    /* no pen test, WMF pens do not have fill */
+
+    /* use a font that was already created at the beginning */
+    rec = wselectobject_set(font_courier_60, wht);  taf(rec,wt,"wselectobject_set");
+
+    rec = U_WMRSETTEXTALIGN_set(U_TA_CENTER | U_TA_BASEBIT);           taf(rec,wt,"U_WMRSETTEXTALIGN_set");
+    
+    offset=5000;
+    for(i=0; i<2; i++){         /* both bkmode*/
+       if(i){ rec = U_WMRSETBKMODE_set(U_TRANSPARENT); cbuf[0]='\0'; strcat(cbuf,"bk:- "); }
+       else { rec = U_WMRSETBKMODE_set(U_OPAQUE);      cbuf[0]='\0'; strcat(cbuf,"bk:+ "); }
+       taf(rec,wt,"U_WMRSETBKMODE_set");
+
+       for(j=0; j<2; j++){      /* two bkcolors         R & turQuoise */
+          if(j){ rec = U_WMRSETBKCOLOR_set(colorref_set(255, 0,   0)); cbuf[5]='\0'; strcat(cbuf,"bC:R ");  }
+          else { rec = U_WMRSETBKCOLOR_set(colorref_set(0, 255, 255)); cbuf[5]='\0'; strcat(cbuf,"bC:Q ");  }
+          taf(rec,wt,"U_WMRSETBKCOLOR_set");
+
+          for(k=0; k<2; k++){   /* two text colors      G & Black */
+             if(k){ rec = U_WMRSETTEXTCOLOR_set(colorref_set(  0, 127,   0)); cbuf[10]='\0'; strcat(cbuf,"tC:G "); }
+             else { rec = U_WMRSETTEXTCOLOR_set(colorref_set(  0,   0,   0)); cbuf[10]='\0'; strcat(cbuf,"tC:K "); }
+             taf(rec,wt,"U_WMRSETTEXTCOLOR_set");
+
+             draw_textrect(8000,offset,700,300,cbuf, 60, wt);  
+             offset += 400;  
+          }
+       }
+    }
+
+    // restore original settings
+    rec = U_WMRSETBKMODE_set(U_TRANSPARENT);                 taf(rec,wt,"U_WMRSETBKMODE_set");
+    rec = U_WMRSETTEXTCOLOR_set(colorref_set(0,0,0));        taf(rec,wt,"U_WMRSETTEXTCOLOR_set");
+    rec = U_WMRSETBKCOLOR_set(colorref_set(0,255,255));      taf(rec,wt,"U_WMRSETBKCOLOR_set");
+    rec = U_WMRSETTEXTALIGN_set(U_TA_DEFAULT);               taf(rec,wt,"U_WMRSETTEXTALIGN_set");
+
+    /* ***************    test variants of background, hatch pattern, hatchcolor on start/end path  *************** */
+    
+    /* Note, AFAIK this is not a valid operation and no tested application can actually draw this.  Applications should at least not explode
+       when they see it.  */
+
+    offset = 5000;
+    textlabel(40, "Path contains invalid operations.",   8800, offset, font_courier_30, wt, wht); offset+=50;
+    textlabel(40, "Any graphic produced is acceptable.", 8800, offset, font_courier_30, wt, wht); offset+=50;
+    textlabel(40, "Rendering program should not crash.", 8800, offset, font_courier_30, wt, wht); offset+=50;
+    textlabel(40, "(No WMF equivalent for EMF test.)",   8800, offset, font_courier_30, wt, wht); offset+=100;
+    not_in_wmf(1.5,9000,offset, pen_red_10, brush_darkred, wt, wht);  /* WMF has no bezierto */
+
 /* ************************************************* */
 
 //

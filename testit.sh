@@ -15,11 +15,12 @@ EXECINPUT=/usr/local/bin/execinput
 mv test_libuemf.emf test_libuemf30.emf
 ./testbed_emf 0 >/dev/null
 ./reademf test_libuemf.emf >test_libuemf_emf.txt
+./reademf test_libuemf30.emf >test_libuemf30_emf.txt
 ./testbed_wmf 0  >/dev/null
 ./readwmf test_libuemf.wmf >test_libuemf_wmf.txt 
 ./test_mapmodes_emf -vX 2000 -vY 1000 >/dev/null
 ls -1 test*ref* | \
-  $EXTRACT -fmt "$USEDIFF -s [1,] [rtds_ref:1,]" | \
+  $EXTRACT -fmt " $USEDIFF -s [1,] [rtds_ref:1,]" | \
   $EXECINPUT
 #
 # clean up

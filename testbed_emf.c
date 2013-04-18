@@ -24,8 +24,8 @@
 /* If Version or Date are changed also edit the text labels for the output.
 
 File:      testbed_emf.c
-Version:   0.0.16
-Date:      20-FEB-2013
+Version:   0.0.17
+Date:      15-MAR-2013
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2013 David Mathog and California Institute of Technology (Caltech)
@@ -203,6 +203,30 @@ void spintext(uint32_t x, uint32_t y, uint32_t textalign, uint32_t *font, EMFTRA
     free(string);
 }
     
+void draw_textrect(int xul, int yul, int width, int height, char *string, int size, EMFTRACK *et){
+    char               *rec;
+    char               *rec2;
+    uint16_t            *text16;
+    int                  slen;
+    uint32_t            *dx;
+    U_RECTL              rclBox;
+
+    rclBox = rectl_set(pointl_set(xul,yul),pointl_set(xul + width, yul + height));
+    rec = U_EMRRECTANGLE_set(rclBox);                  taf(rec,et,"U_EMRRECTANGLE_set");
+
+    text16 = U_Utf8ToUtf16le(string, 0, NULL);
+    slen   = wchar16len(text16);
+    dx = dx_set(-size,  U_FW_NORMAL, slen);
+    rec2 = emrtext_set( pointl_set(xul+width/2,yul + height/2), slen, 2, text16, U_ETO_NONE, U_RCL_DEF, dx);
+    free(text16);
+    free(dx);
+    rec = U_EMREXTTEXTOUTW_set(U_RCL_DEF,U_GM_COMPATIBLE,1.0,1.0,(PU_EMRTEXT)rec2); 
+    taf(rec,et,"U_EMREXTTEXTOUTW_set");
+    free(rec2);
+}   
+
+
+
 void textlabel(uint32_t size, const char *string, uint32_t x, uint32_t y, uint32_t *font, EMFTRACK *et, EMFHANDLES *eht){
     char               *rec;
     char               *rec2;
@@ -521,7 +545,9 @@ int main(int argc, char *argv[]){
     uint32_t             colortype;
     PU_RGBQUAD           ct;         //color table
     int                  numCt;      //number of entries in the color table
-    int                  i,j,k;
+    int                  i,j,k,m;
+    int                  hatch;
+    char                 cbuf[132];
 
     int                  mode = 0;   // conditional for some tests
     unsigned int         umode;
@@ -747,8 +773,8 @@ int main(int argc, char *argv[]){
 
     /* label the drawing */
     
-    textlabel(400, "libUEMF v0.1.5",      9700, 200, &font, et, eht);
-    textlabel(400, "February 14, 2013",    9700, 500, &font, et, eht);
+    textlabel(400, "libUEMF v0.1.6",      9700, 200, &font, et, eht);
+    textlabel(400, "March 13, 2013",    9700, 500, &font, et, eht);
     rec = malloc(128);
     (void)sprintf(rec,"EMF test: %2.2X",mode);
     textlabel(400, rec,                   9700, 800, &font, et, eht);
@@ -1944,6 +1970,114 @@ if(!(mode & PPT_BLOCKERS)){
     free(rgba_px);
     free(px);
     free(Bmi);
+
+    /* ***************    test background variants with combined fill, stroke, text  *************** */
+    
+    if(brush){ rec = deleteobject_set(&brush, eht);      taf(rec,et,"deleteobject_set"); }
+    lb = logbrush_set(U_BS_HATCHED, colorref_set(63, 127, 255), U_HS_CROSS);
+    rec = createbrushindirect_set(&brush, eht,lb);       taf(rec,et,"createbrushindirect_set");
+    rec = selectobject_set(brush, eht);                  taf(rec,et,"selectobject_set");
+
+    if(pen){ rec = deleteobject_set(&pen, eht);          taf(rec,et,"deleteobject_set"); }
+    elp = extlogpen_set(U_PS_GEOMETRIC|U_PS_ENDCAP_SQUARE|U_PS_JOIN_MITER, 50, U_BS_HATCHED, colorref_set(255, 63, 127), U_HS_DIAGCROSS, 0, NULL);
+    rec = extcreatepen_set(&pen, eht,  NULL, 0, NULL, elp );        taf(rec,et,"emrextcreatepen_set");
+    rec = selectobject_set(pen, eht);                    taf(rec,et,"selectobject_set");
+    free(elp);
+
+    if(font){ rec = deleteobject_set(&font, eht);        taf(rec,et,"deleteobject_set"); }
+    FontName = U_Utf8ToUtf16le("Courier New", 0, NULL);  // Helvetica originally, but that does not work
+    lf   = logfont_set( -60, 0, 0, 0, 
+                      U_FW_BOLD, U_FW_NOITALIC, U_FW_NOUNDERLINE, U_FW_NOSTRIKEOUT,
+                      U_ANSI_CHARSET, U_OUT_DEFAULT_PRECIS, U_CLIP_DEFAULT_PRECIS, 
+                      U_DEFAULT_QUALITY, U_DEFAULT_PITCH, FontName);
+    FontStyle = U_Utf8ToUtf16le("Bold", 0, NULL);
+    elfw = logfont_panose_set(lf, FontName, FontStyle, 0, U_PAN_ALL1);  // U_PAN_ALL1 is all U_PAN_NO_FIT, this is what createfont() would have made
+    free(FontName);
+    free(FontStyle);
+    rec  = extcreatefontindirectw_set(&font, eht,  NULL, (char *) &elfw);      taf(rec,et,"extcreatefontindirectw_set");
+    rec  = selectobject_set(font, eht);                  taf(rec,et,"selectobject_set");
+
+    rec = U_EMRSETTEXTALIGN_set(U_TA_CENTER | U_TA_BASEBIT);           taf(rec,et,"U_EMRSETTEXTALIGN_set");
+    
+    offset=5000;
+    for(i=0; i<2; i++){         /* both bkmode*/
+       if(i){ rec = U_EMRSETBKMODE_set(U_TRANSPARENT); cbuf[0]='\0'; strcat(cbuf,"bk:- "); }
+       else { rec = U_EMRSETBKMODE_set(U_OPAQUE);      cbuf[0]='\0'; strcat(cbuf,"bk:+ "); }
+       taf(rec,et,"U_EMRSETBKMODE_set");
+
+       for(j=0; j<2; j++){      /* two bkcolors         R & turQuoise */
+          if(j){ rec = U_EMRSETBKCOLOR_set(colorref_set(255, 0,   0)); cbuf[5]='\0'; strcat(cbuf,"bC:R ");  }
+          else { rec = U_EMRSETBKCOLOR_set(colorref_set(0, 255, 255)); cbuf[5]='\0'; strcat(cbuf,"bC:Q ");  }
+          taf(rec,et,"U_EMRSETBKCOLOR_set");
+
+          for(k=0; k<2; k++){   /* two text colors      G & Black */
+             if(k){ rec = U_EMRSETTEXTCOLOR_set(colorref_set(  0, 127,   0)); cbuf[10]='\0'; strcat(cbuf,"tC:G "); }
+             else { rec = U_EMRSETTEXTCOLOR_set(colorref_set(  0,   0,   0)); cbuf[10]='\0'; strcat(cbuf,"tC:K "); }
+             taf(rec,et,"U_EMRSETTEXTCOLOR_set");
+
+             draw_textrect(8000,offset,700,300,cbuf, 60, et);  
+             offset += 400;  
+          }
+       }
+    }
+
+    // restore original settings
+    rec = U_EMRSETBKMODE_set(U_TRANSPARENT);                 taf(rec,et,"U_EMRSETBKMODE_set");
+    rec = U_EMRSETTEXTCOLOR_set(colorref_set(0,0,0));        taf(rec,et,"U_EMRSETTEXTCOLOR_set");
+    rec = U_EMRSETBKCOLOR_set(colorref_set(0,255,255));      taf(rec,et,"U_EMRSETBKCOLOR_set");
+    rec = U_EMRSETTEXTALIGN_set(U_TA_DEFAULT);               taf(rec,et,"U_EMRSETTEXTALIGN_set");
+
+    /* ***************    test variants of background, hatch pattern, hatchcolor on start/end path  *************** */
+    
+    /* Note, AFAIK this is not a valid operation and no tested application can actually draw this.  Applications should at least not explode
+       when they see it.  */
+
+    offset = 5000;
+    textlabel(40, "Path contains invalid operations.",   8800, offset, &font, et, eht); offset+=50;
+    textlabel(40, "Any graphic produced is acceptable.", 8800, offset, &font, et, eht); offset+=50;
+    textlabel(40, "Rendering program should not crash.", 8800, offset, &font, et, eht); offset+=100;
+    rec = U_EMRBEGINPATH_set();                                     taf(rec,et,"U_EMRBEGINPATH_set");
+    rec = U_EMRMOVETOEX_set(pointl_set(9100, offset));              taf(rec,et,"U_EMRMOVETOEX_set");
+    
+    for(i=0; i<2; i++){         /* both bkmode*/
+       if(i){ rec = U_EMRSETBKMODE_set(U_TRANSPARENT); cbuf[0]='\0'; strcat(cbuf,"bk:- "); }
+       else { rec = U_EMRSETBKMODE_set(U_OPAQUE);      cbuf[0]='\0'; strcat(cbuf,"bk:+ "); }
+       taf(rec,et,"U_EMRSETBKMODE_set");
+
+       for(j=0; j<2; j++){      /* two bkcolors         R & turQuoise */
+          if(j){ rec = U_EMRSETBKCOLOR_set(colorref_set(255, 0,   0)); cbuf[5]='\0'; strcat(cbuf,"bC:R ");  }
+          else { rec = U_EMRSETBKCOLOR_set(colorref_set(0, 255, 255)); cbuf[5]='\0'; strcat(cbuf,"bC:Q ");  }
+          taf(rec,et,"U_EMRSETBKCOLOR_set");
+          
+          for(m=0; m<2; m++){      /* two foreground colors         B & G */
+             if(j){ cr = colorref_set(255, 0,   0);  }
+             else { cr = colorref_set(  0, 0, 255);  }
+
+             for(k=0; k<2; k++){  /* over 2 types of hatch */
+                if(k){ hatch = U_HS_DIAGCROSS;  }
+                else { hatch = U_HS_CROSS;      }
+                rec = deleteobject_set(&pen, eht);                              taf(rec,et,"deleteobject_set"); 
+                elp = extlogpen_set(U_PS_GEOMETRIC|U_PS_ENDCAP_SQUARE|U_PS_JOIN_MITER, 50, U_BS_HATCHED, cr, hatch, 0, NULL);
+                rec = extcreatepen_set(&pen, eht,  NULL, 0, NULL, elp );        taf(rec,et,"emrextcreatepen_set");
+                rec = selectobject_set(pen, eht);                               taf(rec,et,"selectobject_set");
+                free(elp);
+
+                offset += 100;  
+                rec = U_EMRLINETO_set(pointl_set(9000 + k*100, offset));         taf(rec,et,"U_EMRLINETO_set");
+             }
+          }
+       }
+    }
+    rec = U_EMRENDPATH_set();                                       taf(rec,et,"U_EMRENDPATH_set");
+    rec = U_EMRSTROKEPATH_set(rclFrame);                            taf(rec,et,"U_EMRSTROKEPATH_set");
+
+    // restore original settings
+    rec = U_EMRSETBKMODE_set(U_TRANSPARENT);                 taf(rec,et,"U_EMRSETBKMODE_set");
+    rec = U_EMRSETTEXTCOLOR_set(colorref_set(255,0,255));    taf(rec,et,"U_EMRSETTEXTCOLOR_set");
+    rec = U_EMRSETBKCOLOR_set(colorref_set(0,255,255));      taf(rec,et,"U_EMRSETBKCOLOR_set");
+    rec = U_EMRSETTEXTALIGN_set(U_TA_DEFAULT);               taf(rec,et,"U_EMRSETTEXTALIGN_set");
+
+
 /* ************************************************* */
 
 //
