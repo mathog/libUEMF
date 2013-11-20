@@ -24,8 +24,8 @@
 /* If Version or Date are changed also edit the text labels for the output.
 
 File:      testbed_emf.c
-Version:   0.0.17
-Date:      15-MAR-2013
+Version:   0.0.19
+Date:      17-OCT-2013
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2013 David Mathog and California Institute of Technology (Caltech)
@@ -83,12 +83,12 @@ void findhole(char *rec, char *text){  // Test
     else { 
         length = U_EMRSIZE(rec);
         printf("%s recsize: %d",text,length);
+        for(i=0;i<length;i++){
+          uc = (unsigned char) rec[i];
+          printf("byte:%d value:%X\n",i,uc); 
+          fflush(stdout);  // helps keep lines ordered within Valgrind
+        }   
     }
-    for(i=0;i<length;i++){
-      uc = (unsigned char) rec[i];
-      printf("byte:%d value:%X\n",i,uc); 
-      fflush(stdout);  // helps keep lines ordered within Valgrind
-    }   
 }
 
 
@@ -1337,9 +1337,9 @@ int main(int argc, char *argv[]){
     taf(rec,et,"U_EMRSETSTRETCHBLTMODE_set");
 
     colortype = U_BCBM_COLOR32;
-    status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  10, 10, 40, colortype, 0, 1);
+    status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  10, 10, 40, colortype, U_CT_NO, U_ROW_ORDER_INVERT);
        //  Test the inverse operation - this does not affect the EMF contents
-    status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 10, 10,    colortype,  0, 1);
+    status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 10, 10,     colortype, U_CT_NO, U_ROW_ORDER_INVERT);
     if(rgba_diff(rgba_px, rgba_px2, 10 * 10 * 4, 0))printf("Error in RGBA->DIB->RGBA for U_BCBM_COLOR32\n"); fflush(stdout);
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(10, 10, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
@@ -1366,9 +1366,9 @@ int main(int argc, char *argv[]){
 
 
     colortype = U_BCBM_COLOR24;
-    status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  10, 10, 40, colortype, 0, 1);
+    status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  10, 10, 40, colortype, U_CT_NO, U_ROW_ORDER_INVERT);
        //  Test the inverse operation - this does not affect the EMF contents
-    status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 10, 10,     colortype, 0, 1);
+    status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 10, 10,     colortype, U_CT_NO, U_ROW_ORDER_INVERT);
     if(rgba_diff(rgba_px, rgba_px2, 10 * 10 * 4, 1))printf("Error in RGBA->DIB->RGBA for U_BCBM_COLOR24\n"); fflush(stdout);
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(10, 10, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
@@ -1380,9 +1380,9 @@ int main(int argc, char *argv[]){
 
     // 16 bit, 5 bits per color, no table
     colortype = U_BCBM_COLOR16;
-    status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  10, 10, 40, colortype, 0, 1);
+    status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  10, 10, 40, colortype, U_CT_NO, U_ROW_ORDER_INVERT);
        //  Test the inverse operation - this does not affect the EMF contents
-    status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 10, 10,     colortype, 0, 1);
+    status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 10, 10,     colortype, U_CT_NO, U_ROW_ORDER_INVERT);
     if(rgba_diff(rgba_px, rgba_px2, 10 * 10 * 4,2))printf("Error in RGBA->DIB->RGBA for U_BCBM_COLOR16\n"); fflush(stdout);
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(10, 10, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
@@ -1400,9 +1400,9 @@ int main(int argc, char *argv[]){
 
 
     colortype = U_BCBM_COLOR8;
-    status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  10, 10, 40, colortype, 1, 0);
+    status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  10, 10, 40, colortype, U_CT_BGRA, U_ROW_ORDER_SAME);
        //  Test the inverse operation - this does not affect the EMF contents
-    status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 10, 10,     colortype, 1, 0);
+    status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 10, 10,     colortype, U_CT_BGRA, U_ROW_ORDER_SAME);
     if(rgba_diff(rgba_px, rgba_px2, 10 * 10 * 4, 0))printf("Error in RGBA->DIB->RGBA for U_BCBM_COLOR8\n"); fflush(stdout);
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(10, 10, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
@@ -1427,9 +1427,9 @@ int main(int argc, char *argv[]){
     FillImage(rgba_px,4,4,16);
 
     colortype = U_BCBM_COLOR4;
-    status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  4, 4, 16, colortype, 1, 0);
+    status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  4, 4, 16, colortype, U_CT_BGRA, U_ROW_ORDER_SAME);
        //  Test the inverse operation - this does not affect the EMF contents
-    status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 4, 4,     colortype, 1, 0);
+    status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 4, 4,     colortype, U_CT_BGRA, U_ROW_ORDER_SAME);
     if(rgba_diff(rgba_px, rgba_px2, 4 * 4 * 4, 0))printf("Error in RGBA->DIB->RGBA for U_BCBM_COLOR4\n"); fflush(stdout);
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(4, 4, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
@@ -1452,9 +1452,9 @@ int main(int argc, char *argv[]){
     memset(rgba_px, 0xAA, 4*4*2);
 
     colortype = U_BCBM_MONOCHROME;
-    status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  4, 4, 16, colortype, 1, 0);
+    status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  4, 4, 16, colortype, U_CT_BGRA, U_ROW_ORDER_SAME);
        //  Test the inverse operation - this does not affect the EMF contents
-    status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 4, 4,     colortype, 1, 0);
+    status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 4, 4,     colortype, U_CT_BGRA, U_ROW_ORDER_SAME);
     if(rgba_diff(rgba_px, rgba_px2, 4 * 4 * 4, 0))printf("Error in RGBA->DIB->RGBA for U_BCBM_MONOCHROME\n"); fflush(stdout);
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(4, 4, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
@@ -1811,7 +1811,7 @@ if(!(mode & PPT_BLOCKERS)){
     FillImage(rgba_px,5,5,20);
 
     colortype = U_BCBM_COLOR32;
-    status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  5, 5, 20, colortype, 0, 1);
+    status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  5, 5, 20, colortype, U_CT_NO, U_ROW_ORDER_INVERT);
     Bmih = bitmapinfoheader_set(5, 5, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
     Bmi = bitmapinfo_set(Bmih, ct);
     if(brush){ rec = deleteobject_set(&brush, eht);  taf(rec,et,"deleteobject_set"); }
@@ -1900,7 +1900,7 @@ if(!(mode & PPT_BLOCKERS)){
     memset(rgba_px, 0x55, 4*4*4);
     memset(rgba_px, 0xAA, 4*4*2);
     colortype = U_BCBM_MONOCHROME;
-    status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  4, 4, 16, colortype, 1, 0);  // Must use color tables!
+    status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  4, 4, 16, colortype, U_CT_BGRA, U_ROW_ORDER_SAME);  // Must use color tables!
     Bmih = bitmapinfoheader_set(4, 4, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
     Bmi = bitmapinfo_set(Bmih, ct);
     free(ct);

@@ -1,5 +1,7 @@
 /**
-  @file uemf_utf.c Functions for manipulating UTF and various types of text.
+  @file uemf_utf.c
+  
+  @brief Functions for manipulating UTF and various types of text.
 
   
   Compile with "U_VALGRIND" defined defined to enable code which lets valgrind check each record for
@@ -10,8 +12,8 @@
 
 /*
 File:      uemf_utf.c
-Version:   0.0.3
-Date:      24-JAN-2013
+Version:   0.0.4
+Date:      19-MAR-2013
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2013 David Mathog and California Institute of Technology (Caltech)
@@ -32,10 +34,12 @@ extern "C" {
 #include <math.h>   // for U_ROUND()
 #include "uemf_utf.h"
 
+//! \cond
 /* Prototypes for functions used here and defined in uemf_endian.c, but which are not supposed
 to be used in end user code. */
 
 void U_swap2(void *ul, unsigned int count);
+//! \endcond
 
 /* ******************************************************************************************** */
       
@@ -489,6 +493,7 @@ char *U_Latin1ToUtf8(
    size_t srclen,dstlen,status;
    if(max){ srclen = max; }
    else {   srclen = strlen(src)+1; }       // include terminator, will waste some space
+   dstlen = (1 + 2*srclen);                 // This should always work because all latin1 convert to 1 or 2 byte UTF8, it might waste some space
    dst2 = dst = calloc(dstlen,1);
    if(!dst)return(NULL);
    iconv_t conv = iconv_open("UTF-8", "LATIN1"); // everything should translate

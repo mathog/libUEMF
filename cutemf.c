@@ -7,23 +7,22 @@
  Run like:
     cutemf 'rec1,rec2...,recN' src.emf dst.emf
  
- Build with:  gcc -Wall -o cutemf cutemf.c uemf.c uemf_print.c uemf_endian.c -lm
+ Build with:  gcc -Wall -o cutemf cutemf.c uemf.c uemf_endian.c uemf_utf.c upmf.c -lm
 */
 
 /*
 File:      cutemf.c
-Version:   0.0.9
-Date:      26-OCT-2012
+Version:   0.0.10
+Date:      19-JUL-2013
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
-Copyright: 2012 David Mathog and California Institute of Technology (Caltech)
+Copyright: 2013 David Mathog and California Institute of Technology (Caltech)
 */
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "uemf.h"
-#include "uemf_print.h" //REMOVE THIS WHEN DONE DEBUGGING
+#include "upmf.h" // includes "uemf.h"
 #define MAXREC 1000
 
 /*

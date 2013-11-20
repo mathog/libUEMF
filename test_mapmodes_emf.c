@@ -5,16 +5,15 @@
  
  Compile with 
  
-    gcc -g -Wall -O0 -o test_mapmodes_emf -Wall -I. test_mapmodes_emf.c uemf.c uemf_endian.c -lm 
-
+    gcc -O0  -g -std=c99 -Wall -pedantic -o test_mapmodes_emf -Wall -I. test_mapmodes_emf.c uemf.c uemf_endian.c uemf_utf.c -lm
  
 
 File:      test_mapmodes_emf.c
-Version:   0.0.10
-Date:      20-DEC-2012
+Version:   0.0.11
+Date:      12-JUL-2013
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
-Copyright: 2012 David Mathog and California Institute of Technology (Caltech)
+Copyright: 2013 David Mathog and California Institute of Technology (Caltech)
 */
 
 #include <stdlib.h>
@@ -45,6 +44,34 @@ void taf(char *rec,EMFTRACK *et, char *text){  // Test, append, free
 #ifdef U_VALGRIND
     fflush(stdout);  // helps keep lines ordered within Valgrind
 #endif
+}
+
+/* 
+Fill a rectangular RGBA image with gradients.  Used for testing DIB operations.
+*/
+void FillImage(char *px, int w, int h, int stride){
+int        i,j;
+int        xp,xm,yp,ym;   // color weighting factors
+int        r,g,b,a;
+int        pad;
+U_COLORREF color;
+
+    pad = stride - w*4;  // end of row padding in bytes (may be zero)
+    for(j=0; j<h; j++){
+       yp = (255 * j) / (h-1);
+       ym = 255 - yp;
+       for(i=0; i<w; i++, px+=4){
+          xp = (255 * i)/ (w-1);
+          xm = 255 - xp;
+          r = (xm > ym ? ym : xm);
+          g = (xp > ym ? ym : xp);
+          b = (xp > yp ? yp : xp);
+          a = (xm > yp ? yp : xm);
+          color = U_RGBA(r,g,b,a);
+          memcpy(px,&color,4);
+       }
+       px += pad;
+    }
 }
 
 
@@ -190,11 +217,19 @@ int main(int argc, char *argv[]){
     uint32_t             font=0;;
     U_LOGBRUSH           lb;
     U_COLORREF           cr;
+    U_BITMAPINFOHEADER   Bmih;
+    PU_BITMAPINFO        Bmi;
     uint32_t             cbDesc;
+    uint32_t             cbPx;
+    uint32_t             colortype;
+    PU_RGBQUAD           ct;         //color table
+    int                  numCt;      //number of entries in the color table
     int                  i;
     int                  outX,outY;   /* offset in device space of bounds   */
     int                  VX,VY;       /* offset in device space of viewport */
     int                  WX,WY;       /* offset in logical space of Window - calculated from the two preceding values */
+    char                *px;
+    char                *rgba_px;
     
     VX=VY=WX=WY=outX=outY=0;
     
@@ -409,6 +444,35 @@ int main(int argc, char *argv[]){
       rec = U_EMRCLOSEFIGURE_set();                                    taf(rec,et,"U_EMRCLOSEFIGURE_set");
       rec = U_EMRENDPATH_set();                                        taf(rec,et,"U_EMRENDPATH_set");
       rec = U_EMRSTROKEANDFILLPATH_set(rclFrame);                      taf(rec,et,"U_EMRSTROKEANDFILLPATH_set");
+
+
+      // Make a test image, it is 10 x 10 and has various colors, R,G,B in each of 3 corners
+      rgba_px = (char *) malloc(10*10*4);
+      FillImage(rgba_px,10,10,10*4);
+      rec =  U_EMRSETSTRETCHBLTMODE_set(U_STRETCH_DELETESCANS);
+      taf(rec,et,"U_EMRSETSTRETCHBLTMODE_set");
+
+      colortype = U_BCBM_COLOR32;
+      (void) RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  10, 10, 40, colortype, 0, 1);
+      Bmih = bitmapinfoheader_set(10, 10, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
+      Bmi = bitmapinfo_set(Bmih, ct);
+      free(rgba_px);
+      rec = U_EMRSTRETCHDIBITS_set(
+         U_RCL_DEF,
+         pointl_set(tox(xf,11250), toy(yf,7421,9921)), /* 2500 in from LR corner*/
+         pointl_set(tox(xf,2000),  tox(yf,2000)),      /* note: the height may be negative, tox (not toy) for 2nd because only scale needed, not position */
+         pointl_set(0,0), 
+         pointl_set(10,10),
+         U_DIB_RGB_COLORS, 
+         U_SRCCOPY,
+         Bmi, 
+         cbPx, 
+         px);
+      taf(rec,et,"U_EMRSTRETCHDIBITS_set");
+
+      free(Bmi);
+      free(px);
+
 
 
       //

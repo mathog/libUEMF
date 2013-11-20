@@ -19,6 +19,8 @@ mv test_libuemf.emf test_libuemf30.emf
 ./testbed_wmf 0  >/dev/null
 ./readwmf test_libuemf.wmf >test_libuemf_wmf.txt 
 ./test_mapmodes_emf -vX 2000 -vY 1000 >/dev/null
+./testbed_pmf 0 >/dev/null
+./reademf test_libuemf_p.emf >test_libuemf_p_emf.txt
 ls -1 test*ref* | \
   $EXTRACT -fmt " $USEDIFF -s [1,] [rtds_ref:1,]" | \
   $EXECINPUT
@@ -27,8 +29,11 @@ ls -1 test*ref* | \
 #
 rm -f test_libuemf30.emf
 rm -f test_libuemf.emf
+rm -f test_libuemf_p.emf
 rm -f test_libuemf.wmf
+rm -f test_libuemf30_emf.txt
 rm -f test_libuemf_emf.txt
+rm -f test_libuemf_p_emf.txt
 rm -f test_libuemf_wmf.txt
 rm -f test_mm_anisotropic.emf
 rm -f test_mm_hienglish.emf

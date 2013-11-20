@@ -24,8 +24,8 @@
 /* If Version or Date are changed also edit the text labels for the output.
 
 File:      testbed_wmf.c
-Version:   0.0.20
-Date:      21-FEB-2013
+Version:   0.0.22
+Date:      17-OCT-2013
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2013 David Mathog and California Institute of Technology (Caltech)
@@ -68,8 +68,8 @@ int rgba_diff(char *s1, char *s2, uint32_t size, int noa){
 
 void taf(const char *rec,WMFTRACK *wt, char *text){  // Test, append, free
     if(!rec){ printf("%s failed",text);                     }
-    else {    printf("%s recsize: %d",text,U_wmr_size((PU_METARECORD) rec)); }
-    (void) wmf_append((PU_METARECORD)rec,wt, 1);
+    else {    printf("%s recsize: %d",text,U_wmr_size((U_METARECORD *) rec)); }
+    (void) wmf_append((U_METARECORD *)rec,wt, 1);
     printf("\n");
 #ifdef U_VALGRIND
     fflush(stdout);  // helps keep lines ordered within Valgrind
@@ -80,7 +80,7 @@ void taf(const char *rec,WMFTRACK *wt, char *text){  // Test, append, free
 void htaf(char *rec,WMFTRACK *wt, char *text){  // Test, append, free
     if(!rec){ printf("%s failed",text);                     }
     else {    printf("%s success (HEADER, no size)",text); }
-    (void) wmf_header_append((PU_METARECORD)rec,wt, 1);
+    (void) wmf_header_append((U_METARECORD *)rec,wt, 1);
     printf("\n");
 #ifdef U_VALGRIND
     fflush(stdout);  // helps keep lines ordered within Valgrind
@@ -93,14 +93,14 @@ void findhole(char *rec, char *text){  // Test
     unsigned char uc;
     if(!rec){ printf("%s failed",text);                     }
     else { 
-        length = U_wmr_size((PU_METARECORD) rec);
+        length = U_wmr_size((U_METARECORD *) rec);
         printf("%s recsize: %d",text,length);
+        for(i=0;i<length;i++){
+          uc = (unsigned char) rec[i];
+          printf("byte:%d value:%X\n",i,uc); 
+          fflush(stdout);  // helps keep lines ordered within Valgrind
+        }   
     }
-    for(i=0;i<length;i++){
-      uc = (unsigned char) rec[i];
-      printf("byte:%d value:%X\n",i,uc); 
-      fflush(stdout);  // helps keep lines ordered within Valgrind
-    }   
 }
 
 
@@ -167,7 +167,7 @@ void spintext(uint32_t x, uint32_t y, uint32_t textalign, WMFTRACK *wt, WMFHANDL
     int                 slen;
     int16_t            *dx;
     uint32_t            font=0;
-    PU_FONT             puf;
+    U_FONT             *puf;
     
     
     
@@ -252,7 +252,7 @@ void label_row(int x1, int y1, uint32_t font, WMFTRACK *wt, WMFHANDLES *wht){
     return;
 }
 
-void image_column(WMFTRACK *wt, int x1, int y1, int w, int h, PU_BITMAPINFO Bmi, uint32_t cbPx, char *px){
+void image_column(WMFTRACK *wt, int x1, int y1, int w, int h, U_BITMAPINFO *Bmi, uint32_t cbPx, char *px){
     char *rec;
     int   step=0;
 
@@ -271,7 +271,7 @@ void image_column(WMFTRACK *wt, int x1, int y1, int w, int h, PU_BITMAPINFO Bmi,
 
 
     /* convert Bmi + px to Bitmap16 object*/
-    PU_BITMAP16 Bm16 = U_BITMAP16_set(
+    U_BITMAP16 *Bm16 = U_BITMAP16_set(
         Bmi->bmiHeader.biBitCount,                             //!<  bitmap type.?????  No documentation on what this field should hold!
         Bmi->bmiHeader.biWidth,                                //!<  bitmap width in pixels.
         Bmi->bmiHeader.biHeight,                               //!<  bitmap height in scan lines.
@@ -327,13 +327,13 @@ void image_column(WMFTRACK *wt, int x1, int y1, int w, int h, PU_BITMAPINFO Bmi,
 
 void not_in_wmf(double scale, int x, int y, int pen, int brush, WMFTRACK *wt, WMFHANDLES *wht){
     char *rec;
-    PU_POINT16 point16;
+    U_POINT16 *point16;
     U_POINT16 missing[2] = { { 0, 0 }, { 200, 200 } };
 
     point16 = point16_transform(missing, 2, xform_alt_set(scale, 1.0, 0.0, 0.0, x, y));
     rec = wselectobject_set(pen, wht);                    taf(rec,wt,"wselectobject_set");
     rec = wselectobject_set(brush, wht);                  taf(rec,wt,"wselectobject_set");   // make this pen active
-    rec = U_WMRRECTANGLE_set(*(PU_RECT16)point16);        taf(rec,wt,"U_WMRRECTANGLE_set");
+    rec = U_WMRRECTANGLE_set(*(U_RECT16 *)point16);        taf(rec,wt,"U_WMRRECTANGLE_set");
     free(point16);
 }
 
@@ -358,16 +358,16 @@ int main(int argc, char *argv[]){
     int                  font_courier_30;
     int                  font_arial_300;
     int                  reg_1;
-    PU_FONT              puf;
+    U_FONT              *puf;
     U_POINT16            pl1;
     U_POINT16            pl12[12];
     uint16_t             plc[12];
     U_POINT16            plarray[7] = { { 200, 0 }, { 400, 200 }, { 400, 400 }, { 200, 600 } , { 0, 400 }, { 0, 200 }, { 200, 0 }};
     U_POINT16            star5[5]   = { { 100, 0 }, { 200, 300 }, { 0, 100 }, { 200, 100 } , { 0, 300 }};
-    PU_POINT16           point16;
+    U_POINT16           *point16;
     U_POINT16            ScanLines[50];
-    PU_SCAN              scans;
-    PU_REGION            Region;
+    U_SCAN              *scans;
+    U_REGION            *Region;
     int                  status;
     char                *rec;
     char                *string;
@@ -386,12 +386,12 @@ int main(int argc, char *argv[]){
     U_COLORREF           cr;
     U_POINT16            ul,lr;
     U_BITMAPINFOHEADER   Bmih;
-    PU_BITMAPINFO        Bmi;
-    PU_PAIRF             ps;
-    PU_BITMAP16          Bm16;
+    U_BITMAPINFO        *Bmi;
+    U_PAIRF             *ps;
+    U_BITMAP16         *Bm16;
     uint32_t             cbPx;
     uint32_t             colortype;
-    PU_RGBQUAD           ct;         //color table
+    U_RGBQUAD           *ct;         //color table
     int                  numCt;      //number of entries in the color table
     int                  i,j,k;
     int                  offset;
@@ -928,9 +928,9 @@ int main(int argc, char *argv[]){
 
     /* Windows XP Preview (GDI?) does not render this properly, colors are offset  */
     colortype = U_BCBM_COLOR32;
-    status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  10, 10, 40, colortype, 0, 1);
+    status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  10, 10, 40, colortype, U_CT_NO, U_ROW_ORDER_INVERT);
        //  Test the inverse operation - this does not affect the WMF contents
-    status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 10, 10,    colortype,  0, 1);
+    status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 10, 10,     colortype, U_CT_NO, U_ROW_ORDER_INVERT);
     if(rgba_diff(rgba_px, rgba_px2, 10 * 10 * 4, 0))printf("Error in RGBA->DIB->RGBA for U_BCBM_COLOR32\n"); fflush(stdout);
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(10, 10, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
@@ -957,9 +957,9 @@ int main(int argc, char *argv[]){
 
     /* Windows XP Preview (GDI?) does render this properly  */
     colortype = U_BCBM_COLOR24;
-    status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  10, 10, 40, colortype, 0, 1);
+    status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  10, 10, 40, colortype, U_CT_NO, U_ROW_ORDER_INVERT);
        //  Test the inverse operation - this does not affect the WMF contents
-    status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 10, 10,     colortype, 0, 1);
+    status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 10, 10,     colortype, U_CT_NO, U_ROW_ORDER_INVERT);
     if(rgba_diff(rgba_px, rgba_px2, 10 * 10 * 4, 1))printf("Error in RGBA->DIB->RGBA for U_BCBM_COLOR24\n"); fflush(stdout);
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(10, 10, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
@@ -972,9 +972,9 @@ int main(int argc, char *argv[]){
     // 16 bit, 5 bits per color, no table
     /* Windows XP Preview (GDI?) does not render this properly, colors are offset  */
     colortype = U_BCBM_COLOR16;
-    status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  10, 10, 40, colortype, 0, 1);
+    status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  10, 10, 40, colortype, U_CT_NO, U_ROW_ORDER_INVERT);
        //  Test the inverse operation - this does not affect the WMF contents
-    status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 10, 10,     colortype, 0, 1);
+    status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 10, 10,     colortype, U_CT_NO, U_ROW_ORDER_INVERT);
     if(rgba_diff(rgba_px, rgba_px2, 10 * 10 * 4,2))printf("Error in RGBA->DIB->RGBA for U_BCBM_COLOR16\n"); fflush(stdout);
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(10, 10, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
@@ -994,9 +994,9 @@ int main(int argc, char *argv[]){
 
     /* Windows XP Preview (GDI?) does render this properly */
     colortype = U_BCBM_COLOR8;
-    status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  10, 10, 40, colortype, 1, 0);
+    status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  10, 10, 40, colortype, U_CT_BGRA, U_ROW_ORDER_SAME);
        //  Test the inverse operation - this does not affect the WMF contents
-    status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 10, 10,     colortype, 1, 0);
+    status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 10, 10,     colortype, U_CT_BGRA, U_ROW_ORDER_SAME);
     if(rgba_diff(rgba_px, rgba_px2, 10 * 10 * 4, 0))printf("Error in RGBA->DIB->RGBA for U_BCBM_COLOR8\n"); fflush(stdout);
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(10, 10, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
@@ -1022,9 +1022,9 @@ int main(int argc, char *argv[]){
 
     /* Windows XP Preview (GDI?) does render this properly */
     colortype = U_BCBM_COLOR4;
-    status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  4, 4, 16, colortype, 1, 0);
+    status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  4, 4, 16, colortype, U_CT_BGRA, U_ROW_ORDER_SAME);
        //  Test the inverse operation - this does not affect the WMF contents
-    status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 4, 4,     colortype, 1, 0);
+    status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 4, 4,     colortype, U_CT_BGRA, U_ROW_ORDER_SAME);
     if(rgba_diff(rgba_px, rgba_px2, 4 * 4 * 4, 0))printf("Error in RGBA->DIB->RGBA for U_BCBM_COLOR4\n"); fflush(stdout);
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(4, 4, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
@@ -1048,9 +1048,9 @@ int main(int argc, char *argv[]){
 
     /* Windows XP Preview (GDI?) does render this properly */
     colortype = U_BCBM_MONOCHROME;
-    status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  4, 4, 16, colortype, 1, 0);
+    status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  4, 4, 16, colortype, U_CT_BGRA, U_ROW_ORDER_SAME);
        //  Test the inverse operation - this does not affect the WMF contents
-    status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 4, 4,     colortype, 1, 0);
+    status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 4, 4,     colortype, U_CT_BGRA, U_ROW_ORDER_SAME);
     if(rgba_diff(rgba_px, rgba_px2, 4 * 4 * 4, 0))printf("Error in RGBA->DIB->RGBA for U_BCBM_MONOCHROME\n"); fflush(stdout);
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(4, 4, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
@@ -1271,8 +1271,8 @@ int main(int argc, char *argv[]){
       rec = wcreatebrushindirect_set(&brush, wht,lb);   taf(rec,wt,"wcreatebrushindirect_set");
       rec = wselectobject_set(brush, wht);              taf(rec,wt,"wselectobject_set");
 
-      point16 = point16_transform((PU_POINT16) &rclBox, 2, xform_alt_set(1.0, 1.0, 0.0, 0.0, 2000+i*330, 3500));
-      rec = U_WMRRECTANGLE_set(*(PU_RECT16)point16);    taf(rec,wt,"U_WMRRECTANGLE_set");
+      point16 = point16_transform((U_POINT16 *) &rclBox, 2, xform_alt_set(1.0, 1.0, 0.0, 0.0, 2000+i*330, 3500));
+      rec = U_WMRRECTANGLE_set(*(U_RECT16 *)point16);    taf(rec,wt,"U_WMRRECTANGLE_set");
       free(point16);
       rec = wdeleteobject_set(&brush, wht);             taf(rec,wt,"wdeleteobject_set");
     }
@@ -1299,8 +1299,8 @@ int main(int argc, char *argv[]){
        rec = wcreatebrushindirect_set(&brush, wht,lb);   taf(rec,wt,"wcreatebrushindirect_set");
        rec = wselectobject_set(brush, wht);              taf(rec,wt,"wselectobject_set");
 
-       point16 = point16_transform((PU_POINT16) &rclBox, 2, xform_alt_set(1.0, 1.0, 0.0, 0.0, 2000+i*330, 3830));
-       rec = U_WMRRECTANGLE_set(*(PU_RECT16)point16); taf(rec,wt,"U_WMRRECTANGLE_set");
+       point16 = point16_transform((U_POINT16 *) &rclBox, 2, xform_alt_set(1.0, 1.0, 0.0, 0.0, 2000+i*330, 3830));
+       rec = U_WMRRECTANGLE_set(*(U_RECT16 *)point16); taf(rec,wt,"U_WMRRECTANGLE_set");
        free(point16);
        rec = wdeleteobject_set(&brush, wht);             taf(rec,wt,"wdeleteobject_set");
     }
@@ -1319,7 +1319,7 @@ int main(int argc, char *argv[]){
     FillImage(rgba_px,5,5,20);
 
     colortype = U_BCBM_COLOR32;
-    status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  5, 5, 20, colortype, 0, 1);
+    status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  5, 5, 20, colortype, U_CT_NO, U_ROW_ORDER_INVERT);
     Bmih = bitmapinfoheader_set(5, 5, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
     Bmi = bitmapinfo_set(Bmih, ct);
 
@@ -1333,8 +1333,8 @@ int main(int argc, char *argv[]){
     for(i=1;i<=10;i++){
       lr = point16_set(30*i,30*i);
       rclBox = U_RECT16_set(ul,lr);
-      point16 = point16_transform((PU_POINT16) &rclBox, 2, xform_alt_set(1.0, 1.0, 0.0, 0.0, 2000+i*330, 4160));
-      rec = U_WMRRECTANGLE_set(*(PU_RECT16)point16); taf(rec,wt,"U_WMRRECTANGLE_set");
+      point16 = point16_transform((U_POINT16 *) &rclBox, 2, xform_alt_set(1.0, 1.0, 0.0, 0.0, 2000+i*330, 4160));
+      rec = U_WMRRECTANGLE_set(*(U_RECT16 *)point16); taf(rec,wt,"U_WMRRECTANGLE_set");
       free(point16);
     }
     rec = wdeleteobject_set(&brush, wht);  taf(rec,wt,"wdeleteobject_set");
@@ -1361,8 +1361,8 @@ int main(int argc, char *argv[]){
 
     lr = point16_set(30*i,30*i);
     rclBox = U_RECT16_set(ul,lr);
-    point16 = point16_transform((PU_POINT16) &rclBox, 2, xform_alt_set(1.0, 1.0, 0.0, 0.0, 2000+i*330, 4160));
-    rec = U_WMRRECTANGLE_set(*(PU_RECT16)point16); taf(rec,wt,"U_WMRRECTANGLE_set");
+    point16 = point16_transform((U_POINT16 *) &rclBox, 2, xform_alt_set(1.0, 1.0, 0.0, 0.0, 2000+i*330, 4160));
+    rec = U_WMRRECTANGLE_set(*(U_RECT16 *)point16); taf(rec,wt,"U_WMRRECTANGLE_set");
     free(point16);
     rec = wdeleteobject_set(&brush, wht);                  taf(rec,wt,"wdeleteobject_set");
     } /* LODRAW_BLOCKERS */
@@ -1417,7 +1417,7 @@ int main(int argc, char *argv[]){
     memset(rgba_px, 0x55, 4*4*4);
     memset(rgba_px, 0xAA, 4*4*2);
     colortype = U_BCBM_MONOCHROME;
-    status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  4, 4, 16, colortype, 1, 0);  // Must use color tables!
+    status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  4, 4, 16, colortype, U_CT_BGRA, U_ROW_ORDER_SAME);  // Must use color tables!
     Bmih = bitmapinfoheader_set(4, 4, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
     Bmi = bitmapinfo_set(Bmih, ct);
     free(ct);
@@ -1431,8 +1431,8 @@ int main(int argc, char *argv[]){
     for(i=1;i<=10;i++){
       lr = point16_set(30*i,30*i);
       rclBox = U_RECT16_set(ul,lr);
-      point16 = point16_transform((PU_POINT16) &rclBox, 2, xform_alt_set(1.0, 1.0, 0.0, 0.0, 2000+i*330, 4520));
-      rec = U_WMRRECTANGLE_set(*(PU_RECT16)point16); taf(rec,wt,"U_WMRRECTANGLE_set");
+      point16 = point16_transform((U_POINT16 *) &rclBox, 2, xform_alt_set(1.0, 1.0, 0.0, 0.0, 2000+i*330, 4520));
+      rec = U_WMRRECTANGLE_set(*(U_RECT16 *)point16); taf(rec,wt,"U_WMRRECTANGLE_set");
       free(point16);
     }
     rec = wdeleteobject_set(&brush, wht);  taf(rec,wt,"wdeleteobject_set");
@@ -1455,8 +1455,8 @@ int main(int argc, char *argv[]){
 
     lr = point16_set(30*i,30*i);
     rclBox = U_RECT16_set(ul,lr);
-    point16 = point16_transform((PU_POINT16) &rclBox, 2, xform_alt_set(1.0, 1.0, 0.0, 0.0, 2000+i*330, 4520));
-    rec = U_WMRRECTANGLE_set(*(PU_RECT16)point16); taf(rec,wt,"U_WMRRECTANGLE_set");
+    point16 = point16_transform((U_POINT16 *) &rclBox, 2, xform_alt_set(1.0, 1.0, 0.0, 0.0, 2000+i*330, 4520));
+    rec = U_WMRRECTANGLE_set(*(U_RECT16 *)point16); taf(rec,wt,"U_WMRRECTANGLE_set");
     free(point16);
 
     rec = wdeleteobject_set(&brush, wht);  taf(rec,wt,"wdeleteobject_set");
@@ -1504,8 +1504,8 @@ int main(int argc, char *argv[]){
   lr = point16_set(100,100);
   rclBox = U_RECT16_set(ul,lr);
   for (i=0; i<5; i++){
-    point16 = point16_transform((PU_POINT16) &rclBox, 2, xform_alt_set(1.0, 1.0, 0.0, 0.0, 200+i*330, 7000));
-    rec = U_WMRRECTANGLE_set(*(PU_RECT16)point16); taf(rec,wt,"U_WMRRECTANGLE_set");
+    point16 = point16_transform((U_POINT16 *) &rclBox, 2, xform_alt_set(1.0, 1.0, 0.0, 0.0, 200+i*330, 7000));
+    rec = U_WMRRECTANGLE_set(*(U_RECT16 *)point16); taf(rec,wt,"U_WMRRECTANGLE_set");
     free(point16);
   }
 

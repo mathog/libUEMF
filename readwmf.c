@@ -12,8 +12,8 @@
 
 /*
 File:      readwmf.c
-Version:   0.0.4
-Date:      03-JAN-2012
+Version:   0.0.5
+Date:      17-OCT-2013
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2012 David Mathog and California Institute of Technology (Caltech)
@@ -60,6 +60,7 @@ int myMetaFileProc(char *contents, size_t length)
 }
 
 int main(int argc, char *argv[]){
+(void) argc;  /* quiet the unused parameter compiler warning */
 size_t    length;
 char     *contents=NULL;
 

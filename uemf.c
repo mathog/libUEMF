@@ -1,7 +1,9 @@
 /**
-  @file uemf.c Functions for manipulating EMF files and structures.
+  @file uemf.c
+  
+  @brief Functions for manipulating EMF files and structures.
 
-  [U_EMR*]_set all take data and return a pointer to memory holding the constructed record.  
+  [U_EMR]_set all take data and return a pointer to memory holding the constructed record.  
   The size of that record is also returned in recsize.
   It is also in the second int32 in the record, but may have been byte swapped and so not usable.
   If something goes wrong a NULL pointer is returned and recsize is set to 0.
@@ -14,8 +16,8 @@
 
 /*
 File:      uemf.c
-Version:   0.0.21
-Date:      20-FEB-2013
+Version:   0.0.23
+Date:      05-NOV-2013
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2013 David Mathog and California Institute of Technology (Caltech)
@@ -41,9 +43,12 @@ extern "C" {
 #include <wingdi.h>   //Not actually used, looking for collisions
 #endif
 #include "uemf.h"
-/* one prototype from uemf_endian.  Put it here because end user should never need to see it, sno
+
+//! \cond
+/* one prototype from uemf_endian.  Put it here because end user should never need to see it, so
 not in uemf.h or uemf_endian.h */
 void U_swap2(void *ul, unsigned int count);
+//! \endcond
 
 /**
     \brief Look up the name of the EMR record by type.  Returns U_EMR_INVALID if out of range.
@@ -54,7 +59,7 @@ void U_swap2(void *ul, unsigned int count);
 */
 char *U_emr_names(unsigned int idx){
    if(idx<U_EMR_MIN || idx > U_EMR_MAX){ idx = 0; }
-   static char *U_WMR_NAMES[U_EMR_MAX+1]={
+   static char *U_EMR_NAMES[U_EMR_MAX+1]={
       "U_EMR_INVALID",          
       "U_EMR_HEADER",          
       "U_EMR_POLYBEZIER",
@@ -179,7 +184,7 @@ char *U_emr_names(unsigned int idx){
       "U_EMR_COLORMATCHTOTARGETW",
       "U_EMR_CREATECOLORSPACEW"
    };
-   return(U_WMR_NAMES[idx]);
+   return(U_EMR_NAMES[idx]);
 }
 
 
@@ -615,7 +620,7 @@ int emr_arc_points(
     \param h          Height of pixel array
     \param stride     Row stride of input pixel array in bytes
     \param colortype  DIB BitCount Enumeration
-    \param use_ct     If true use color table (only for 1-16 bit DIBs)
+    \param use_ct     If true use color table (only for 1-16 bit DIBs).
     \param invert     If DIB rows are in opposite order from RGBA rows
 */
 int RGBA_to_DIB(
@@ -695,7 +700,7 @@ int RGBA_to_DIB(
           b = *rptr++;
           a = *rptr++;
           if(use_ct){
-             color = U_BGRA(r,g,b,a); // color has order in memory: b,g,r,a
+             if(use_ct){ color = U_BGRA(r,g,b,a); } // color has order in memory: b,g,r,a, same as EMF+ ARGB
              index = -1;
              for(lct = *ct, k=0; k<found; k++,lct++){  // Is this color in the table (VERY inefficient if there are a lot of colors!!!)
                 if(*(uint32_t *)lct != *(uint32_t *) &color)continue;
@@ -793,14 +798,14 @@ int RGBA_to_DIB(
 
 /**
     \brief Get the actual number of colors in the color table from the BitMapInfoHeader.  
+    \return Number of entries in the color table.
+    \param Bmih  char * pointer to the U_BITMAPINFOHEADER
+    
     BitmapInfoHeader may list 0 for some types which implies the maximum value.
     If the image is big enough, that is set by the bit count, as in 256 for an 8
     bit image.  
     If the image is smaller it is set by width * height.
     Note, this may be called by WMF code, so it is not safe to assume the data is aligned.
-    
-    \return Number of entries in the color table.
-    \param Bmih  char * pointer to the U_BITMAPINFOHEADER
 */
 int get_real_color_count(
        const char *Bmih
@@ -819,13 +824,11 @@ int get_real_color_count(
 
 /**
     \brief Get the actual number of colors in the color table from the ClrUsed, BitCount, Width, and Height.  
-    BitmapInfoHeader may list 0 for some types which implies the maximum value.
-    If the image is big enough, that is set by the bit count, as in 256 for an 8
-    bit image.  
-    If the image is smaller it is set by width * height.
-    
     \return Number of entries in the color table.
-    \param PU_BITMAPINFOHEADER pointer to to the U_BITMAPINFOHEADER
+    \param Colors        Number of colors in the table.
+    \param BitCount      BitCount Enumeration
+    \param Width         bitmap width
+    \param Height        bitmap height
 */
 int get_real_color_icount(
        int Colors,
@@ -891,6 +894,11 @@ int get_DIB_params(
       *numCt     = get_real_color_count((const char *) Bmih);
       if( numCt){ *ct = (PU_RGBQUAD) ((char *)Bmi + sizeof(U_BITMAPINFOHEADER)); }
       else {      *ct = NULL;                                                    }                                                                                       
+   }
+   else if(bic == U_BI_BITFIELDS){ /* to date only encountered once, for 32 bit, from PPT*/
+      *numCt     = 0;
+      *ct        = NULL;
+      bic        = U_BI_RGB;  /* there seems to be no difference, at least for the 32 bit images */
    }
    else {
       *numCt     = Bmih->biSizeImage;
@@ -1536,19 +1544,54 @@ int drawing_size(
 }
 
 /** 
-    \brief Set a U_COLORREF value from separeate R,G,B values.
-    Or use macro directly:  cr = U_RGB(r,g,b).
+    \brief Set a U_COLORREF value from separate R,G,B values.
     \param red    Red   component
     \param green  Green component
     \param blue   Blue  component
     
 */
-U_COLORREF colorref_set(
+U_COLORREF colorref3_set(
       uint8_t red,
       uint8_t green,
       uint8_t blue
    ){
    U_COLORREF cr = (U_COLORREF){red , green, blue, 0};
+   return(cr);
+}
+
+/** 
+    \brief Set a U_COLORREF value from separate R,G,B, and Reserved values.
+    \param red        Red      component
+    \param green      Green    component
+    \param blue       Blue     component
+    \param Reserved   Reserved component
+    
+*/
+U_COLORREF colorref4_set(
+      uint8_t red,
+      uint8_t green,
+      uint8_t blue,
+      uint8_t Reserved
+   ){
+   U_COLORREF cr = (U_COLORREF){red , green, blue, Reserved};
+   return(cr);
+}
+
+/** 
+    \brief Set a U_RGBQUAD value from separate R,G,B, Reserved values.
+    \param red       Red      component
+    \param green     Green    component
+    \param blue      Blue     component
+    \param reserved  Reserved component
+    
+*/
+U_RGBQUAD rgbquad_set(
+      uint8_t red,
+      uint8_t green,
+      uint8_t blue,
+      uint8_t reserved
+   ){
+   U_RGBQUAD cr = (U_RGBQUAD){blue , green, red, reserved};
    return(cr);
 }
 
@@ -5515,7 +5558,6 @@ char *U_EMRCREATECOLORSPACEW_set(
    }
    return(record);
 } 
-
 
 
 #ifdef __cplusplus

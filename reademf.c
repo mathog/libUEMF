@@ -7,13 +7,13 @@
  
  Writes description of the EMF file to stdout.
 
- Build with:  gcc -Wall -o reademf reademf.c uemf.c uemf_print.c uemf_endian.c uemf_utf.c -lm
+ Build with:  gcc -Wall -o reademf reademf.c uemf.c uemf_print.c uemf_endian.c uemf_utf.c upmf.c upmf_print.c -lm
 */
 
 /*
 File:      reademf.c
-Version:   0.0.4
-Date:      11-JAN-2013
+Version:   0.0.6
+Date:      17-OCT-2013
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2013 David Mathog and California Institute of Technology (Caltech)
@@ -70,6 +70,7 @@ int myEnhMetaFileProc(char *contents, size_t length)
 }
 
 int main(int argc, char *argv[]){
+(void) argc;  /* quiet the unused parameter compiler warning */
 size_t    length;
 char     *contents=NULL;
 
