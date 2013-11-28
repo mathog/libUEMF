@@ -12388,17 +12388,17 @@ U_EMR_COMMENT                 record: 1911 type:70   offset:  190500 rsize:     
    +  ObjID:60 ObjType:4(Region) ntype:0 ContinueD:N ContinueB:N
    +  MetaFileSig:DBC01 GraphicsVersion:2 ChildNodes:2
    +  RegionNode(Level:1) { Type:2(Or) RegionNodeChildNodes:
-   +  Left(Level:2) {
+   +  RNCN__Left(Level:2) {
    +  RegionNode(Level:2) { Type:10000000(Rect){UL{12550.000000,1900.000000},WH{300.000000,850.000000}}
    +  RegionNode(Level:2) }
-   +  Left(Level:2) },
-   +  Right(Level:2) {
+   +  RNCN__Left(Level:2) },
+   +  RNCN_Right(Level:2) {
    +  RegionNode(Level:2) { Type:10000001(Path) RegionNodePath: 
    +  Path: Version:DBC01002 Count:8 Flags:0
    +  Points(Float): 0:{12550.000000,1350.000000} 1:{12850.000000,1450.000000} 2:{12850.000000,1700.000000} 3:{12550.000000,1800.000000} 4:{12550.000000,2250.000000} 5:{12850.000000,2150.000000} 6:{12850.000000,2700.000000} 7:{12550.000000,2600.000000}
    +  Types: 0:{Flags:0 Type:Start} 1:{Flags:0 Type:Line} 2:{Flags:0 Type:Line} 3:{Flags:8 Type:Line} 4:{Flags:0 Type:Start} 5:{Flags:0 Type:Line} 6:{Flags:0 Type:Line} 7:{Flags:8 Type:Line}
    +  RegionNode(Level:2) }
-   +  Right(Level:2) },
+   +  RNCN_Right(Level:2) },
    +  RegionNode(Level:1) }
 U_EMR_COMMENT                 record: 1912 type:70   offset:  190652 rsize:      48
    cbData:         36

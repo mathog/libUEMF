@@ -1630,15 +1630,15 @@ int U_PMF_REGIONNODE_print(const char *contents, int Level){
 int U_PMF_REGIONNODECHILDNODES_print(const char *contents, int Level){
    uint32_t    size,rsize;
    printf(" RegionNodeChildNodes:\n");
-   printf("   +  Left(Level:%d) {",    Level);
+   printf("   +  RNCN__Left(Level:%d) {",    Level);
    size = U_PMF_REGIONNODE_print(contents, Level);
-   printf("   +  Left(Level:%d) },\n", Level);
+   printf("   +  RNCN__Left(Level:%d) },\n", Level);
    if(size){
       contents += size;
-      printf("   +  Right(Level:%d) {",   Level);
+      printf("   +  RNCN_Right(Level:%d) {",   Level);
       rsize = U_PMF_REGIONNODE_print(contents, Level);
       size += rsize;
-      printf("   +  Right(Level:%d) },\n",Level);
+      printf("   +  RNCN_Right(Level:%d) },\n",Level);
    }
    return(size);
 }
@@ -1656,7 +1656,7 @@ int U_PMF_REGIONNODEPATH_print(const char *contents){
    if(status){
       printf(" RegionNodePath: \n");
       (void) U_PMF_PATH_print(Data);
-      status = Size;
+      status = Size + 4; /* data sizee + the 4 bytes encoding the size */
    }
    return(status);
 }
