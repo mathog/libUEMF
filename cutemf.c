@@ -12,23 +12,23 @@
 
 /*
 File:      cutemf.c
-Version:   0.0.10
-Date:      19-JUL-2013
+Version:   0.0.11
+Date:      19-MAR-2014
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
-Copyright: 2013 David Mathog and California Institute of Technology (Caltech)
+Copyright: 2014 David Mathog and California Institute of Technology (Caltech)
 */
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include "upmf.h" // includes "uemf.h"
-#define MAXREC 1000
+#define MAXREC 10000
 
 /*
   cut_recs  Copy only those records NOT in the cuts list.  Returns NULL or exits.
 */
-char *cut_recs(EMFTRACK *et, char *contents, size_t *length, int *cuts, int cutN)
+char *cut_recs(EMFTRACK *et, EMFHANDLES *eht, char *contents, size_t *length, int *cuts, int cutN)
 {
     size_t   off=0;
     int      OK =1;
@@ -45,10 +45,15 @@ char *cut_recs(EMFTRACK *et, char *contents, size_t *length, int *cuts, int cutN
 
        pEmr = (PU_ENHMETARECORD)(contents + off);
        if(pEmr->iType == U_EMR_EOF){ OK=0; }
-
-       if(!recnum && (pEmr->iType != U_EMR_HEADER)){
-          printf("cutemf: Fatal Error: EMF file does not begin with an EMR_HEADER record\n");
-          exit(EXIT_FAILURE); 
+       
+       if(recnum==0){
+           U_EMRHEADER *record;
+           if(pEmr->iType != U_EMR_HEADER){
+              printf("cutemf: Fatal Error: EMF file does not begin with an EMR_HEADER record\n");
+              exit(EXIT_FAILURE); 
+           }
+           record = (U_EMRHEADER *)pEmr;
+           eht->peak = record->nHandles -1;  /* emf_finish needs this later */
        }
        
        if(icuts>=cutN || (recnum != cuts[icuts])){
@@ -91,7 +96,24 @@ void get_ints(const char *estring, int *array, int *cutN){
          printf("cutemf: fatal error: too many records were listed\n");
          exit(EXIT_FAILURE);
       }
-      array[count++]=atoi(token);
+      int slen = strlen(token);
+      int dash = strcspn(token,"-");
+      int i;
+      if(dash < slen){
+         token[dash]='\0';
+         int start = atoi(token);
+         int stop  = atoi(token+dash+1);
+         if(start>stop){
+            printf("cutemf: fatal error: range A-B has start:%d and stop:%d\n",start,stop);
+            exit(EXIT_FAILURE);
+         }
+         for(i=start;i<=stop;i++){
+            array[count++]=i;
+         }
+      }
+      else {
+          array[count++]=atoi(token);
+      }
       token = strtok(NULL," \t:,");
    }
    qsort(array, count, sizeof(int), cmpint);
@@ -110,13 +132,14 @@ int main(int argc, char *argv[]){
 
    if(argc != 4){
       printf("cutemf:  remove specific records from an EMF file.\n\n");
-      printf("   Usage:    cutemf 'rec1,rec2,...recN' src.emf dst.emf\n");
-      printf("   Example:  cutemf '2,6,9' in.emf out.emf\n\n");
+      printf("   Usage:    cutemf 'rec1,rec2,recA-recB,...recN' src.emf dst.emf\n");
+      printf("   Example:  cutemf '2,6,9,13-20' in.emf out.emf\n\n");
       printf("   Record numbering starts at 0.\n");
       printf("   Record numbers are separated by spaces, commas, colons, or tabs.\n");
+      printf("   Record ranges may be specified with A-B (no spaces).\n");
       printf("   Record 0 may not be removed.\n");
       printf("   When the last record is an EMR_EOF, it may not be removed.\n");
-      printf("   A maximum of 1000 records may be removed at a time.\n");
+      printf("   A maximum of 10000 records may be removed at a time.\n");
       exit(EXIT_FAILURE);
    }
    if(emf_readdata(argv[2],&contents,&length)){
@@ -133,7 +156,7 @@ int main(int argc, char *argv[]){
       exit(EXIT_FAILURE);
    }
 
-   contents = cut_recs(et, contents,&length,&cutem[0],cutN); /* copy records and free contents */
+   contents = cut_recs(et, eht, contents,&length,&cutem[0],cutN); /* copy records and free contents */
    
    status=emf_finish(et, eht);
    if(status){

@@ -18,12 +18,12 @@
 */
 
 /*
-File:      uemf_endian.h
-Version:   0.0.13
-Date:      24-OCT-2013
+File:      uemf_endian.c
+Version:   0.0.14
+Date:      15-JAN-2014
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
-Copyright: 2013 David Mathog and California Institute of Technology (Caltech)
+Copyright: 2014 David Mathog and California Institute of Technology (Caltech)
 */
 
 #ifdef __cplusplus

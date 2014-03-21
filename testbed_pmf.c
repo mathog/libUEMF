@@ -23,8 +23,8 @@
 /* If Version or Date are changed also edit the text labels for the output.
 
 File:      testbed_pmf.c
-Version:   0.0.1
-Date:      08-AUG-2013
+Version:   0.0.2
+Date:      2-DEC-2013
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2013 David Mathog and California Institute of Technology (Caltech)
@@ -1673,8 +1673,8 @@ int main(int argc, char *argv[]){
     
     poColor   = U_PMF_ARGB_set(255,0,0,0);
 
-    textlabel(poac, 400, "libUEMF v0.1.7",      9700, 200, U_SA_Near, U_SA_Near, poColor, et);
-    textlabel(poac, 400, "Nov 11, 2013",        9700, 500, U_SA_Near, U_SA_Near, poColor, et);
+    textlabel(poac, 400, "libUEMF v0.1.9",      9700, 200, U_SA_Near, U_SA_Near, poColor, et);
+    textlabel(poac, 400, "Dec 02, 2013",        9700, 500, U_SA_Near, U_SA_Near, poColor, et);
     rec = malloc(128);
     (void)sprintf(rec,"EMF+ test: %2.2X",mode);
     textlabel(poac, 400, rec,                   9700, 800, U_SA_Near, U_SA_Near, poColor, et);
@@ -2306,9 +2306,9 @@ int main(int argc, char *argv[]){
     pl12[2] = (U_PMF_POINTF){  0, 400};
     pl12[3] = (U_PMF_POINTF){  2,   1}; // these next two are actually used as the pattern for U_PS_USERSTYLE
     pl12[4] = (U_PMF_POINTF){  4,   3}; // dash =2, gap=1, dash=4, gap =3
-    for(i=0; i<U_DD_Types; i++){ /* 0 is solid, that is not dashed, line construction is different */
+    for(i=0; i<U_DD_Types+7; i++){ 
        /* make the dashed pen - this is quite involved... */
-       if(i){ /* dashed lines */
+       if(i>=1 && i<U_DD_Types){ /* dashed lines using one of our predefined types */
           poDashes = U_PMF_DASHEDLINEDATA_set2(50.0, i);
           IfNullPtr(poDashes,__LINE__,"OOPS on U_PMF_DASHEDLINEDATA_set2\n");
           poPenOD   = U_PMF_PENOPTIONALDATA_set(U_PD_StartCap |U_PD_EndCap |U_PD_Join |U_PD_MiterLimit |U_PD_LineStyle | U_PD_DLData,
@@ -2317,12 +2317,21 @@ int main(int argc, char *argv[]){
                   poDashes, U_PA_Center, NULL, NULL, NULL);
           U_PO_free(&poDashes);
        }
-       else { /* solid line */
+       else if(i==0){ /* solid line */
           poPenOD   = U_PMF_PENOPTIONALDATA_set(U_PD_StartCap |U_PD_EndCap |U_PD_Join |U_PD_MiterLimit |U_PD_LineStyle,
                   NULL, U_LCT_Flat, U_LCT_Flat, U_LJT_Miter,
                   10.0, U_LS_Solid, U_DLCT_Flat, 0.0,
                   NULL, U_PA_Center, NULL, NULL, NULL);
        }
+       else { /* dot/dash set by bit patterns, lowest bit must always be set*/
+          poDashes = U_PMF_DASHEDLINEDATA_set3(50.0, (i<<16) | 0x7F00FFFF); /* lowest bit set, highest bit clear */
+          IfNullPtr(poDashes,__LINE__,"OOPS on U_PMF_DASHEDLINEDATA_set3\n");
+          poPenOD   = U_PMF_PENOPTIONALDATA_set(U_PD_StartCap |U_PD_EndCap |U_PD_Join |U_PD_MiterLimit |U_PD_LineStyle | U_PD_DLData,
+                  NULL, U_LCT_Flat, U_LCT_Flat, U_LJT_Miter,
+                  10.0, U_LS_Solid, U_DLCT_Flat, 0.0,
+                  poDashes, U_PA_Center, NULL, NULL, NULL);
+          U_PO_free(&poDashes);
+        }
           IfNullPtr(poPenOD,__LINE__,"OOPS on U_PMF_PENOPTIONALDATA_set\n");
        poPenD    = U_PMF_PENDATA_set(U_UT_World, 1.0, poPenOD);
           IfNullPtr(poPenD,__LINE__,"OOPS on U_PMF_PENDATA_set\n");
@@ -2347,7 +2356,7 @@ int main(int argc, char *argv[]){
           U_PO_free(&poBrush);
 
        U_DPO_clear(dpath);
-       points = pointfs_transform(pl12, 3, xform_alt_set(1.0, 1.0, 0.0, 0.0, 200 + i*50, 3700));
+       points = pointfs_transform(pl12, 3, xform_alt_set(1.0, 1.0, 0.0, 0.0, 100 + i*50, 3700));
        IfNotTrue(U_PATH_polylineto(dpath, 3, points, U_PTP_None, U_SEG_NEW),__LINE__, "OOPS on U_PATH_polylineto\n");
        poPath = U_PMF_PATH_set2(Version, dpath);
           IfNullPtr(poPath,__LINE__,"OOPS U_PMF_PATH_set3\n");

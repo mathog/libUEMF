@@ -2401,6 +2401,62 @@ U_PSEUDO_OBJ *U_PMF_DASHEDLINEDATA_set2(U_FLOAT Unit, int StdPat){
 }
 
 /**
+    \brief  Utility function to create and set a U_PMF_DASHEDLINEDATA PseudoObject from the bits that are set in a uint32_t
+    \return Pointer to PseudoObject, NULL on error
+    \param  Unit       Length of the repeat unit
+    \param  BitPat     uint32_t holding the bit pattern, the lowest order bit MUST be set and the highest order MUST be clear.
+    
+    Make a line with a dot/dash pattern defined by the bits in the BitPat value.  If a bit is set it is drawn,
+    if clear it is not.  Every bit drawn has length Unit/32, and consecutive drawn bits are merged together.  
+    The lowest order bit is the first bit that may be drawn, the highest the last.  
+    
+        Example: if the integer has value 0x13 the pattern produced will be:
+        0          ->  2*unit/32 drawn
+        2*unit/32  ->  5*unit/32 not drawn
+        5*unit/32  ->  6*unit/32 drawn
+        6*unit/32  ->  unit      not drawn
+
+    EMF+ manual 2.2.2.16, Microsoft name: EmfPlusDashedLineData Object
+*/
+U_PSEUDO_OBJ *U_PMF_DASHEDLINEDATA_set3(U_FLOAT Unit, uint32_t BitPat){
+   uint32_t Elements=0;
+   U_FLOAT SubUnit = Unit/32.0;
+   U_FLOAT Lengths[32];  /* This is the most dash/spaces that will be needed*/
+   if(!(0x00000001 & BitPat))return(NULL);  /* Pattern must start with a drawn segment, this bit must be set */
+   if(  0x80000000 & BitPat )return(NULL);  /* Pattern must end with an undrawn segment, this bit must be clear */
+   int i=0;
+   int k;
+   int lastType=1;
+   int newType=0;
+   uint32_t j=1;
+   Lengths[0]=0;
+   for(k=0; k<32; k++, j=j<<1){
+      if(j & BitPat){
+         if(!lastType){
+            newType=1;
+         }
+      }
+      else {
+         if(lastType){
+            newType=1;
+         }
+      }
+      if(newType){
+         i++;
+         Lengths[i]=0;
+         Elements++;
+         lastType = !lastType;
+         newType = 0;
+      }
+      Lengths[i] += SubUnit;
+   }
+   Elements = i+1;
+
+   U_PSEUDO_OBJ *po = U_PMF_DASHEDLINEDATA_set(Elements, Lengths);
+   return(po);
+}
+
+/**
     \brief  Create and set a U_PMF_FILLPATHOBJ PseudoObject
     \return Pointer to PseudoObject, NULL on error
     \param  Path       U_PSEUDO_OBJ containing a U_PMF_PATH object

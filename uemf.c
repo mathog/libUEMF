@@ -16,11 +16,11 @@
 
 /*
 File:      uemf.c
-Version:   0.0.23
-Date:      05-NOV-2013
+Version:   0.0.25
+Date:      15-JAN-2014
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
-Copyright: 2013 David Mathog and California Institute of Technology (Caltech)
+Copyright: 2014 David Mathog and California Institute of Technology (Caltech)
 */
 
 #ifdef __cplusplus
@@ -468,7 +468,7 @@ uint32_t emr_properties(uint32_t type){
          table[115] = 0xA0;     //   U_EMRSETLAYOUT                 1    0    1    0    0    0    0    0
          table[116] = 0x82;     //   U_EMRTRANSPARENTBLT            1    0    0    0    0    0    1    0
          table[117] = 0xA0;     //   U_EMRUNDEF117                  1    0    1    0    0    0    0    0
-         table[118] = 0x82;     //   U_EMRGRADIENTFILL              1    0    0    0    0    0    1    0
+         table[118] = 0x82;     //   U_EMRGRADIENTFILL              1    0    1    0    0    0    1    0
          table[119] = 0xA0;     //   U_EMRSETLINKEDUFIS             1    0    1    0    0    0    0    0
          table[120] = 0x20;     //   U_EMRSETTEXTJUSTIFICATION      0    0    1    0    0    0    0    0
          table[121] = 0xA0;     //   U_EMRCOLORMATCHTOTARGETW       1    0    1    0    0    0    0    0
@@ -700,7 +700,7 @@ int RGBA_to_DIB(
           b = *rptr++;
           a = *rptr++;
           if(use_ct){
-             if(use_ct){ color = U_BGRA(r,g,b,a); } // color has order in memory: b,g,r,a, same as EMF+ ARGB
+             color = U_BGRA(r,g,b,a); // color has order in memory: b,g,r,a, same as EMF+ ARGB
              index = -1;
              for(lct = *ct, k=0; k<found; k++,lct++){  // Is this color in the table (VERY inefficient if there are a lot of colors!!!)
                 if(*(uint32_t *)lct != *(uint32_t *) &color)continue;
@@ -1379,8 +1379,8 @@ int emf_htable_create(
    }
    ehtl->stack = malloc(initsize * sizeof(uint32_t));
    if(!ehtl->stack){
-      free(ehtl);
       free(ehtl->table);
+      free(ehtl);
       return(5);
    }
    memset(ehtl->table , 0, initsize * sizeof(uint32_t));  // zero all slots in the table
@@ -5477,6 +5477,12 @@ char *U_EMRTRANSPARENTBLT_set(
     \param ulMode       Gradientfill Enumeration (determines Triangle/Rectangle)
     \param TriVert      Array of TriVertex objects
     \param GradObj      Array of gradient objects (each has 2 [rect] or 3 [triangle] indices into TriVert array) 
+
+There is an MS documentation or library problem for this record, as the size of the GradObj must always be set
+as if it was an array of U_GRADIENT3 objects for both rect and triangle.  For horizontal and vertical gradients
+this means that there will be unused bytes at the end of the record.  This is not what the documentation says,
+but it is how MS's libraries work.
+
 */
 char *U_EMRGRADIENTFILL_set(
       const U_RECTL             rclBounds,
@@ -5488,6 +5494,7 @@ char *U_EMRGRADIENTFILL_set(
    ){
    char *record;
    unsigned int   cbTriVert,cbGradObj,off;
+   unsigned int   cbGradObjAlloc; /* larger than cbGradObj, because of problem described above */
    int   irecsize;
 
    cbTriVert = sizeof(U_TRIVERTEX) * nTriVert;  // all of the cb's will be a multiple of 4 bytes
@@ -5495,8 +5502,9 @@ char *U_EMRGRADIENTFILL_set(
    else if(ulMode == U_GRADIENT_FILL_RECT_H || 
            ulMode == U_GRADIENT_FILL_RECT_V){   cbGradObj = sizeof(U_GRADIENT4) * nGradObj; }
    else {                                       return(NULL);                               }
+   cbGradObjAlloc = sizeof(U_GRADIENT3) * nGradObj; 
 
-   irecsize = sizeof(U_EMRGRADIENTFILL) + cbTriVert + cbGradObj;
+   irecsize = sizeof(U_EMRGRADIENTFILL) + cbTriVert + cbGradObjAlloc;
    record   = malloc(irecsize);
    if(record){
       ((PU_EMR)             record)->iType      = U_EMR_GRADIENTFILL;
@@ -5509,6 +5517,10 @@ char *U_EMRGRADIENTFILL_set(
       memcpy(record + off, TriVert, cbTriVert);
       off += cbTriVert;
       memcpy(record + off, GradObj, cbGradObj);
+      off += cbGradObj;
+      if(cbGradObjAlloc > cbGradObj){
+         memset(record+off,0,cbGradObjAlloc - cbGradObj);
+      }
    }
    return(record);
 }

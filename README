@@ -16,7 +16,7 @@ This code has been tested on 32 bit Ubuntu (LE), 32 bit Mingw, 64 bit Manriva, a
 
 libUEMF is released under the GPL 2 license, read the file 'COPYING' for more information
 
-Version 0.1.8, released November 27, 2013.
+Version 0.1.13, released March 21, 2014.
 
 To report bugs or provide feedback send email to David Mathog, mathog@caltech.edu.
 
@@ -365,6 +365,34 @@ History
 
   (Note, version numbers in files represent the libUEMF release where it was last modified, so not
   all files will show the same version numbers in each release.)
+
+0.1.13 2014-03-21
+  Fixed bug, cutemf was messing up the object count (pens, brushes, etc.).
+  Added cutemf can now take ranges of lines.
+  Added testbed_emf generates clipping records for rect and path (but not region).
+
+0.1.12 2014-02-14
+  Documentation change, U_WMRCREATEPATTERNBRUSH is obsolete.
+  Changed wmf_finish() so that it accurately reflects the largest number of objects used, 
+     previously it showed the number of appends, which was much larger.
+
+0.1.11 2014-01-29
+  Fixed bug in uwmf.c (wrong minimum record size on U_WMRTEXTOUT)
+  Fixed bug in uwmf.c (U_WMRCREATEPATTERNBRUSH not right)
+  Fixed bug in uwmf_print.c (U_WMRTEXTOUT_print, x,y were reversed)
+  Added error handling to uemf_utf.c for cases where src is a null pointer.
+  Added a test of createpatternbrush to testlib_wmf
+  
+0.1.10 2014-01-14
+  Slight changes in documentation for uemf.h.
+  Fixed typo in uemf_endian.c.
+  Fixed a tiny bug in uemf.c (if memory allocation failed a struct would have
+     been deleted before the struct itself. 
+
+0.1.9  2013-12-02
+  Added U_PMF_DASHEDLINEDATA_set3 (dot/dash pattern from bits in a uint32_t).
+  Finally was able to make linear gradient gradientfill records work.  Updated 
+    testbed_emf.c to include that. 
 
 0.1.8  2013-11-28
   Fixed a bug in U_PMF_REGIONNODEPATH_print(), returned size was 4 too small.

@@ -95,11 +95,11 @@ these WMF enumerations is by referencing the following table:
 
 /*
 File:      uemf.h
-Version:   0.0.24
-Date:      06-NOV-2013
+Version:   0.0.25
+Date:      15-JAN-2014
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
-Copyright: 2013 David Mathog and California Institute of Technology (Caltech)
+Copyright: 2014 David Mathog and California Institute of Technology (Caltech)
 */
 
 #ifndef _UEMF_

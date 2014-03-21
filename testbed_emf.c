@@ -24,11 +24,11 @@
 /* If Version or Date are changed also edit the text labels for the output.
 
 File:      testbed_emf.c
-Version:   0.0.19
-Date:      17-OCT-2013
+Version:   0.0.21
+Date:      21-Mar-2014
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
-Copyright: 2013 David Mathog and California Institute of Technology (Caltech)
+Copyright: 2014 David Mathog and California Institute of Technology (Caltech)
 */
 
 #include <stdlib.h>
@@ -498,6 +498,151 @@ void image_column(EMFTRACK *et, int x1, int y1, int w, int h, PU_BITMAPINFO Bmi,
 
 }
 
+void draw_star(EMFTRACK *et, EMFHANDLES *eht, U_RECTL rclFrame, int x, int y){
+   U_POINT Star[] = {
+      {593,688},
+      {381,501},
+      {166,684},
+      {278,425},
+      { 38,276},
+      {319,303},
+      {386, 28},
+      {447,304},
+      {729,283},
+      {486,427}
+   };
+   U_POINT *points;
+   char *rec;
+
+   points = points_transform( Star, 10, xform_alt_set(0.5, 1.0, 0.0, 0.0, x, y));
+   rec = selectobject_set(U_BLACK_PEN, eht);                       taf(rec,et,"selectobject_set");
+   rec = selectobject_set(U_GRAY_BRUSH, eht);                      taf(rec,et,"selectobject_set");
+   rec = U_EMRSETPOLYFILLMODE_set(U_WINDING);                      taf(rec,et,"U_EMRSETPOLYFILLMODE_set");
+   rec = U_EMRBEGINPATH_set();                                     taf(rec,et,"U_EMRBEGINPATH_set");
+   rec = U_EMRPOLYGON_set(findbounds(10, points, 0), 10, points);  taf(rec,et,"U_EMRPOLYGON_set");
+   rec = U_EMRENDPATH_set();                                       taf(rec,et,"U_EMRENDPATH_set");
+   rec = U_EMRSTROKEANDFILLPATH_set(rclFrame);                     taf(rec,et,"U_EMRSTROKEANDFILLPATH_set");
+   free(points);
+}
+
+void test_clips(int x, int y, uint32_t *font, U_RECTL rclFrame, EMFTRACK *et, EMFHANDLES *eht){
+   char *rec;
+   uint32_t      redpen;
+   U_EXTLOGPEN  *elp;
+   U_COLORREF    cr;
+   U_POINT blob7[] = {
+      {  0,  0},
+      {200, 10},
+      {500,100},
+      {600,800},
+      {350,700},
+      {150,400},
+      {100, 10},
+   };
+   U_POINT *points;
+
+   /* define a red pen */
+   cr = colorref_set(255, 0, 0);
+   elp = extlogpen_set(U_PS_SOLID|U_PS_ENDCAP_SQUARE|U_PS_JOIN_MITER|U_PS_GEOMETRIC, 2, U_BS_SOLID, cr, U_HS_HORIZONTAL,0,NULL);
+   rec = extcreatepen_set(&redpen, eht,  NULL, 0, NULL, elp );      taf(rec,et,"emrextcreatepen_set");
+   free(elp);
+
+   textlabel(40, "NoClip", x+50 , y - 60, font, et, eht);
+   draw_star(et,eht, rclFrame, x,y);
+
+   /* rectangle clipping */
+   y += 500;
+   textlabel(40, "Rect (include)", x+50 , y - 60, font, et, eht);
+   rec = selectobject_set(redpen, eht);                             taf(rec,et,"selectobject_set");
+   rec = selectobject_set(U_NULL_BRUSH, eht);                       taf(rec,et,"selectobject_set");
+   rec = U_EMRRECTANGLE_set((U_RECTL){x, y, x+200, y+400});         taf(rec,et,"U_EMRRECTANGLE_set");
+
+   rec = U_EMRSAVEDC_set();                                         taf(rec,et,"U_EMRSAVEDC_set");
+   rec = U_EMRINTERSECTCLIPRECT_set((U_RECTL){x, y, x+200, y+400}); taf(rec,et,"U_EMRINTERSECTCLIPRECT_set");
+   draw_star(et,eht, rclFrame, x,y);
+   rec = U_EMRRESTOREDC_set(-1);                                    taf(rec,et,"U_EMRSAVEDC_set");
+
+   /* double rectangle clipping */
+   y += 500;
+   textlabel(40, "Rectd (include,include)", x+50 , y - 60, font, et, eht);
+   rec = selectobject_set(redpen, eht);                             taf(rec,et,"selectobject_set");
+   rec = selectobject_set(U_NULL_BRUSH, eht);                       taf(rec,et,"selectobject_set");
+   rec = U_EMRRECTANGLE_set((U_RECTL){x, y, x+200, y+400});         taf(rec,et,"U_EMRRECTANGLE_set");
+   rec = U_EMRRECTANGLE_set((U_RECTL){x, y+200, x+400, y+400});     taf(rec,et,"U_EMRRECTANGLE_set");
+
+   rec = U_EMRSAVEDC_set();                                         taf(rec,et,"U_EMRSAVEDC_set");
+   rec = U_EMRINTERSECTCLIPRECT_set((U_RECTL){x, y, x+200, y+400}); taf(rec,et,"U_EMRINTERSECTCLIPRECT_set");
+   rec = U_EMRINTERSECTCLIPRECT_set((U_RECTL){x,y+200,x+400,y+400});taf(rec,et,"U_EMRINTERSECTCLIPRECT_set");
+   draw_star(et,eht, rclFrame, x,y);
+   rec = U_EMRRESTOREDC_set(-1);                                    taf(rec,et,"U_EMRSAVEDC_set");
+
+   /* excluded rectangle clipping */
+   y += 500;
+   textlabel(40, "Rect (exclude)", x+50 , y - 60, font, et, eht);
+   rec = selectobject_set(redpen, eht);                             taf(rec,et,"selectobject_set");
+   rec = selectobject_set(U_NULL_BRUSH, eht);                       taf(rec,et,"selectobject_set");
+   rec = U_EMRRECTANGLE_set((U_RECTL){x, y, x+200, y+400});         taf(rec,et,"U_EMRRECTANGLE_set");
+
+   rec = U_EMRSAVEDC_set();                                         taf(rec,et,"U_EMRSAVEDC_set");
+   rec = U_EMREXCLUDECLIPRECT_set((U_RECTL){x, y, x+200, y+400});   taf(rec,et,"U_EMREXCLUDECLIPRECT_set");
+   draw_star(et,eht, rclFrame, x,y);
+   rec = U_EMRRESTOREDC_set(-1);                                    taf(rec,et,"U_EMRSAVEDC_set");
+
+   /* double excluded rectangle clipping */
+   y += 500;
+   textlabel(40, "Rects (exclude,exclude)", x+50 , y - 60, font, et, eht);
+   rec = selectobject_set(redpen, eht);                             taf(rec,et,"selectobject_set");
+   rec = selectobject_set(U_NULL_BRUSH, eht);                       taf(rec,et,"selectobject_set");
+   rec = U_EMRRECTANGLE_set((U_RECTL){x, y, x+200, y+400});         taf(rec,et,"U_EMRRECTANGLE_set");
+   rec = U_EMRRECTANGLE_set((U_RECTL){x, y+200, x+400, y+400});     taf(rec,et,"U_EMRRECTANGLE_set");
+
+   rec = U_EMRSAVEDC_set();                                         taf(rec,et,"U_EMRSAVEDC_set");
+   rec = U_EMREXCLUDECLIPRECT_set((U_RECTL){x, y, x+200, y+400});   taf(rec,et,"U_EMREXCLUDECLIPRECT_set");
+   rec = U_EMREXCLUDECLIPRECT_set((U_RECTL){x,y+200,x+400,y+400});  taf(rec,et,"U_EMREXCLUDECLIPRECT_set");
+   draw_star(et,eht, rclFrame, x,y);
+   rec = U_EMRRESTOREDC_set(-1);                                    taf(rec,et,"U_EMRSAVEDC_set");
+
+   /* rectangle clipping then path LOGIC */
+   int i;
+   for(i=U_RGN_MIN;i<=U_RGN_MAX;i++){
+      y += 500;
+      switch(i){
+         case U_RGN_AND:
+            textlabel(40, "Rect (include) AND path", x+50 , y - 60, font, et, eht); break;
+         case U_RGN_OR:
+            textlabel(40, "Rect (include) OR path", x+50 , y - 60, font, et, eht); break;
+         case U_RGN_XOR: 
+            textlabel(40, "Rect (include) XOR path", x+50 , y - 60, font, et, eht); break;
+         case U_RGN_DIFF:
+            textlabel(40, "Rect (include) DIFF path", x+50 , y - 60, font, et, eht); break;
+         case U_RGN_COPY:
+            textlabel(40, "Rect (include) COPY path", x+50 , y - 60, font, et, eht); break;
+      }
+      rec = selectobject_set(redpen, eht);                             taf(rec,et,"selectobject_set");
+      rec = selectobject_set(U_NULL_BRUSH, eht);                       taf(rec,et,"selectobject_set");
+      rec = U_EMRRECTANGLE_set((U_RECTL){x, y, x+200, y+400});         taf(rec,et,"U_EMRRECTANGLE_set");
+      points = points_transform( blob7, 7, xform_alt_set(0.5, 1.0, 0.0, 0.0, x, y));
+      rec = U_EMRSETPOLYFILLMODE_set(U_WINDING);                       taf(rec,et,"U_EMRSETPOLYFILLMODE_set");
+      rec = U_EMRBEGINPATH_set();                                      taf(rec,et,"U_EMRBEGINPATH_set");
+      rec = U_EMRPOLYGON_set(findbounds(7, points, 0), 7, points);     taf(rec,et,"U_EMRPOLYGON_set");
+      rec = U_EMRENDPATH_set();                                        taf(rec,et,"U_EMRENDPATH_set");
+      rec = U_EMRSTROKEPATH_set(rclFrame);                             taf(rec,et,"U_EMRSTROKEPATH_set");
+
+      rec = U_EMRSAVEDC_set();                                         taf(rec,et,"U_EMRSAVEDC_set");
+      rec = U_EMRINTERSECTCLIPRECT_set((U_RECTL){x, y, x+200, y+400}); taf(rec,et,"U_EMRINTERSECTCLIPRECT_set");
+      rec = U_EMRBEGINPATH_set();                                      taf(rec,et,"U_EMRBEGINPATH_set");
+      rec = U_EMRPOLYGON_set(findbounds(7, points, 0), 7, points);     taf(rec,et,"U_EMRPOLYGON_set");
+      rec = U_EMRENDPATH_set();                                        taf(rec,et,"U_EMRENDPATH_set");
+      rec = U_EMRSELECTCLIPPATH_set(i);                                taf(rec,et,"U_EMRSELECTCLIPPATH_set");
+      draw_star(et,eht, rclFrame, x,y);
+      rec = U_EMRRESTOREDC_set(-1);                                    taf(rec,et,"U_EMRSAVEDC_set");
+      free(points);
+   }
+
+   /* rectangle clipping then path OR */
+
+}
+
 int main(int argc, char *argv[]){
     EMFTRACK            *et;
     EMFHANDLES          *eht;
@@ -654,7 +799,7 @@ int main(int argc, char *argv[]){
       printf("Syntax: testbed_emf flags\n");
       printf("   Flags is a hexadecimal number composed of the following optional bits (use 0 for a standard run):\n");
       printf("   1  Disable tests that block EMF import into PowerPoint (dotted lines)\n");
-      printf("   2  Enable tests that block EMF being displayed in Windows Preview (currently, GradientFill)\n");
+      printf("   2  Enable tests that block EMF being displayed in Windows Preview (currently, none)\n");
       printf("   4  Rotate and scale the test image within the page.\n");
       exit(EXIT_FAILURE);
     }
@@ -773,8 +918,8 @@ int main(int argc, char *argv[]){
 
     /* label the drawing */
     
-    textlabel(400, "libUEMF v0.1.6",      9700, 200, &font, et, eht);
-    textlabel(400, "March 13, 2013",    9700, 500, &font, et, eht);
+    textlabel(400, "libUEMF v0.1.13",      9700, 200, &font, et, eht);
+    textlabel(400, "March 21, 2014",       9700, 500, &font, et, eht);
     rec = malloc(128);
     (void)sprintf(rec,"EMF test: %2.2X",mode);
     textlabel(400, rec,                   9700, 800, &font, et, eht);
@@ -1175,39 +1320,45 @@ int main(int argc, char *argv[]){
     free(points);
 
     PU_TRIVERTEX         tvs;
+    U_TRIVERTEX          tvrect[5]    = {{0,0,0xFFFF,0,0,0}, {100,100,0,0xFFFF,0,0}, {200,200,0,0,0xFFFF,0}, 
+                                         {300,100,0xFFFF,0xFFFF,0,0}, {300,200,0x7FFF,0x7FFF,0x7FFF,0}};
+    U_GRADIENT4          grrect[4]    = {{0,4},{0,1},{1,2},{2,3}};
+
     U_TRIVERTEX          tvtrig[3]    = {{0,0,0xFFFF,0,0,0}, {50,100,0,0,0xFFFF,0}, {100,0,0,0xFFFF,0,0}};
     U_GRADIENT3          grtrig[1]    = {{0,1,2}};
-    U_TRIVERTEX          tvrect4[4]   = {{0,0,0xFFFF,0,0,0}, {0,100,0xFFFF,0,0,0}, {100,100,0,0xFFFF,0,0}, {100,00,0,0xFFFF,0,0}};
+
+    U_TRIVERTEX          tvtrig4[4]   = {{0,0,0xFFFF,0,0,0}, {0,100,0xFFFF,0,0,0}, {100,100,0,0xFFFF,0,0}, {100,00,0,0xFFFF,0,0}};
     U_GRADIENT3          grrect3[2]   = {{0,1,2},{0,2,3}};
-    if(mode & PREVIEW_BLOCKERS){
+
     /*  gradientfill
-        These appear to create the proper binary records, but XP cannot use them and they poison the EMF so that nothing shows.
-        Color is not the problem, does the same thing with 0x0F00 and other simpler colors.
+        It appears that when a record contains multiple gradients they are drawn in order with later ones
+        overwriting overlapping earlier ones.
     */
-        
-        U_TRIVERTEX          tvrect[2]    = {{0,0,0xFFFF,0,0,0}, {100,100,0,0xFFFF,0,0}};
-        U_GRADIENT4          grrect[1]    = {{0,1}};
+    int nv=5;
+    int ng=4;
 
-        tvs = trivertex_transform(tvrect, 2, xform_alt_set(2.0, 1.0, 0.0, 0.0, 200, 4300));
-        rec = U_EMRGRADIENTFILL_set(U_RCL_DEF, 2, 1, U_GRADIENT_FILL_RECT_V, tvs, (uint32_t *) grrect );
-        taf(rec,et,"U_EMRGRADIENTFILL_set");
-        free(tvs);
-
-        tvs = trivertex_transform(tvrect, 2, xform_alt_set(2.0, 1.0, 0.0, 0.0, 300, 4300));
-        rec = U_EMRGRADIENTFILL_set(U_RCL_DEF, 2, 1, U_GRADIENT_FILL_RECT_H, tvs, (uint32_t *) grrect );
-        taf(rec,et,"U_EMRGRADIENTFILL_set");
-        free(tvs);
-
-    } // PREVIEW_BLOCKERS
-
-    /* this one works and does not poison the EMF file */
-    tvs = trivertex_transform(tvtrig, 3, xform_alt_set(2.0, 1.0, 0.0, 0.0, 100, 4300));
-    rec = U_EMRGRADIENTFILL_set(U_RCL_DEF, 3, 1, U_GRADIENT_FILL_TRIANGLE, tvs, (uint32_t *) grtrig );
+    tvs = trivertex_transform(tvrect, nv, xform_alt_set(2.0, 1.0, 0.0, 0.0, 400, 4200));
+    rec = U_EMRGRADIENTFILL_set(U_RCL_DEF, nv, ng, U_GRADIENT_FILL_RECT_V, tvs, (uint32_t *) grrect );
     taf(rec,et,"U_EMRGRADIENTFILL_set");
     free(tvs);
 
-    tvs = trivertex_transform(tvrect4, 4, xform_alt_set(2.0, 1.0, 0.0, 0.0, 100, 4550));
-    rec = U_EMRGRADIENTFILL_set(U_RCL_DEF, 4, 2, U_GRADIENT_FILL_TRIANGLE, tvs, (uint32_t *) grrect3 );
+    tvs = trivertex_transform(tvrect, nv, xform_alt_set(2.0, 1.0, 0.0, 0.0, 400, 4650));
+    rec = U_EMRGRADIENTFILL_set(U_RCL_DEF, nv, ng, U_GRADIENT_FILL_RECT_H, tvs, (uint32_t *) grrect );
+    taf(rec,et,"U_EMRGRADIENTFILL_set");
+    free(tvs);
+
+    /* this one works and does not poison the EMF file */
+    nv=3;
+    ng=1;
+    tvs = trivertex_transform(tvtrig, nv, xform_alt_set(2.0, 1.0, 0.0, 0.0, 100, 4200));
+    rec = U_EMRGRADIENTFILL_set(U_RCL_DEF, nv, ng, U_GRADIENT_FILL_TRIANGLE, tvs, (uint32_t *) grtrig );
+    taf(rec,et,"U_EMRGRADIENTFILL_set");
+    free(tvs);
+
+    nv=4;
+    ng=2;
+    tvs = trivertex_transform(tvtrig4, nv, xform_alt_set(2.0, 1.0, 0.0, 0.0, 100, 4650));
+    rec = U_EMRGRADIENTFILL_set(U_RCL_DEF, nv, ng, U_GRADIENT_FILL_TRIANGLE, tvs, (uint32_t *) grrect3 );
     taf(rec,et,"U_EMRGRADIENTFILL_set");
     free(tvs);
 
@@ -2076,6 +2227,10 @@ if(!(mode & PPT_BLOCKERS)){
     rec = U_EMRSETTEXTCOLOR_set(colorref_set(255,0,255));    taf(rec,et,"U_EMRSETTEXTCOLOR_set");
     rec = U_EMRSETBKCOLOR_set(colorref_set(0,255,255));      taf(rec,et,"U_EMRSETBKCOLOR_set");
     rec = U_EMRSETTEXTALIGN_set(U_TA_DEFAULT);               taf(rec,et,"U_EMRSETTEXTALIGN_set");
+
+
+    /* Test clipping regions */
+    test_clips(9700, 5000, &font, rclFrame, et,eht);
 
 
 /* ************************************************* */

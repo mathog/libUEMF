@@ -24,11 +24,11 @@
 /* If Version or Date are changed also edit the text labels for the output.
 
 File:      testbed_wmf.c
-Version:   0.0.22
-Date:      17-OCT-2013
+Version:   0.0.23
+Date:      29-JAN-2014
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
-Copyright: 2013 David Mathog and California Institute of Technology (Caltech)
+Copyright: 2014 David Mathog and California Institute of Technology (Caltech)
 */
 
 #include <stdlib.h>
@@ -656,8 +656,8 @@ int main(int argc, char *argv[]){
 
     /* label the drawing */
     
-    textlabel(400, "libUEMF v0.1.6",       9700, 200, font_courier_400, wt, wht);
-    textlabel(400, "March 15, 2013",       9700, 500, font_courier_400, wt, wht);
+    textlabel(400, "libUEMF v0.1.11",      9700, 200, font_courier_400, wt, wht);
+    textlabel(400, "January 29, 2014",     9700, 500, font_courier_400, wt, wht);
     rec = malloc(128);
     (void)sprintf(rec,"WMF test: %2.2X",mode);
     textlabel(400, rec,                    9700, 800, font_courier_400, wt, wht);
@@ -1340,31 +1340,42 @@ int main(int argc, char *argv[]){
     rec = wdeleteobject_set(&brush, wht);  taf(rec,wt,"wdeleteobject_set");
 
     if(!(mode & LODRAW_BLOCKERS)){  /* LODRAW does not like bitmap16 */
-    /* use dibcreatepatternbrush_srcbm16_set */
-
-    Bm16 = U_BITMAP16_set(
-        Bmi->bmiHeader.biBitCount,    //!<  bitmap type.?????  No documentation on what this field should hold!
-        Bmi->bmiHeader.biWidth,       //!<  bitmap width in pixels.
-        Bmi->bmiHeader.biHeight,      //!<  bitmap height in scan lines.
-        4,                            //!<  alignment in array, this is a DIB, so 4
-        Bmi->bmiHeader.biBitCount,    //!<  number of adjacent color bits on each plane (R bits + G bits + B bits ????)
-        px                            //!<  bitmap pixel data. Bytes contained = (((Width * BitsPixel + 15) >> 4) << 1) * Height
-    );
-    rec = wcreatedibpatternbrush_srcbm16_set(&brush, wht, U_DIB_RGB_COLORS, Bm16);  
-    taf(rec,wt,"wcreatedibpatternbrush_srcbm16_set");    
+       /* use dibcreatepatternbrush_srcbm16_set */
+       Bm16 = U_BITMAP16_set(
+           Bmi->bmiHeader.biBitCount,    //!<  bitmap type.?????  No documentation on what this field should hold!
+           Bmi->bmiHeader.biWidth,       //!<  bitmap width in pixels.
+           Bmi->bmiHeader.biHeight,      //!<  bitmap height in scan lines.
+           4,                            //!<  alignment in array, this is a DIB, so 4
+           Bmi->bmiHeader.biBitCount,    //!<  number of adjacent color bits on each plane (R bits + G bits + B bits ????)
+           px                            //!<  bitmap pixel data. Bytes contained = (((Width * BitsPixel + 15) >> 4) << 1) * Height
+       );
+       rec = wcreatedibpatternbrush_srcbm16_set(&brush, wht, U_DIB_RGB_COLORS, Bm16);  
+       taf(rec,wt,"wcreatedibpatternbrush_srcbm16_set");    
     
-/* this does not display correctly in Windows XP Preview.
-    rec = wcreatepatternbrush_set(&brush, wht, Bm16, px);  taf(rec,wt,"wcreatepatternbrush_set");
-*/
-    free(Bm16);
-    rec = wselectobject_set(brush, wht);                   taf(rec,wt,"wselectobject_set");
+       rec = wselectobject_set(brush, wht);                   taf(rec,wt,"wselectobject_set");
 
-    lr = point16_set(30*i,30*i);
-    rclBox = U_RECT16_set(ul,lr);
-    point16 = point16_transform((U_POINT16 *) &rclBox, 2, xform_alt_set(1.0, 1.0, 0.0, 0.0, 2000+i*330, 4160));
-    rec = U_WMRRECTANGLE_set(*(U_RECT16 *)point16); taf(rec,wt,"U_WMRRECTANGLE_set");
-    free(point16);
-    rec = wdeleteobject_set(&brush, wht);                  taf(rec,wt,"wdeleteobject_set");
+       lr = point16_set(30*i,30*i);
+       rclBox = U_RECT16_set(ul,lr);
+       point16 = point16_transform((U_POINT16 *) &rclBox, 2, xform_alt_set(1.0, 1.0, 0.0, 0.0, 2000+i*330, 4160));
+       rec = U_WMRRECTANGLE_set(*(U_RECT16 *)point16); taf(rec,wt,"U_WMRRECTANGLE_set");
+       free(point16);
+       rec = wdeleteobject_set(&brush, wht);                  taf(rec,wt,"wdeleteobject_set");
+
+
+       i++;
+       rec = wcreatepatternbrush_set(&brush, wht, Bm16, px);  taf(rec,wt,"wcreatepatternbrush_set");
+       free(Bm16);
+    
+       rec = wselectobject_set(brush, wht);                   taf(rec,wt,"wselectobject_set");
+
+       lr = point16_set(30*i,30*i);
+       rclBox = U_RECT16_set(ul,lr);
+       point16 = point16_transform((U_POINT16 *) &rclBox, 2, xform_alt_set(1.0, 1.0, 0.0, 0.0, 2000+i*330, 4160));
+       rec = U_WMRRECTANGLE_set(*(U_RECT16 *)point16); taf(rec,wt,"U_WMRRECTANGLE_set");
+       free(point16);
+       rec = wdeleteobject_set(&brush, wht);                  taf(rec,wt,"wdeleteobject_set");
+
+       
     } /* LODRAW_BLOCKERS */
 
     free(rgba_px);
@@ -1437,29 +1448,29 @@ int main(int argc, char *argv[]){
     }
     rec = wdeleteobject_set(&brush, wht);  taf(rec,wt,"wdeleteobject_set");
     
-   if(!(mode & LODRAW_BLOCKERS)){  /* LODRAW does not like bitmap16 */
-     /* use dibcreatepatternbrush_srcbm16_set */
+    if(!(mode & LODRAW_BLOCKERS)){  /* LODRAW does not like bitmap16 */
+        /* use dibcreatepatternbrush_srcbm16_set */
 
-    Bm16 = U_BITMAP16_set(
-        Bmi->bmiHeader.biBitCount,    //!<  bitmap type.?????  No documentation on what this field should hold!
-        Bmi->bmiHeader.biWidth,       //!<  bitmap width in pixels.
-        Bmi->bmiHeader.biHeight,      //!<  bitmap height in scan lines.
-        4,                            //!<  alignment in array, this is a DIB, so 4
-        Bmi->bmiHeader.biBitCount,    //!<  number of adjacent color bits on each plane (R bits + G bits + B bits ????)
-        px                            //!<  bitmap pixel data. Bytes contained = (((Width * BitsPixel + 15) >> 4) << 1) * Height
-    );
-    rec = wcreatedibpatternbrush_srcbm16_set(&brush, wht, U_DIB_RGB_COLORS, Bm16);  
-    taf(rec,wt,"wcreatedibpatternbrush_srcbm16_set");    
-    free(Bm16);
-    rec = wselectobject_set(brush, wht);              taf(rec,wt,"wselectobject_set");
+       Bm16 = U_BITMAP16_set(
+           Bmi->bmiHeader.biBitCount,    //!<  bitmap type.?????  No documentation on what this field should hold!
+           Bmi->bmiHeader.biWidth,       //!<  bitmap width in pixels.
+           Bmi->bmiHeader.biHeight,      //!<  bitmap height in scan lines.
+           4,                            //!<  alignment in array, this is a DIB, so 4
+           Bmi->bmiHeader.biBitCount,    //!<  number of adjacent color bits on each plane (R bits + G bits + B bits ????)
+           px                            //!<  bitmap pixel data. Bytes contained = (((Width * BitsPixel + 15) >> 4) << 1) * Height
+       );
+       rec = wcreatedibpatternbrush_srcbm16_set(&brush, wht, U_DIB_RGB_COLORS, Bm16);  
+       taf(rec,wt,"wcreatedibpatternbrush_srcbm16_set");    
+       free(Bm16);
+       rec = wselectobject_set(brush, wht);              taf(rec,wt,"wselectobject_set");
 
-    lr = point16_set(30*i,30*i);
-    rclBox = U_RECT16_set(ul,lr);
-    point16 = point16_transform((U_POINT16 *) &rclBox, 2, xform_alt_set(1.0, 1.0, 0.0, 0.0, 2000+i*330, 4520));
-    rec = U_WMRRECTANGLE_set(*(U_RECT16 *)point16); taf(rec,wt,"U_WMRRECTANGLE_set");
-    free(point16);
+       lr = point16_set(30*i,30*i);
+       rclBox = U_RECT16_set(ul,lr);
+       point16 = point16_transform((U_POINT16 *) &rclBox, 2, xform_alt_set(1.0, 1.0, 0.0, 0.0, 2000+i*330, 4520));
+       rec = U_WMRRECTANGLE_set(*(U_RECT16 *)point16); taf(rec,wt,"U_WMRRECTANGLE_set");
+       free(point16);
 
-    rec = wdeleteobject_set(&brush, wht);  taf(rec,wt,"wdeleteobject_set");
+       rec = wdeleteobject_set(&brush, wht);  taf(rec,wt,"wdeleteobject_set");
     } /* LODRAW_BLOCKERS */
 
     free(rgba_px);
