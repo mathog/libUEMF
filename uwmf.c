@@ -20,7 +20,7 @@
 /*
 File:      uwmf.c
 Version:   0.0.14
-Date:      14-FEB-2014
+Date:      24-MAR-2014
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2014 David Mathog and California Institute of Technology (Caltech)
@@ -327,9 +327,9 @@ uint32_t U_wmr_values(int idx){
     \param idx WMR record type. 
     
 */
-char *U_wmr_names(int idx){
+const char *U_wmr_names(int idx){
    int ret;
-   static char *U_WMR_NAMES[257]={
+   static const char *U_WMR_NAMES[257]={
       "U_WMR_EOF",
       "U_WMR_SETBKCOLOR",
       "U_WMR_SETBKMODE",
@@ -597,9 +597,9 @@ char *U_wmr_names(int idx){
     \return name of the WMR record, "UNKNOWN_ESCAPE" if out of range.
     \param idx Escape record type.     
 */
-char *U_wmr_escnames(int idx){
-   char *name;
-   if(idx>=0 && idx <= 0x0023){
+const char *U_wmr_escnames(int idx){
+   const char *name;
+   if(idx>=1 && idx <= 0x0023){
       switch(idx){
           case    0x0001:  name = "NEWFRAME";                      break;
           case    0x0002:  name = "ABORTDOC";                      break;
@@ -2064,7 +2064,7 @@ char *U_WMRCORE_PALETTE_set(
       off = U_SIZE_METARECORD;
          memcpy(record+off, &Palette->Start,      2);   off+=2;
          memcpy(record+off, &Palette->NumEntries, 2);   off+=2;
-         memcpy(record+off, &Palette->PalEntries, nPE); off+=2;
+         memcpy(record+off, &Palette->PalEntries, nPE);
    }
    return(record);
 }
@@ -2835,13 +2835,13 @@ char *U_WMRTEXTOUT_set(U_POINT16 Dst, char *string){
    if(record){
       U_WMRCORE_SETRECHEAD(record,irecsize,U_WMR_TEXTOUT);
       off = U_SIZE_METARECORD;
-         memcpy(record+off,&Length,2);             off+=2;
-         memcpy(record+off,string,Length);         off+=Length;
+         memcpy(record+off,&Length,2);          off+=2;
+         memcpy(record+off,string,Length);      off+=Length;
       if(Length!=L2){ 
-         memset(record+off,0,1);                   off+=1;
+         memset(record+off,0,1);                off+=1;
       }
-         memcpy(record+off,&Dst.y,2);              off+=2;
-         memcpy(record+off,&Dst.x,2);              off+=2;
+      memcpy(record+off,&Dst.y,2);              off+=2;
+      memcpy(record+off,&Dst.x,2);
    }
    return(record);
 }
@@ -3458,7 +3458,7 @@ char *U_WMRDIBCREATEPATTERNBRUSH_set(
          if(cbBm164 - cbBm16)memset(record+off,0,cbBm164 - cbBm16);
       }
    }
-   else if(Bmi){
+   else if(Bmi && Px){
       SET_CB_FROM_PXBMI(Px,Bmi,cbImage,cbImage4,cbBmi,cbPx);
       irecsize = U_SIZE_WMRDIBCREATEPATTERNBRUSH + cbBmi + cbImage4;
       record   = malloc(irecsize);
@@ -4482,23 +4482,17 @@ int U_WMRCORE_RECSAFE_get(
 /* records like U_WMRFLOODFILL and others. all args are optional, Color is not */
 int U_WMRCORE_1U16_CRF_2U16_get(
       const char *contents,
-      int         minsize,
       uint16_t   *arg1,
       U_COLORREF *Color,
       uint16_t   *arg2,
       uint16_t   *arg3
    ){
-   int  size = U_WMRCORE_RECSAFE_get(contents, minsize);
-   int  irecsize,off;
-   irecsize  = U_SIZE_METARECORD + U_SIZE_COLORREF;
-   if(arg1)irecsize+=2;
-   if(arg2)irecsize+=2;
-   if(arg3)irecsize+=2;
-   off = U_SIZE_METARECORD;
-   if(arg1){  memcpy(arg1,   contents + off, 2); off+=2; }
-              memcpy(Color,  contents + off, 4); off+=4;
-   if(arg2){  memcpy(arg2,   contents + off, 2); off+=2; }
-   if(arg3){  memcpy(arg3,   contents + off, 2); off+=2; }
+   int  size = 0;
+   int  off  = U_SIZE_METARECORD;
+   if(arg1){  memcpy(arg1,   contents + off, 2); off+=2; size+=2;}
+              memcpy(Color,  contents + off, 4); off+=4; size+=4;
+   if(arg2){  memcpy(arg2,   contents + off, 2); off+=2; size+=2;}
+   if(arg3){  memcpy(arg3,   contents + off, 2);         size+=2;}
    return(size);
 }
 
@@ -5223,7 +5217,6 @@ int U_WMRFLOODFILL_get(
    ){
    return  U_WMRCORE_1U16_CRF_2U16_get(
       contents,
-      (U_SIZE_WMRFLOODFILL),
       Mode,
       Color,
       U_P16(coord->y),
@@ -5353,7 +5346,6 @@ int U_WMRSETPIXEL_get(
       U_POINT16  *Coord){
    return  U_WMRCORE_1U16_CRF_2U16_get(
       contents,
-      (U_SIZE_WMRSETPIXEL),
       NULL,
       Color,
       U_P16(Coord->y),
@@ -5398,7 +5390,7 @@ int U_WMRTEXTOUT_get(
    if(L2 & 1)L2++;
    off = U_SIZE_METARECORD + 2 + L2;
    memcpy(&Dst->y, contents + off, 2); off+=2;
-   memcpy(&Dst->x, contents + off, 2); off+=2;
+   memcpy(&Dst->x, contents + off, 2);
    return(size);
 }
 
@@ -6130,7 +6122,6 @@ int U_WMREXTFLOODFILL_get(
    ){
    return  U_WMRCORE_1U16_CRF_2U16_get(
       contents,
-      (U_SIZE_WMREXTFLOODFILL),
       Mode,
       Color,
       U_P16(coord->y),

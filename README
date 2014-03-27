@@ -16,7 +16,7 @@ This code has been tested on 32 bit Ubuntu (LE), 32 bit Mingw, 64 bit Manriva, a
 
 libUEMF is released under the GPL 2 license, read the file 'COPYING' for more information
 
-Version 0.1.13, released March 21, 2014.
+Version 0.1.14, released March 27, 2014.
 
 To report bugs or provide feedback send email to David Mathog, mathog@caltech.edu.
 
@@ -365,6 +365,18 @@ History
 
   (Note, version numbers in files represent the libUEMF release where it was last modified, so not
   all files will show the same version numbers in each release.)
+
+0.1.14 2014_03_27
+  Fixed bug, in U_PMF_RECTN_set() in upmf.c.  Never tested.
+  Fixed a few potential bugs in upmf.c if a null pointer was passed for
+     certain function arguments.  (Previously unhandled cases.)
+  Fixed bug, operations setting variables that are never read along those
+     execution paths: upmf_print.c, uemf.c, uwmf.c, uemf_endian.cm upmf.c.
+  Fixed potential (but very unlikely) memory leaks in upmf.c and uemf_utf.c.
+  Added test of U_PMF_RECTN_set to testbed_pmf.c.
+  Changed U_wmr_names() and U_wmr_escnames() to const char* (from char*).
+  Changed method for suppressing unused parameter warnings.
+
 
 0.1.13 2014-03-21
   Fixed bug, cutemf was messing up the object count (pens, brushes, etc.).

@@ -36,8 +36,8 @@
 
 /*
 File:      uwmf.h
-Version:   0.0.9
-Date:      14-FEB-2014
+Version:   0.0.10
+Date:      24-MAR-2014
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2014 David Mathog and California Institute of Technology (Caltech)
@@ -2093,8 +2093,8 @@ uint32_t     U_wmr_properties(uint32_t type);
 
 uint32_t     U_wmr_size(const U_METARECORD *record);
 uint32_t     U_wmr_values(int idx);
-char        *U_wmr_names(int idx);
-char        *U_wmr_escnames(int idx);
+const char  *U_wmr_names(int idx);
+const char  *U_wmr_escnames(int idx);
 
 void         U_sanerect16(U_RECT16 rc, double *left, double *top, double *right, double *bottom);
 

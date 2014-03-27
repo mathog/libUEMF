@@ -23,11 +23,11 @@
 /* If Version or Date are changed also edit the text labels for the output.
 
 File:      testbed_pmf.c
-Version:   0.0.2
-Date:      2-DEC-2013
+Version:   0.0.3
+Date:      24-MAR-2014
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
-Copyright: 2013 David Mathog and California Institute of Technology (Caltech)
+Copyright: 2014 David Mathog and California Institute of Technology (Caltech)
 */
 
 #include <stdlib.h>
@@ -1112,6 +1112,7 @@ int main(int argc, char *argv[]){
     U_PSEUDO_OBJ          *poPen;
     U_PSEUDO_OBJ          *poRectfs;
     U_PSEUDO_OBJ          *poRectf;
+    U_PSEUDO_OBJ          *poRects;
     U_PSEUDO_OBJ          *poFont;
     U_PSEUDO_OBJ          *poPath;
     U_PSEUDO_OBJ          *poPoints;
@@ -1125,7 +1126,8 @@ int main(int argc, char *argv[]){
 //    U_PMF_ARGB            *ColorNArgb;
     uint32_t               Version = U_PMF_GRAPHICSVERSIONOBJ_set(2); /* this is needed over, and over...*/
     U_PMF_RECTF            Rectfs[20];
-    U_PMF_RECTF           *rects;
+    U_PMF_RECTF           *pRectfs;
+    U_PMF_RECT             Rects[20];
     U_PMF_POINTF           Pointfs[20];
     uint8_t                Ppts[20];
     U_PMF_TRANSFORMMATRIX  Tm;
@@ -1673,8 +1675,8 @@ int main(int argc, char *argv[]){
     
     poColor   = U_PMF_ARGB_set(255,0,0,0);
 
-    textlabel(poac, 400, "libUEMF v0.1.9",      9700, 200, U_SA_Near, U_SA_Near, poColor, et);
-    textlabel(poac, 400, "Dec 02, 2013",        9700, 500, U_SA_Near, U_SA_Near, poColor, et);
+    textlabel(poac, 400, "libUEMF v0.1.14",     9700, 200, U_SA_Near, U_SA_Near, poColor, et);
+    textlabel(poac, 400, "Mar 24, 2014",        9700, 500, U_SA_Near, U_SA_Near, poColor, et);
     rec = malloc(128);
     (void)sprintf(rec,"EMF+ test: %2.2X",mode);
     textlabel(poac, 400, rec,                   9700, 800, U_SA_Near, U_SA_Near, poColor, et);
@@ -2046,6 +2048,19 @@ int main(int argc, char *argv[]){
     po = U_PMR_DRAWRECTS_set(OBJ_PEN_GROUP1, poRectfs);
     paf(et, poac, po, "U_PMR_DRAWRECTS_set");
        U_PO_free(&poRectfs);
+       
+    /* Test the multiple rects functions with multiple rects (int)*/
+    Rects[0] = (U_PMF_RECT){5900, 2600, 300, 300};
+    Rects[1] = (U_PMF_RECT){6000, 2700, 300, 300};
+    Rects[2] = (U_PMF_RECT){6100, 2800, 300, 300};
+    poRects  = U_PMF_RECTN_set(3, Rects);
+       IfNullPtr(poRects,__LINE__,"OOPS on U_PMF_RECTFN_set\n");
+    po = U_PMR_FILLRECTS_set(poBrushID, poRects);
+       IfNullPtr(po,__LINE__,"OOPS on U_PMR_FILLRECTS_set\n");
+    paf(et, poac, po, "U_PMR_FILLRECTS_set");
+    po = U_PMR_DRAWRECTS_set(OBJ_PEN_GROUP1, poRects);
+    paf(et, poac, po, "U_PMR_DRAWRECTS_set");
+       U_PO_free(&poRects);
        
     /* a series of red bounded, grey filled shapes, using U_PMF_POINTF points */
     U_DPO_clear(dpath);
@@ -2722,15 +2737,15 @@ int main(int argc, char *argv[]){
              U_PO_free(&poBrush);
              U_PO_free(&poPen);
 
-          rects = rectfs_transform(Rectfs, 1, xform_alt_set(1.0, 1.0, 0.0, 0.0, 2000+i*105, 3500 + k*310));
-          poRectfs  = U_PMF_RECTFN_set(1, rects);
+          pRectfs = rectfs_transform(Rectfs, 1, xform_alt_set(1.0, 1.0, 0.0, 0.0, 2000+i*105, 3500 + k*310));
+          poRectfs  = U_PMF_RECTFN_set(1, pRectfs);
              IfNullPtr(poRectfs,__LINE__,"OOPS on U_PMF_RECTFN_set\n");
           po = U_PMR_FILLRECTS_set(poBrushID, poRectfs);
           paf(et, poac, po, "U_PMR_FILLRECTS_set");
           po = U_PMR_DRAWRECTS_set(OBJ_PEN_BLACK_1, poRectfs);
           paf(et, poac, po, "U_PMR_DRAWRECTS_set");
              U_PO_free(&poRectfs);
-             free(rects);
+             free(pRectfs);
 
           points = pointfs_transform(Pointfs, 2, xform_alt_set(1.0, 1.0, 0.0, 0.0, 2000+(i+54)*105, 3500 + k*310));
           poPoints = U_PMF_POINTF_set(2, points);

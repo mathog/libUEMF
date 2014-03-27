@@ -19,8 +19,8 @@
 
 /*
 File:      uemf_endian.c
-Version:   0.0.14
-Date:      15-JAN-2014
+Version:   0.0.16
+Date:      27-MAR-2014
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2014 David Mathog and California Institute of Technology (Caltech)
@@ -425,7 +425,7 @@ by end user code and to further that end prototypes are NOT provided and they ar
 // all core*_swap call this, U_EMRSETMARGN_swap and some others all it directly
 // numbered as core5 to be consistent with uemf.c, but must appear before the others as there is no prototype
 void core5_swap(char *record, int torev){
-   torev = torev;  // shuts up compiler warnings about unused parameters
+   UNUSED_PARAMETER(torev);
    PU_ENHMETARECORD pEMR = (PU_ENHMETARECORD)(record);
    U_swap4(pEMR,2);                         // iType nSize
 }
@@ -1188,10 +1188,8 @@ void U_EMREXTSELECTCLIPRGN_swap(char *record, int torev){
    int nextroff=0;
    int limit=0;
    PU_EMREXTSELECTCLIPRGN pEmr = (PU_EMREXTSELECTCLIPRGN) (record);
-   roff = 0;
    if(torev){
       limit    = pEmr->emr.nSize;
-      nextroff = 0; 
    }
    core5_swap(record, torev);
    if(!torev){
