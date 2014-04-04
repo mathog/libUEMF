@@ -24,8 +24,8 @@
 /* If Version or Date are changed also edit the text labels for the output.
 
 File:      testbed_emf.c
-Version:   0.0.21
-Date:      21-Mar-2014
+Version:   0.0.22
+Date:      04-APR-2014
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2014 David Mathog and California Institute of Technology (Caltech)
@@ -537,7 +537,7 @@ void test_clips(int x, int y, uint32_t *font, U_RECTL rclFrame, EMFTRACK *et, EM
       {600,800},
       {350,700},
       {150,400},
-      {100, 10},
+      {100,100},
    };
    U_POINT *points;
 
@@ -547,12 +547,12 @@ void test_clips(int x, int y, uint32_t *font, U_RECTL rclFrame, EMFTRACK *et, EM
    rec = extcreatepen_set(&redpen, eht,  NULL, 0, NULL, elp );      taf(rec,et,"emrextcreatepen_set");
    free(elp);
 
-   textlabel(40, "NoClip", x+50 , y - 60, font, et, eht);
+   textlabel(40, "NoClip", x , y - 60, font, et, eht);
    draw_star(et,eht, rclFrame, x,y);
 
    /* rectangle clipping */
    y += 500;
-   textlabel(40, "Rect (include)", x+50 , y - 60, font, et, eht);
+   textlabel(40, "Rect (include)", x , y - 60, font, et, eht);
    rec = selectobject_set(redpen, eht);                             taf(rec,et,"selectobject_set");
    rec = selectobject_set(U_NULL_BRUSH, eht);                       taf(rec,et,"selectobject_set");
    rec = U_EMRRECTANGLE_set((U_RECTL){x, y, x+200, y+400});         taf(rec,et,"U_EMRRECTANGLE_set");
@@ -564,7 +564,7 @@ void test_clips(int x, int y, uint32_t *font, U_RECTL rclFrame, EMFTRACK *et, EM
 
    /* double rectangle clipping */
    y += 500;
-   textlabel(40, "Rectd (include,include)", x+50 , y - 60, font, et, eht);
+   textlabel(40, "Rects (include,include)", x , y - 60, font, et, eht);
    rec = selectobject_set(redpen, eht);                             taf(rec,et,"selectobject_set");
    rec = selectobject_set(U_NULL_BRUSH, eht);                       taf(rec,et,"selectobject_set");
    rec = U_EMRRECTANGLE_set((U_RECTL){x, y, x+200, y+400});         taf(rec,et,"U_EMRRECTANGLE_set");
@@ -578,7 +578,7 @@ void test_clips(int x, int y, uint32_t *font, U_RECTL rclFrame, EMFTRACK *et, EM
 
    /* excluded rectangle clipping */
    y += 500;
-   textlabel(40, "Rect (exclude)", x+50 , y - 60, font, et, eht);
+   textlabel(40, "Rect (exclude)", x , y - 60, font, et, eht);
    rec = selectobject_set(redpen, eht);                             taf(rec,et,"selectobject_set");
    rec = selectobject_set(U_NULL_BRUSH, eht);                       taf(rec,et,"selectobject_set");
    rec = U_EMRRECTANGLE_set((U_RECTL){x, y, x+200, y+400});         taf(rec,et,"U_EMRRECTANGLE_set");
@@ -590,7 +590,7 @@ void test_clips(int x, int y, uint32_t *font, U_RECTL rclFrame, EMFTRACK *et, EM
 
    /* double excluded rectangle clipping */
    y += 500;
-   textlabel(40, "Rects (exclude,exclude)", x+50 , y - 60, font, et, eht);
+   textlabel(40, "Rects (exclude,exclude)", x , y - 60, font, et, eht);
    rec = selectobject_set(redpen, eht);                             taf(rec,et,"selectobject_set");
    rec = selectobject_set(U_NULL_BRUSH, eht);                       taf(rec,et,"selectobject_set");
    rec = U_EMRRECTANGLE_set((U_RECTL){x, y, x+200, y+400});         taf(rec,et,"U_EMRRECTANGLE_set");
@@ -608,15 +608,15 @@ void test_clips(int x, int y, uint32_t *font, U_RECTL rclFrame, EMFTRACK *et, EM
       y += 500;
       switch(i){
          case U_RGN_AND:
-            textlabel(40, "Rect (include) AND path", x+50 , y - 60, font, et, eht); break;
+            textlabel(40, "Rect (include) AND path", x , y - 60, font, et, eht); break;
          case U_RGN_OR:
-            textlabel(40, "Rect (include) OR path", x+50 , y - 60, font, et, eht); break;
+            textlabel(40, "Rect (include) OR path", x , y - 60, font, et, eht); break;
          case U_RGN_XOR: 
-            textlabel(40, "Rect (include) XOR path", x+50 , y - 60, font, et, eht); break;
+            textlabel(40, "Rect (include) XOR path", x , y - 60, font, et, eht); break;
          case U_RGN_DIFF:
-            textlabel(40, "Rect (include) DIFF path", x+50 , y - 60, font, et, eht); break;
+            textlabel(40, "Rect (include) DIFF path", x , y - 60, font, et, eht); break;
          case U_RGN_COPY:
-            textlabel(40, "Rect (include) COPY path", x+50 , y - 60, font, et, eht); break;
+            textlabel(40, "Rect (include) COPY path", x , y - 60, font, et, eht); break;
       }
       rec = selectobject_set(redpen, eht);                             taf(rec,et,"selectobject_set");
       rec = selectobject_set(U_NULL_BRUSH, eht);                       taf(rec,et,"selectobject_set");
@@ -639,7 +639,39 @@ void test_clips(int x, int y, uint32_t *font, U_RECTL rclFrame, EMFTRACK *et, EM
       free(points);
    }
 
-   /* rectangle clipping then path OR */
+   /* rectangle clipping then offset */
+   y += 500;
+   int ox = 100;
+   int oy = 20;
+   textlabel(40, "Rect (include,offset)", x , y - 60, font, et, eht);
+   rec = selectobject_set(redpen, eht);                             taf(rec,et,"selectobject_set");
+   rec = selectobject_set(U_NULL_BRUSH, eht);                       taf(rec,et,"selectobject_set");
+   rec = U_EMRRECTANGLE_set((U_RECTL){x, y, x+200, y+400});         taf(rec,et,"U_EMRRECTANGLE_set");
+   rec = U_EMRRECTANGLE_set((U_RECTL){x+ox, y+oy, x+200+ox, y+400+oy});         taf(rec,et,"U_EMRRECTANGLE_set");
+
+   rec = U_EMRSAVEDC_set();                                         taf(rec,et,"U_EMRSAVEDC_set");
+   rec = U_EMRINTERSECTCLIPRECT_set((U_RECTL){x, y, x+200, y+400}); taf(rec,et,"U_EMRINTERSECTCLIPRECT_set");
+   rec = U_EMROFFSETCLIPRGN_set((U_POINTL){ox,oy});                 taf(rec,et,"U_EMROFFSETCLIPRGN_set");
+   draw_star(et,eht, rclFrame, x,y);
+   rec = U_EMRRESTOREDC_set(-1);                                    taf(rec,et,"U_EMRSAVEDC_set");
+
+   /* double rectangle clipping  then offset */
+   y += 500;
+   textlabel(40, "Rects (include,include,offset)", x , y - 60, font, et, eht);
+   rec = selectobject_set(redpen, eht);                             taf(rec,et,"selectobject_set");
+   rec = selectobject_set(U_NULL_BRUSH, eht);                       taf(rec,et,"selectobject_set");
+   rec = U_EMRRECTANGLE_set((U_RECTL){x, y, x+200, y+400});         taf(rec,et,"U_EMRRECTANGLE_set");
+   rec = U_EMRRECTANGLE_set((U_RECTL){x, y+200, x+400, y+400});     taf(rec,et,"U_EMRRECTANGLE_set");
+   rec = U_EMRRECTANGLE_set((U_RECTL){x+ox, y+200+oy, x+200+ox, y+400+oy});
+                                                                    taf(rec,et,"U_EMRRECTANGLE_set");
+
+   rec = U_EMRSAVEDC_set();                                         taf(rec,et,"U_EMRSAVEDC_set");
+   rec = U_EMRINTERSECTCLIPRECT_set((U_RECTL){x, y, x+200, y+400}); taf(rec,et,"U_EMRINTERSECTCLIPRECT_set");
+   rec = U_EMRINTERSECTCLIPRECT_set((U_RECTL){x,y+200,x+400,y+400});taf(rec,et,"U_EMRINTERSECTCLIPRECT_set");
+   rec = U_EMROFFSETCLIPRGN_set((U_POINTL){ox,oy});                 taf(rec,et,"U_EMROFFSETCLIPRGN_set");
+   draw_star(et,eht, rclFrame, x,y);
+   rec = U_EMRRESTOREDC_set(-1);                                    taf(rec,et,"U_EMRSAVEDC_set");
+
 
 }
 
@@ -918,8 +950,8 @@ int main(int argc, char *argv[]){
 
     /* label the drawing */
     
-    textlabel(400, "libUEMF v0.1.13",      9700, 200, &font, et, eht);
-    textlabel(400, "March 21, 2014",       9700, 500, &font, et, eht);
+    textlabel(400, "libUEMF v0.1.15",     9700, 200, &font, et, eht);
+    textlabel(400, "April 4, 2014",       9700, 500, &font, et, eht);
     rec = malloc(128);
     (void)sprintf(rec,"EMF test: %2.2X",mode);
     textlabel(400, rec,                   9700, 800, &font, et, eht);
@@ -2230,7 +2262,7 @@ if(!(mode & PPT_BLOCKERS)){
 
 
     /* Test clipping regions */
-    test_clips(9700, 5000, &font, rclFrame, et,eht);
+    test_clips(13250, 1400, &font, rclFrame, et,eht);
 
 
 /* ************************************************* */

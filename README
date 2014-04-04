@@ -16,7 +16,7 @@ This code has been tested on 32 bit Ubuntu (LE), 32 bit Mingw, 64 bit Manriva, a
 
 libUEMF is released under the GPL 2 license, read the file 'COPYING' for more information
 
-Version 0.1.14, released March 27, 2014.
+Version 0.1.15, released Apr 4, 2014.
 
 To report bugs or provide feedback send email to David Mathog, mathog@caltech.edu.
 
@@ -365,6 +365,12 @@ History
 
   (Note, version numbers in files represent the libUEMF release where it was last modified, so not
   all files will show the same version numbers in each release.)
+
+0.1.15 2014_04_04
+  Changed record flags for U_EMRSELECTCLIPPATH record, it consumes a path but does not ALTER (which
+     forced a premature draw.)
+  Added U_EMROFFSETCLIPRGN test to testbed_emf.c.
+  Changed location on dist drawing where clipping appears.
 
 0.1.14 2014_03_27
   Fixed bug, in U_PMF_RECTN_set() in upmf.c.  Never tested.
