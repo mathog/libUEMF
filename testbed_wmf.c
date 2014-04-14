@@ -337,6 +337,131 @@ void not_in_wmf(double scale, int x, int y, int pen, int brush, WMFTRACK *wt, WM
     free(point16);
 }
 
+void draw_star(WMFTRACK *wt, WMFHANDLES *wht, int pen_black_1, int brush_gray, int x, int y){
+   U_POINT16  Star[] = {
+      {593,688},
+      {381,501},
+      {166,684},
+      {278,425},
+      { 38,276},
+      {319,303},
+      {386, 28},
+      {447,304},
+      {729,283},
+      {486,427}
+   };
+   U_POINT16 *points;
+   char *rec;
+
+   points = point16_transform(Star, 10, xform_alt_set(0.5, 1.0, 0.0, 0.0, x, y));
+   rec = wselectobject_set(pen_black_1, wht);         taf(rec,wt,"wselectobject_set");
+   rec = wselectobject_set(brush_gray, wht);          taf(rec,wt,"wselectobject_set");
+   rec = U_WMRSETPOLYFILLMODE_set(U_WINDING);         taf(rec,wt,"U_WMRSETPOLYFILLMODE_set");
+   rec = wbegin_path_set();                           taf(rec,wt,"wbegin_path_set");
+   rec = U_WMRPOLYGON_set(10, points);                taf(rec,wt,"U_WMRPOLYGON_set");
+   rec = wend_path_set();                             taf(rec,wt,"wend_path_set");
+
+   free(points);
+}
+
+void test_clips(int x, int y, const int font, int pen_red_1, int pen_black_1, int brush_gray, int brush_null, WMFTRACK *wt, WMFHANDLES *wht){
+   char *rec;
+
+   textlabel(40, "NoClip", x , y - 60, font, wt, wht);
+   draw_star(wt, wht, pen_black_1, brush_gray, x, y);
+
+   /* rectangle clipping */
+   y += 500;
+   textlabel(40, "Rect (include)", x , y - 60, font, wt, wht);
+   rec = wselectobject_set(pen_red_1, wht);                              taf(rec,wt,"selectobject_set");
+   rec = wselectobject_set(brush_null, wht);                             taf(rec,wt,"selectobject_set");
+   rec = U_WMRRECTANGLE_set((U_RECT16){x, y, x+200, y+400});             taf(rec,wt,"U_WMRRECTANGLE_set");
+   rec = U_WMRSAVEDC_set();                                              taf(rec,wt,"U_WMRSAVEDC_set");
+   rec = U_WMRINTERSECTCLIPRECT_set((U_RECT16){x, y, x+200, y+400});     taf(rec,wt,"U_WMRINTERSECTCLIPRECT_set");
+   draw_star(wt, wht, pen_black_1, brush_gray, x, y);
+   rec = U_WMRRESTOREDC_set(-1);                                         taf(rec,wt,"U_WMRSAVEDC_set");
+
+   /* double rectangle clipping */
+   y += 500;
+   textlabel(40, "Rect (include,inlude)", x , y - 60, font, wt, wht);
+   rec = wselectobject_set(pen_red_1, wht);                              taf(rec,wt,"selectobject_set");
+   rec = wselectobject_set(brush_null, wht);                             taf(rec,wt,"selectobject_set");
+   rec = U_WMRRECTANGLE_set((U_RECT16){x, y, x+200, y+400});             taf(rec,wt,"U_WMRRECTANGLE_set");
+   rec = U_WMRRECTANGLE_set((U_RECT16){x, y+200, x+400, y+400});         taf(rec,wt,"U_WMRRECTANGLE_set");
+   rec = U_WMRSAVEDC_set();                                              taf(rec,wt,"U_WMRSAVEDC_set");
+   rec = U_WMRINTERSECTCLIPRECT_set((U_RECT16){x, y, x+200, y+400});     taf(rec,wt,"U_WMRINTERSECTCLIPRECT_set");
+   rec = U_WMRINTERSECTCLIPRECT_set((U_RECT16){x, y+200, x+400, y+400}); taf(rec,wt,"U_WMRINTERSECTCLIPRECT_set");
+   draw_star(wt, wht, pen_black_1, brush_gray, x, y);
+   rec = U_WMRRESTOREDC_set(-1);                                         taf(rec,wt,"U_WMRSAVEDC_set");
+
+   /* excluded rectangle clipping */
+   y += 500;
+   textlabel(40, "Rect (exlude)", x , y - 60, font, wt, wht);
+   rec = wselectobject_set(pen_red_1, wht);                              taf(rec,wt,"selectobject_set");
+   rec = wselectobject_set(brush_null, wht);                             taf(rec,wt,"selectobject_set");
+   rec = U_WMRRECTANGLE_set((U_RECT16){x, y, x+200, y+400});             taf(rec,wt,"U_WMRRECTANGLE_set");
+   rec = U_WMRSAVEDC_set();                                              taf(rec,wt,"U_WMRSAVEDC_set");
+   rec = U_WMREXCLUDECLIPRECT_set((U_RECT16){x, y, x+200, y+400});       taf(rec,wt,"U_WMRINTERSECTCLIPRECT_set");
+   draw_star(wt, wht, pen_black_1, brush_gray, x, y);
+   rec = U_WMRRESTOREDC_set(-1);                                         taf(rec,wt,"U_WMRSAVEDC_set");
+
+   /* double excluded rectangle clipping */
+   y += 500;
+   textlabel(40, "Rect (include,inlude)", x , y - 60, font, wt, wht);
+   rec = wselectobject_set(pen_red_1, wht);                              taf(rec,wt,"selectobject_set");
+   rec = wselectobject_set(brush_null, wht);                             taf(rec,wt,"selectobject_set");
+   rec = U_WMRRECTANGLE_set((U_RECT16){x, y, x+200, y+400});             taf(rec,wt,"U_WMRRECTANGLE_set");
+   rec = U_WMRRECTANGLE_set((U_RECT16){x, y+200, x+400, y+400});         taf(rec,wt,"U_WMRRECTANGLE_set");
+   rec = U_WMRSAVEDC_set();                                              taf(rec,wt,"U_WMRSAVEDC_set");
+   rec = U_WMREXCLUDECLIPRECT_set((U_RECT16){x, y, x+200, y+400});       taf(rec,wt,"U_WMRINTERSECTCLIPRECT_set");
+   rec = U_WMREXCLUDECLIPRECT_set((U_RECT16){x, y+200, x+400, y+400});   taf(rec,wt,"U_WMRINTERSECTCLIPRECT_set");
+   draw_star(wt, wht, pen_black_1, brush_gray, x, y);
+   rec = U_WMRRESTOREDC_set(-1);                                         taf(rec,wt,"U_WMRSAVEDC_set");
+
+
+
+   /* rectangle clipping then path LOGIC - NOT implemented in WMF */
+   int i;
+   for(i=U_RGN_MIN;i<=U_RGN_MAX;i++){
+      y += 500;
+      textlabel(40, "not implemented", x , y - 60, font, wt, wht);
+      not_in_wmf(1.5,x,y, pen_red_1, brush_null, wt, wht);  /* WMF has no bezierto */
+   }
+
+   /* rectangle clipping then offset */
+   y += 500;
+   int ox = 100;
+   int oy = 20;
+   textlabel(40, "Rect (include,offset)", x , y - 60, font, wt, wht);
+   rec = wselectobject_set(pen_red_1, wht);                              taf(rec,wt,"selectobject_set");
+   rec = wselectobject_set(brush_null, wht);                             taf(rec,wt,"selectobject_set");
+   rec = U_WMRRECTANGLE_set((U_RECT16){x, y, x+200, y+400});             taf(rec,wt,"U_WMRRECTANGLE_set");
+   rec = U_WMRRECTANGLE_set((U_RECT16){x+ox, y+oy, x+200+ox, y+400+oy}); taf(rec,wt,"U_WMRRECTANGLE_set");
+
+   rec = U_WMRSAVEDC_set();                                              taf(rec,wt,"U_WMRSAVEDC_set");
+   rec = U_WMRINTERSECTCLIPRECT_set((U_RECT16){x, y, x+200, y+400});     taf(rec,wt,"U_WWMRINTERSECTCLIPRECT_set");
+   rec = U_WMROFFSETCLIPRGN_set((U_POINT16){ox,oy});                     taf(rec,wt,"U_WMROFFSETCLIPRGN_set");
+   draw_star(wt, wht, pen_black_1, brush_gray, x, y);
+   rec = U_WMRRESTOREDC_set(-1);                                         taf(rec,wt,"U_WMRSAVEDC_set");
+
+   /* double rectangle clipping  then offset */
+   y += 500;
+   textlabel(40, "Rects (include,include,offset)", x , y - 60, font, wt, wht);
+   rec = wselectobject_set(pen_red_1, wht);                              taf(rec,wt,"selectobject_set");
+   rec = wselectobject_set(brush_null, wht);                             taf(rec,wt,"selectobject_set");
+   rec = U_WMRRECTANGLE_set((U_RECT16){x, y, x+200, y+400});             taf(rec,wt,"U_WMRRECTANGLE_set");
+   rec = U_WMRRECTANGLE_set((U_RECT16){x, y+200, x+400, y+400});         taf(rec,wt,"U_WMRRECTANGLE_set");
+   rec = U_WMRRECTANGLE_set((U_RECT16){x+ox, y+200+oy, x+200+ox, y+400+oy}); 
+                                                                         taf(rec,wt,"U_WMRRECTANGLE_set");
+
+   rec = U_WMRSAVEDC_set();                                              taf(rec,wt,"U_WMRSAVEDC_set");
+   rec = U_WMRINTERSECTCLIPRECT_set((U_RECT16){x, y, x+200, y+400});     taf(rec,wt,"U_WWMRINTERSECTCLIPRECT_set");
+   rec = U_WMRINTERSECTCLIPRECT_set((U_RECT16){x, y+200, x+400, y+400}); taf(rec,wt,"U_WWMRINTERSECTCLIPRECT_set");
+   rec = U_WMROFFSETCLIPRGN_set((U_POINT16){ox,oy});                     taf(rec,wt,"U_WMROFFSETCLIPRGN_set");
+   draw_star(wt, wht, pen_black_1, brush_gray, x, y);
+   rec = U_WMRRESTOREDC_set(-1);                                         taf(rec,wt,"U_WMRSAVEDC_set");
+}
+
 int main(int argc, char *argv[]){
     WMFTRACK            *wt;
     WMFHANDLES          *wht;
@@ -348,6 +473,7 @@ int main(int argc, char *argv[]){
     int                  pen_black_1;
     int                  pen_white_1;
     int                  pen_turquoise_50;
+    int                  pen_red_1;
     int                  pen_red_10;
     int                  pen_darkred_10;
     int                  pen_darkred_200;
@@ -588,6 +714,11 @@ int main(int argc, char *argv[]){
     pen_turquoise_50 = pen;
 
     cr  = colorref_set(255, 0, 0);
+    up  = U_PEN_set(U_PS_SOLID | U_PS_JOIN_MITER | U_PS_ENDCAP_SQUARE, 1, cr);
+    rec = wcreatepenindirect_set(&pen, wht, up);                   taf(rec,wt,"wcreatepenindect_set");
+    pen_red_1 = pen;
+
+    cr  = colorref_set(255, 0, 0);
     up  = U_PEN_set(U_PS_SOLID | U_PS_JOIN_MITER | U_PS_ENDCAP_SQUARE, 10, cr);
     rec = wcreatepenindirect_set(&pen, wht, up);                   taf(rec,wt,"wcreatepenindect_set");
     pen_red_10 = pen;
@@ -656,8 +787,8 @@ int main(int argc, char *argv[]){
 
     /* label the drawing */
     
-    textlabel(400, "libUEMF v0.1.11",      9700, 200, font_courier_400, wt, wht);
-    textlabel(400, "January 29, 2014",     9700, 500, font_courier_400, wt, wht);
+    textlabel(400, "libUEMF v0.1.16",      9700, 200, font_courier_400, wt, wht);
+    textlabel(400, "April 11, 2014",       9700, 500, font_courier_400, wt, wht);
     rec = malloc(128);
     (void)sprintf(rec,"WMF test: %2.2X",mode);
     textlabel(400, rec,                    9700, 800, font_courier_400, wt, wht);
@@ -1611,6 +1742,10 @@ int main(int argc, char *argv[]){
     textlabel(40, "(No WMF equivalent for EMF test.)",   8800, offset, font_courier_30, wt, wht); offset+=100;
     not_in_wmf(1.5,9000,offset, pen_red_10, brush_darkred, wt, wht);  /* WMF has no bezierto */
 
+
+    /* Test clipping regions */
+    test_clips(13250, 1400, font_courier_30, pen_red_1, pen_black_1, brush_gray, brush_null, wt, wht);
+
 /* ************************************************* */
 
 //
@@ -1621,7 +1756,7 @@ int main(int argc, char *argv[]){
     taf(rec,wt,"U_WMREOF_set");
 
     /* Test the endian routines (on either Big or Little Endian machines).
-    This must be done befoe the call to emf_finish, as that will swap the byte
+    This must be done befoe the call to wmf_finish, as that will swap the byte
     order of the WMF data before it writes it out on a BE machine.  */
     
 #if 1 
@@ -1646,8 +1781,8 @@ int main(int argc, char *argv[]){
 #endif // swap testing
 
     status=wmf_finish(wt);
-    if(status){ printf("emf_finish failed: %d\n", status); }
-    else {      printf("emf_finish sucess\n");             }
+    if(status){ printf("wmf_finish failed: %d\n", status); }
+    else {      printf("wmf_finish sucess\n");             }
 
     wmf_free(&wt);
     wmf_htable_free(&wht);
