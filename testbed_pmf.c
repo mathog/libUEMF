@@ -5,6 +5,7 @@
    1  Disable tests that block EMF import into PowerPoint (dotted lines)
    2  Enable tests that block EMF being displayed in Windows Preview (currently, GradientFill)
    4  Use a rotated, scaled, offset world transform
+   8  Disable clipping tests.
    Default is 0, no option set.
 
  Compile with 
@@ -40,6 +41,7 @@ Copyright: 2014 David Mathog and California Institute of Technology (Caltech)
 #define PPT_BLOCKERS     1
 #define PREVIEW_BLOCKERS 2
 #define WORLDXFORM_TEST  4
+#define NO_CLIP_TEST     8
 #define ALPHA_YES        1
 #define ALPHA_NO         0
 #define CMP_IMG_YES      1
@@ -619,9 +621,13 @@ void grad_star(EMFTRACK *et, int x, int y, int options, U_PSEUDO_OBJ *poac){
    U_PSEUDO_OBJ           *poPGBD;
    U_PSEUDO_OBJ           *poBrush;
    U_PSEUDO_OBJ           *poBrushID;
+   U_PSEUDO_OBJ           *poColor;
    U_PSEUDO_OBJ           *po;
    U_DPSEUDO_OBJ          *dpath=NULL;
    uint32_t                Flags = U_BD_Transform;
+
+   poColor   = U_PMF_ARGB_set(255,0,0,0);
+   textlabel(poac, 40, "Text_____Beneath______Star____Test1", x -30 , y + 250, U_SA_Near, U_SA_Near, poColor, et);
 
    poBrushID = U_PMF_4NUM_set(OBJ_BRUSH_GROUP1);
       IfNullPtr(poBrushID,__LINE__,"OOPS on U_PMF_4NUM_set\n");
@@ -668,6 +674,8 @@ void grad_star(EMFTRACK *et, int x, int y, int options, U_PSEUDO_OBJ *poac){
       IfNullPtr(po,__LINE__,"OOPS on U_PMR_FILLPATH_set\n");
    paf(et, poac, po, "U_PMR_FILLPATH_set");
  
+   textlabel(poac, 40, "Text_____Above________Star____Test2", x -30 , y + 450, U_SA_Near, U_SA_Near, poColor, et);
+
    U_PO_free(&poTm);
    U_PO_free(&poPGBOD);
    U_PO_free(&poBrush);
@@ -678,6 +686,7 @@ void grad_star(EMFTRACK *et, int x, int y, int options, U_PSEUDO_OBJ *poac){
    free(center);
    free(points);
    U_PO_free(&poBrushID);
+   U_PO_free(&poColor);
    U_DPO_free(&dpath);
 }
 
@@ -908,6 +917,7 @@ void test_clips(EMFTRACK *et, int x, int y, U_PSEUDO_OBJ *poac){
    grad_star(et, x+800, y, 0, poac);
    grad_star(et, x+800, y+700, 1, poac);
    
+printf("DEBUG test_clip 100\n");fflush(stdout);
    /* NOW reset the clipping */
    po = U_PMR_RESETCLIP_set();
        IfNullPtr(po,__LINE__,"OOPS on U_PMR_RESETCLIP\n");
@@ -1356,6 +1366,7 @@ int main(int argc, char *argv[]){
       printf("   1  Disable tests that block EMF import into PowerPoint (dotted lines)\n");
       printf("   2  Enable tests that block EMF being displayed in Windows Preview (currently, GradientFill)\n");
       printf("   4  Rotate and scale the test image within the page.\n");
+      printf("   8  Disable clipping tests.\n");
       exit(EXIT_FAILURE);
     }
  
@@ -1675,8 +1686,8 @@ int main(int argc, char *argv[]){
     
     poColor   = U_PMF_ARGB_set(255,0,0,0);
 
-    textlabel(poac, 400, "libUEMF v0.1.14",     9700, 200, U_SA_Near, U_SA_Near, poColor, et);
-    textlabel(poac, 400, "Mar 24, 2014",        9700, 500, U_SA_Near, U_SA_Near, poColor, et);
+    textlabel(poac, 400, "libUEMF v0.1.17",     9700, 200, U_SA_Near, U_SA_Near, poColor, et);
+    textlabel(poac, 400, "July 25, 2014",        9700, 500, U_SA_Near, U_SA_Near, poColor, et);
     rec = malloc(128);
     (void)sprintf(rec,"EMF+ test: %2.2X",mode);
     textlabel(poac, 400, rec,                   9700, 800, U_SA_Near, U_SA_Near, poColor, et);
@@ -2850,7 +2861,9 @@ int main(int argc, char *argv[]){
     gradient_column(et, offset, 5000, 300, 300, poac);
 
     /* Test clipping regions */
-    test_clips(et, 6700,1300, poac);
+    if(!(mode & NO_CLIP_TEST)){
+       test_clips(et, 6700,1300, poac);
+    }
 
 /* WORKING HERE, INSERT NEW CODE ABOVE */
 

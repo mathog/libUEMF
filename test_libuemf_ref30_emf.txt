@@ -3,8 +3,8 @@ U_EMR_HEADER                  record:    0 type:1    offset:       0 rsize:     
    rclFrame:       {0,0,29699,20999} 
    dSignature:     0x464D4520
    nVersion:       0x00010000
-   nBytes:         130592
-   nRecords:       1810
+   nBytes:         144416
+   nRecords:       1954
    nHandles:       6
    sReserved:      0
    nDescription:   51
@@ -80,7 +80,7 @@ U_EMR_EXTTEXTOUTW             record:   23 type:84   offset:     944 rsize:     
    rclBounds:      {0,0,-1,-1} 
    exScale:        1.000000
    eyScale:        1.000000
-   emrtext:        ptlReference:{9700,200} nChars:15 offString:76 string16:<libUEMF v0.1.15> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:108 Dx:240:240:240:240:240:240:240:240:240:240:240:240:240:240:240:
+   emrtext:        ptlReference:{9700,200} nChars:15 offString:76 string16:<libUEMF v0.1.17> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:108 Dx:240:240:240:240:240:240:240:240:240:240:240:240:240:240:240:
 U_EMR_SETTEXTALIGN            record:   24 type:22   offset:    1112 rsize:      12
    iMode:          0x00000000
 U_EMR_SELECTOBJECT            record:   25 type:37   offset:    1124 rsize:      12
@@ -97,7 +97,7 @@ U_EMR_EXTTEXTOUTW             record:   29 type:84   offset:    1492 rsize:     
    rclBounds:      {0,0,-1,-1} 
    exScale:        1.000000
    eyScale:        1.000000
-   emrtext:        ptlReference:{9700,500} nChars:13 offString:76 string16:<April 4, 2014> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:104 Dx:240:240:240:240:240:240:240:240:240:240:240:240:240:
+   emrtext:        ptlReference:{9700,500} nChars:13 offString:76 string16:<July 25, 2014> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:104 Dx:240:240:240:240:240:240:240:240:240:240:240:240:240:
 U_EMR_SETTEXTALIGN            record:   30 type:22   offset:    1648 rsize:      12
    iMode:          0x00000000
 U_EMR_SELECTOBJECT            record:   31 type:37   offset:    1660 rsize:      12
@@ -5768,592 +5768,1000 @@ U_EMR_EXTTEXTOUTW             record: 1537 type:84   offset:  119304 rsize:     
    exScale:        1.000000
    eyScale:        1.000000
    emrtext:        ptlReference:{13250,1340} nChars:6 offString:76 string16:<NoClip> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:88 Dx:24:24:24:24:24:24:
-U_EMR_SELECTOBJECT            record: 1538 type:37   offset:  119416 rsize:      12
-   StockObject:    0x80000007
+U_EMR_SETTEXTALIGN            record: 1538 type:22   offset:  119416 rsize:      12
+   iMode:          0x00000000
 U_EMR_SELECTOBJECT            record: 1539 type:37   offset:  119428 rsize:      12
+   StockObject:    0x8000000E
+U_EMR_DELETEOBJECT            record: 1540 type:40   offset:  119440 rsize:      12
+   ihObject:       2
+U_EMR_EXTCREATEFONTINDIRECTW  record: 1541 type:82   offset:  119452 rsize:     332
+   ihFont:         2
+   Font:           elfLogFont:lfHeight:-40 lfWidth:0 lfEscapement:0 lfOrientation:0 lfWeight:400 lfItalic:0x00 lfUnderline:0x00 lfStrikeOut:0x00 lfCharSet:0x00 lfOutPrecision:0x00 lfClipPrecision:0x00 lfQuality:0x00 lfPitchAndFamily:0x00 lfFaceName:Courier New elfFullName:Courier New elfStyle:Normal elfVersion:0 elfStyleSize:0 elfMatch:0 elfReserved:0 elfVendorId:00000000 elfCulture:0 elfPanose:bFamilyType:1 bSerifStyle:1 bWeight:1 bProportion:1 bContrast:1 bStrokeVariation:1 bArmStyle:1 bLetterform:1 bMidline:1 bXHeight:1 
+U_EMR_SELECTOBJECT            record: 1542 type:37   offset:  119784 rsize:      12
+   ihObject:       2
+U_EMR_EXTTEXTOUTW             record: 1543 type:84   offset:  119796 rsize:     196
+   iGraphicsMode:  1
+   rclBounds:      {0,0,-1,-1} 
+   exScale:        1.000000
+   eyScale:        1.000000
+   emrtext:        ptlReference:{13220,1460} nChars:20 offString:76 string16:<TextBeneathStarTest1> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:116 Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
+U_EMR_SELECTOBJECT            record: 1544 type:37   offset:  119992 rsize:      12
+   StockObject:    0x80000007
+U_EMR_SELECTOBJECT            record: 1545 type:37   offset:  120004 rsize:      12
    StockObject:    0x80000002
-U_EMR_SETPOLYFILLMODE         record: 1540 type:19   offset:  119440 rsize:      12
+U_EMR_SETPOLYFILLMODE         record: 1546 type:19   offset:  120016 rsize:      12
    iMode:          0x00000002
-U_EMR_BEGINPATH               record: 1541 type:59   offset:  119452 rsize:       8
-U_EMR_POLYGON                 record: 1542 type:3    offset:  119460 rsize:     108
+U_EMR_BEGINPATH               record: 1547 type:59   offset:  120028 rsize:       8
+U_EMR_POLYGON                 record: 1548 type:3    offset:  120036 rsize:     108
    rclBounds:      {13269,1414,13615,1744} 
    cptl:           10
    Points:         [0]:{13547,1744} [1]:{13441,1651} [2]:{13333,1742} [3]:{13389,1613} [4]:{13269,1538} [5]:{13410,1552} [6]:{13443,1414} [7]:{13474,1552} [8]:{13615,1542} [9]:{13493,1614} 
-U_EMR_ENDPATH                 record: 1543 type:60   offset:  119568 rsize:       8
-U_EMR_STROKEANDFILLPATH       record: 1544 type:63   offset:  119576 rsize:      24
+U_EMR_ENDPATH                 record: 1549 type:60   offset:  120144 rsize:       8
+U_EMR_STROKEANDFILLPATH       record: 1550 type:63   offset:  120152 rsize:      24
    rclBox:         {0,0,29699,20999} 
-U_EMR_SETTEXTALIGN            record: 1545 type:22   offset:  119600 rsize:      12
+U_EMR_SETTEXTALIGN            record: 1551 type:22   offset:  120176 rsize:      12
    iMode:          0x00000000
-U_EMR_SELECTOBJECT            record: 1546 type:37   offset:  119612 rsize:      12
+U_EMR_SELECTOBJECT            record: 1552 type:37   offset:  120188 rsize:      12
    StockObject:    0x8000000E
-U_EMR_DELETEOBJECT            record: 1547 type:40   offset:  119624 rsize:      12
+U_EMR_DELETEOBJECT            record: 1553 type:40   offset:  120200 rsize:      12
    ihObject:       2
-U_EMR_EXTCREATEFONTINDIRECTW  record: 1548 type:82   offset:  119636 rsize:     332
+U_EMR_EXTCREATEFONTINDIRECTW  record: 1554 type:82   offset:  120212 rsize:     332
    ihFont:         2
    Font:           elfLogFont:lfHeight:-40 lfWidth:0 lfEscapement:0 lfOrientation:0 lfWeight:400 lfItalic:0x00 lfUnderline:0x00 lfStrikeOut:0x00 lfCharSet:0x00 lfOutPrecision:0x00 lfClipPrecision:0x00 lfQuality:0x00 lfPitchAndFamily:0x00 lfFaceName:Courier New elfFullName:Courier New elfStyle:Normal elfVersion:0 elfStyleSize:0 elfMatch:0 elfReserved:0 elfVendorId:00000000 elfCulture:0 elfPanose:bFamilyType:1 bSerifStyle:1 bWeight:1 bProportion:1 bContrast:1 bStrokeVariation:1 bArmStyle:1 bLetterform:1 bMidline:1 bXHeight:1 
-U_EMR_SELECTOBJECT            record: 1549 type:37   offset:  119968 rsize:      12
+U_EMR_SELECTOBJECT            record: 1555 type:37   offset:  120544 rsize:      12
    ihObject:       2
-U_EMR_EXTTEXTOUTW             record: 1550 type:84   offset:  119980 rsize:     160
+U_EMR_EXTTEXTOUTW             record: 1556 type:84   offset:  120556 rsize:     196
+   iGraphicsMode:  1
+   rclBounds:      {0,0,-1,-1} 
+   exScale:        1.000000
+   eyScale:        1.000000
+   emrtext:        ptlReference:{13220,1610} nChars:20 offString:76 string16:<TextAbove__StarTest2> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:116 Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
+U_EMR_SETTEXTALIGN            record: 1557 type:22   offset:  120752 rsize:      12
+   iMode:          0x00000000
+U_EMR_SELECTOBJECT            record: 1558 type:37   offset:  120764 rsize:      12
+   StockObject:    0x8000000E
+U_EMR_DELETEOBJECT            record: 1559 type:40   offset:  120776 rsize:      12
+   ihObject:       2
+U_EMR_EXTCREATEFONTINDIRECTW  record: 1560 type:82   offset:  120788 rsize:     332
+   ihFont:         2
+   Font:           elfLogFont:lfHeight:-40 lfWidth:0 lfEscapement:0 lfOrientation:0 lfWeight:400 lfItalic:0x00 lfUnderline:0x00 lfStrikeOut:0x00 lfCharSet:0x00 lfOutPrecision:0x00 lfClipPrecision:0x00 lfQuality:0x00 lfPitchAndFamily:0x00 lfFaceName:Courier New elfFullName:Courier New elfStyle:Normal elfVersion:0 elfStyleSize:0 elfMatch:0 elfReserved:0 elfVendorId:00000000 elfCulture:0 elfPanose:bFamilyType:1 bSerifStyle:1 bWeight:1 bProportion:1 bContrast:1 bStrokeVariation:1 bArmStyle:1 bLetterform:1 bMidline:1 bXHeight:1 
+U_EMR_SELECTOBJECT            record: 1561 type:37   offset:  121120 rsize:      12
+   ihObject:       2
+U_EMR_EXTTEXTOUTW             record: 1562 type:84   offset:  121132 rsize:     160
    iGraphicsMode:  1
    rclBounds:      {0,0,-1,-1} 
    exScale:        1.000000
    eyScale:        1.000000
    emrtext:        ptlReference:{13250,1840} nChars:14 offString:76 string16:<Rect (include)> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:104 Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
-U_EMR_SELECTOBJECT            record: 1551 type:37   offset:  120140 rsize:      12
+U_EMR_SELECTOBJECT            record: 1563 type:37   offset:  121292 rsize:      12
    ihObject:       5
-U_EMR_SELECTOBJECT            record: 1552 type:37   offset:  120152 rsize:      12
+U_EMR_SELECTOBJECT            record: 1564 type:37   offset:  121304 rsize:      12
    StockObject:    0x80000005
-U_EMR_RECTANGLE               record: 1553 type:43   offset:  120164 rsize:      24
+U_EMR_RECTANGLE               record: 1565 type:43   offset:  121316 rsize:      24
    rclBox:         {13250,1900,13450,2300} 
-U_EMR_SAVEDC                  record: 1554 type:33   offset:  120188 rsize:       8
-U_EMR_INTERSECTCLIPRECT       record: 1555 type:30   offset:  120196 rsize:      24
+U_EMR_SAVEDC                  record: 1566 type:33   offset:  121340 rsize:       8
+U_EMR_INTERSECTCLIPRECT       record: 1567 type:30   offset:  121348 rsize:      24
    rclBox:         {13250,1900,13450,2300} 
-U_EMR_SELECTOBJECT            record: 1556 type:37   offset:  120220 rsize:      12
+U_EMR_SETTEXTALIGN            record: 1568 type:22   offset:  121372 rsize:      12
+   iMode:          0x00000000
+U_EMR_SELECTOBJECT            record: 1569 type:37   offset:  121384 rsize:      12
+   StockObject:    0x8000000E
+U_EMR_DELETEOBJECT            record: 1570 type:40   offset:  121396 rsize:      12
+   ihObject:       2
+U_EMR_EXTCREATEFONTINDIRECTW  record: 1571 type:82   offset:  121408 rsize:     332
+   ihFont:         2
+   Font:           elfLogFont:lfHeight:-40 lfWidth:0 lfEscapement:0 lfOrientation:0 lfWeight:400 lfItalic:0x00 lfUnderline:0x00 lfStrikeOut:0x00 lfCharSet:0x00 lfOutPrecision:0x00 lfClipPrecision:0x00 lfQuality:0x00 lfPitchAndFamily:0x00 lfFaceName:Courier New elfFullName:Courier New elfStyle:Normal elfVersion:0 elfStyleSize:0 elfMatch:0 elfReserved:0 elfVendorId:00000000 elfCulture:0 elfPanose:bFamilyType:1 bSerifStyle:1 bWeight:1 bProportion:1 bContrast:1 bStrokeVariation:1 bArmStyle:1 bLetterform:1 bMidline:1 bXHeight:1 
+U_EMR_SELECTOBJECT            record: 1572 type:37   offset:  121740 rsize:      12
+   ihObject:       2
+U_EMR_EXTTEXTOUTW             record: 1573 type:84   offset:  121752 rsize:     196
+   iGraphicsMode:  1
+   rclBounds:      {0,0,-1,-1} 
+   exScale:        1.000000
+   eyScale:        1.000000
+   emrtext:        ptlReference:{13220,1960} nChars:20 offString:76 string16:<TextBeneathStarTest1> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:116 Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
+U_EMR_SELECTOBJECT            record: 1574 type:37   offset:  121948 rsize:      12
    StockObject:    0x80000007
-U_EMR_SELECTOBJECT            record: 1557 type:37   offset:  120232 rsize:      12
+U_EMR_SELECTOBJECT            record: 1575 type:37   offset:  121960 rsize:      12
    StockObject:    0x80000002
-U_EMR_SETPOLYFILLMODE         record: 1558 type:19   offset:  120244 rsize:      12
+U_EMR_SETPOLYFILLMODE         record: 1576 type:19   offset:  121972 rsize:      12
    iMode:          0x00000002
-U_EMR_BEGINPATH               record: 1559 type:59   offset:  120256 rsize:       8
-U_EMR_POLYGON                 record: 1560 type:3    offset:  120264 rsize:     108
+U_EMR_BEGINPATH               record: 1577 type:59   offset:  121984 rsize:       8
+U_EMR_POLYGON                 record: 1578 type:3    offset:  121992 rsize:     108
    rclBounds:      {13269,1914,13615,2244} 
    cptl:           10
    Points:         [0]:{13547,2244} [1]:{13441,2151} [2]:{13333,2242} [3]:{13389,2113} [4]:{13269,2038} [5]:{13410,2052} [6]:{13443,1914} [7]:{13474,2052} [8]:{13615,2042} [9]:{13493,2114} 
-U_EMR_ENDPATH                 record: 1561 type:60   offset:  120372 rsize:       8
-U_EMR_STROKEANDFILLPATH       record: 1562 type:63   offset:  120380 rsize:      24
+U_EMR_ENDPATH                 record: 1579 type:60   offset:  122100 rsize:       8
+U_EMR_STROKEANDFILLPATH       record: 1580 type:63   offset:  122108 rsize:      24
    rclBox:         {0,0,29699,20999} 
-U_EMR_RESTOREDC               record: 1563 type:34   offset:  120404 rsize:      12
-   iRelative:      -1
-U_EMR_SETTEXTALIGN            record: 1564 type:22   offset:  120416 rsize:      12
+U_EMR_SETTEXTALIGN            record: 1581 type:22   offset:  122132 rsize:      12
    iMode:          0x00000000
-U_EMR_SELECTOBJECT            record: 1565 type:37   offset:  120428 rsize:      12
+U_EMR_SELECTOBJECT            record: 1582 type:37   offset:  122144 rsize:      12
    StockObject:    0x8000000E
-U_EMR_DELETEOBJECT            record: 1566 type:40   offset:  120440 rsize:      12
+U_EMR_DELETEOBJECT            record: 1583 type:40   offset:  122156 rsize:      12
    ihObject:       2
-U_EMR_EXTCREATEFONTINDIRECTW  record: 1567 type:82   offset:  120452 rsize:     332
+U_EMR_EXTCREATEFONTINDIRECTW  record: 1584 type:82   offset:  122168 rsize:     332
    ihFont:         2
    Font:           elfLogFont:lfHeight:-40 lfWidth:0 lfEscapement:0 lfOrientation:0 lfWeight:400 lfItalic:0x00 lfUnderline:0x00 lfStrikeOut:0x00 lfCharSet:0x00 lfOutPrecision:0x00 lfClipPrecision:0x00 lfQuality:0x00 lfPitchAndFamily:0x00 lfFaceName:Courier New elfFullName:Courier New elfStyle:Normal elfVersion:0 elfStyleSize:0 elfMatch:0 elfReserved:0 elfVendorId:00000000 elfCulture:0 elfPanose:bFamilyType:1 bSerifStyle:1 bWeight:1 bProportion:1 bContrast:1 bStrokeVariation:1 bArmStyle:1 bLetterform:1 bMidline:1 bXHeight:1 
-U_EMR_SELECTOBJECT            record: 1568 type:37   offset:  120784 rsize:      12
+U_EMR_SELECTOBJECT            record: 1585 type:37   offset:  122500 rsize:      12
    ihObject:       2
-U_EMR_EXTTEXTOUTW             record: 1569 type:84   offset:  120796 rsize:     216
+U_EMR_EXTTEXTOUTW             record: 1586 type:84   offset:  122512 rsize:     196
+   iGraphicsMode:  1
+   rclBounds:      {0,0,-1,-1} 
+   exScale:        1.000000
+   eyScale:        1.000000
+   emrtext:        ptlReference:{13220,2110} nChars:20 offString:76 string16:<TextAbove__StarTest2> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:116 Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
+U_EMR_RESTOREDC               record: 1587 type:34   offset:  122708 rsize:      12
+   iRelative:      -1
+U_EMR_SETTEXTALIGN            record: 1588 type:22   offset:  122720 rsize:      12
+   iMode:          0x00000000
+U_EMR_SELECTOBJECT            record: 1589 type:37   offset:  122732 rsize:      12
+   StockObject:    0x8000000E
+U_EMR_DELETEOBJECT            record: 1590 type:40   offset:  122744 rsize:      12
+   ihObject:       2
+U_EMR_EXTCREATEFONTINDIRECTW  record: 1591 type:82   offset:  122756 rsize:     332
+   ihFont:         2
+   Font:           elfLogFont:lfHeight:-40 lfWidth:0 lfEscapement:0 lfOrientation:0 lfWeight:400 lfItalic:0x00 lfUnderline:0x00 lfStrikeOut:0x00 lfCharSet:0x00 lfOutPrecision:0x00 lfClipPrecision:0x00 lfQuality:0x00 lfPitchAndFamily:0x00 lfFaceName:Courier New elfFullName:Courier New elfStyle:Normal elfVersion:0 elfStyleSize:0 elfMatch:0 elfReserved:0 elfVendorId:00000000 elfCulture:0 elfPanose:bFamilyType:1 bSerifStyle:1 bWeight:1 bProportion:1 bContrast:1 bStrokeVariation:1 bArmStyle:1 bLetterform:1 bMidline:1 bXHeight:1 
+U_EMR_SELECTOBJECT            record: 1592 type:37   offset:  123088 rsize:      12
+   ihObject:       2
+U_EMR_EXTTEXTOUTW             record: 1593 type:84   offset:  123100 rsize:     216
    iGraphicsMode:  1
    rclBounds:      {0,0,-1,-1} 
    exScale:        1.000000
    eyScale:        1.000000
    emrtext:        ptlReference:{13250,2340} nChars:23 offString:76 string16:<Rects (include,include)> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:124 Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
-U_EMR_SELECTOBJECT            record: 1570 type:37   offset:  121012 rsize:      12
+U_EMR_SELECTOBJECT            record: 1594 type:37   offset:  123316 rsize:      12
    ihObject:       5
-U_EMR_SELECTOBJECT            record: 1571 type:37   offset:  121024 rsize:      12
+U_EMR_SELECTOBJECT            record: 1595 type:37   offset:  123328 rsize:      12
    StockObject:    0x80000005
-U_EMR_RECTANGLE               record: 1572 type:43   offset:  121036 rsize:      24
+U_EMR_RECTANGLE               record: 1596 type:43   offset:  123340 rsize:      24
    rclBox:         {13250,2400,13450,2800} 
-U_EMR_RECTANGLE               record: 1573 type:43   offset:  121060 rsize:      24
+U_EMR_RECTANGLE               record: 1597 type:43   offset:  123364 rsize:      24
    rclBox:         {13250,2600,13650,2800} 
-U_EMR_SAVEDC                  record: 1574 type:33   offset:  121084 rsize:       8
-U_EMR_INTERSECTCLIPRECT       record: 1575 type:30   offset:  121092 rsize:      24
+U_EMR_SAVEDC                  record: 1598 type:33   offset:  123388 rsize:       8
+U_EMR_INTERSECTCLIPRECT       record: 1599 type:30   offset:  123396 rsize:      24
    rclBox:         {13250,2400,13450,2800} 
-U_EMR_INTERSECTCLIPRECT       record: 1576 type:30   offset:  121116 rsize:      24
+U_EMR_INTERSECTCLIPRECT       record: 1600 type:30   offset:  123420 rsize:      24
    rclBox:         {13250,2600,13650,2800} 
-U_EMR_SELECTOBJECT            record: 1577 type:37   offset:  121140 rsize:      12
+U_EMR_SETTEXTALIGN            record: 1601 type:22   offset:  123444 rsize:      12
+   iMode:          0x00000000
+U_EMR_SELECTOBJECT            record: 1602 type:37   offset:  123456 rsize:      12
+   StockObject:    0x8000000E
+U_EMR_DELETEOBJECT            record: 1603 type:40   offset:  123468 rsize:      12
+   ihObject:       2
+U_EMR_EXTCREATEFONTINDIRECTW  record: 1604 type:82   offset:  123480 rsize:     332
+   ihFont:         2
+   Font:           elfLogFont:lfHeight:-40 lfWidth:0 lfEscapement:0 lfOrientation:0 lfWeight:400 lfItalic:0x00 lfUnderline:0x00 lfStrikeOut:0x00 lfCharSet:0x00 lfOutPrecision:0x00 lfClipPrecision:0x00 lfQuality:0x00 lfPitchAndFamily:0x00 lfFaceName:Courier New elfFullName:Courier New elfStyle:Normal elfVersion:0 elfStyleSize:0 elfMatch:0 elfReserved:0 elfVendorId:00000000 elfCulture:0 elfPanose:bFamilyType:1 bSerifStyle:1 bWeight:1 bProportion:1 bContrast:1 bStrokeVariation:1 bArmStyle:1 bLetterform:1 bMidline:1 bXHeight:1 
+U_EMR_SELECTOBJECT            record: 1605 type:37   offset:  123812 rsize:      12
+   ihObject:       2
+U_EMR_EXTTEXTOUTW             record: 1606 type:84   offset:  123824 rsize:     196
+   iGraphicsMode:  1
+   rclBounds:      {0,0,-1,-1} 
+   exScale:        1.000000
+   eyScale:        1.000000
+   emrtext:        ptlReference:{13220,2460} nChars:20 offString:76 string16:<TextBeneathStarTest1> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:116 Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
+U_EMR_SELECTOBJECT            record: 1607 type:37   offset:  124020 rsize:      12
    StockObject:    0x80000007
-U_EMR_SELECTOBJECT            record: 1578 type:37   offset:  121152 rsize:      12
+U_EMR_SELECTOBJECT            record: 1608 type:37   offset:  124032 rsize:      12
    StockObject:    0x80000002
-U_EMR_SETPOLYFILLMODE         record: 1579 type:19   offset:  121164 rsize:      12
+U_EMR_SETPOLYFILLMODE         record: 1609 type:19   offset:  124044 rsize:      12
    iMode:          0x00000002
-U_EMR_BEGINPATH               record: 1580 type:59   offset:  121176 rsize:       8
-U_EMR_POLYGON                 record: 1581 type:3    offset:  121184 rsize:     108
+U_EMR_BEGINPATH               record: 1610 type:59   offset:  124056 rsize:       8
+U_EMR_POLYGON                 record: 1611 type:3    offset:  124064 rsize:     108
    rclBounds:      {13269,2414,13615,2744} 
    cptl:           10
    Points:         [0]:{13547,2744} [1]:{13441,2651} [2]:{13333,2742} [3]:{13389,2613} [4]:{13269,2538} [5]:{13410,2552} [6]:{13443,2414} [7]:{13474,2552} [8]:{13615,2542} [9]:{13493,2614} 
-U_EMR_ENDPATH                 record: 1582 type:60   offset:  121292 rsize:       8
-U_EMR_STROKEANDFILLPATH       record: 1583 type:63   offset:  121300 rsize:      24
+U_EMR_ENDPATH                 record: 1612 type:60   offset:  124172 rsize:       8
+U_EMR_STROKEANDFILLPATH       record: 1613 type:63   offset:  124180 rsize:      24
    rclBox:         {0,0,29699,20999} 
-U_EMR_RESTOREDC               record: 1584 type:34   offset:  121324 rsize:      12
-   iRelative:      -1
-U_EMR_SETTEXTALIGN            record: 1585 type:22   offset:  121336 rsize:      12
+U_EMR_SETTEXTALIGN            record: 1614 type:22   offset:  124204 rsize:      12
    iMode:          0x00000000
-U_EMR_SELECTOBJECT            record: 1586 type:37   offset:  121348 rsize:      12
+U_EMR_SELECTOBJECT            record: 1615 type:37   offset:  124216 rsize:      12
    StockObject:    0x8000000E
-U_EMR_DELETEOBJECT            record: 1587 type:40   offset:  121360 rsize:      12
+U_EMR_DELETEOBJECT            record: 1616 type:40   offset:  124228 rsize:      12
    ihObject:       2
-U_EMR_EXTCREATEFONTINDIRECTW  record: 1588 type:82   offset:  121372 rsize:     332
+U_EMR_EXTCREATEFONTINDIRECTW  record: 1617 type:82   offset:  124240 rsize:     332
    ihFont:         2
    Font:           elfLogFont:lfHeight:-40 lfWidth:0 lfEscapement:0 lfOrientation:0 lfWeight:400 lfItalic:0x00 lfUnderline:0x00 lfStrikeOut:0x00 lfCharSet:0x00 lfOutPrecision:0x00 lfClipPrecision:0x00 lfQuality:0x00 lfPitchAndFamily:0x00 lfFaceName:Courier New elfFullName:Courier New elfStyle:Normal elfVersion:0 elfStyleSize:0 elfMatch:0 elfReserved:0 elfVendorId:00000000 elfCulture:0 elfPanose:bFamilyType:1 bSerifStyle:1 bWeight:1 bProportion:1 bContrast:1 bStrokeVariation:1 bArmStyle:1 bLetterform:1 bMidline:1 bXHeight:1 
-U_EMR_SELECTOBJECT            record: 1589 type:37   offset:  121704 rsize:      12
+U_EMR_SELECTOBJECT            record: 1618 type:37   offset:  124572 rsize:      12
    ihObject:       2
-U_EMR_EXTTEXTOUTW             record: 1590 type:84   offset:  121716 rsize:     160
+U_EMR_EXTTEXTOUTW             record: 1619 type:84   offset:  124584 rsize:     196
+   iGraphicsMode:  1
+   rclBounds:      {0,0,-1,-1} 
+   exScale:        1.000000
+   eyScale:        1.000000
+   emrtext:        ptlReference:{13220,2610} nChars:20 offString:76 string16:<TextAbove__StarTest2> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:116 Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
+U_EMR_RESTOREDC               record: 1620 type:34   offset:  124780 rsize:      12
+   iRelative:      -1
+U_EMR_SETTEXTALIGN            record: 1621 type:22   offset:  124792 rsize:      12
+   iMode:          0x00000000
+U_EMR_SELECTOBJECT            record: 1622 type:37   offset:  124804 rsize:      12
+   StockObject:    0x8000000E
+U_EMR_DELETEOBJECT            record: 1623 type:40   offset:  124816 rsize:      12
+   ihObject:       2
+U_EMR_EXTCREATEFONTINDIRECTW  record: 1624 type:82   offset:  124828 rsize:     332
+   ihFont:         2
+   Font:           elfLogFont:lfHeight:-40 lfWidth:0 lfEscapement:0 lfOrientation:0 lfWeight:400 lfItalic:0x00 lfUnderline:0x00 lfStrikeOut:0x00 lfCharSet:0x00 lfOutPrecision:0x00 lfClipPrecision:0x00 lfQuality:0x00 lfPitchAndFamily:0x00 lfFaceName:Courier New elfFullName:Courier New elfStyle:Normal elfVersion:0 elfStyleSize:0 elfMatch:0 elfReserved:0 elfVendorId:00000000 elfCulture:0 elfPanose:bFamilyType:1 bSerifStyle:1 bWeight:1 bProportion:1 bContrast:1 bStrokeVariation:1 bArmStyle:1 bLetterform:1 bMidline:1 bXHeight:1 
+U_EMR_SELECTOBJECT            record: 1625 type:37   offset:  125160 rsize:      12
+   ihObject:       2
+U_EMR_EXTTEXTOUTW             record: 1626 type:84   offset:  125172 rsize:     160
    iGraphicsMode:  1
    rclBounds:      {0,0,-1,-1} 
    exScale:        1.000000
    eyScale:        1.000000
    emrtext:        ptlReference:{13250,2840} nChars:14 offString:76 string16:<Rect (exclude)> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:104 Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
-U_EMR_SELECTOBJECT            record: 1591 type:37   offset:  121876 rsize:      12
+U_EMR_SELECTOBJECT            record: 1627 type:37   offset:  125332 rsize:      12
    ihObject:       5
-U_EMR_SELECTOBJECT            record: 1592 type:37   offset:  121888 rsize:      12
+U_EMR_SELECTOBJECT            record: 1628 type:37   offset:  125344 rsize:      12
    StockObject:    0x80000005
-U_EMR_RECTANGLE               record: 1593 type:43   offset:  121900 rsize:      24
+U_EMR_RECTANGLE               record: 1629 type:43   offset:  125356 rsize:      24
    rclBox:         {13250,2900,13450,3300} 
-U_EMR_SAVEDC                  record: 1594 type:33   offset:  121924 rsize:       8
-U_EMR_EXCLUDECLIPRECT         record: 1595 type:29   offset:  121932 rsize:      24
+U_EMR_SAVEDC                  record: 1630 type:33   offset:  125380 rsize:       8
+U_EMR_EXCLUDECLIPRECT         record: 1631 type:29   offset:  125388 rsize:      24
    rclBox:         {13250,2900,13450,3300} 
-U_EMR_SELECTOBJECT            record: 1596 type:37   offset:  121956 rsize:      12
+U_EMR_SETTEXTALIGN            record: 1632 type:22   offset:  125412 rsize:      12
+   iMode:          0x00000000
+U_EMR_SELECTOBJECT            record: 1633 type:37   offset:  125424 rsize:      12
+   StockObject:    0x8000000E
+U_EMR_DELETEOBJECT            record: 1634 type:40   offset:  125436 rsize:      12
+   ihObject:       2
+U_EMR_EXTCREATEFONTINDIRECTW  record: 1635 type:82   offset:  125448 rsize:     332
+   ihFont:         2
+   Font:           elfLogFont:lfHeight:-40 lfWidth:0 lfEscapement:0 lfOrientation:0 lfWeight:400 lfItalic:0x00 lfUnderline:0x00 lfStrikeOut:0x00 lfCharSet:0x00 lfOutPrecision:0x00 lfClipPrecision:0x00 lfQuality:0x00 lfPitchAndFamily:0x00 lfFaceName:Courier New elfFullName:Courier New elfStyle:Normal elfVersion:0 elfStyleSize:0 elfMatch:0 elfReserved:0 elfVendorId:00000000 elfCulture:0 elfPanose:bFamilyType:1 bSerifStyle:1 bWeight:1 bProportion:1 bContrast:1 bStrokeVariation:1 bArmStyle:1 bLetterform:1 bMidline:1 bXHeight:1 
+U_EMR_SELECTOBJECT            record: 1636 type:37   offset:  125780 rsize:      12
+   ihObject:       2
+U_EMR_EXTTEXTOUTW             record: 1637 type:84   offset:  125792 rsize:     196
+   iGraphicsMode:  1
+   rclBounds:      {0,0,-1,-1} 
+   exScale:        1.000000
+   eyScale:        1.000000
+   emrtext:        ptlReference:{13220,2960} nChars:20 offString:76 string16:<TextBeneathStarTest1> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:116 Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
+U_EMR_SELECTOBJECT            record: 1638 type:37   offset:  125988 rsize:      12
    StockObject:    0x80000007
-U_EMR_SELECTOBJECT            record: 1597 type:37   offset:  121968 rsize:      12
+U_EMR_SELECTOBJECT            record: 1639 type:37   offset:  126000 rsize:      12
    StockObject:    0x80000002
-U_EMR_SETPOLYFILLMODE         record: 1598 type:19   offset:  121980 rsize:      12
+U_EMR_SETPOLYFILLMODE         record: 1640 type:19   offset:  126012 rsize:      12
    iMode:          0x00000002
-U_EMR_BEGINPATH               record: 1599 type:59   offset:  121992 rsize:       8
-U_EMR_POLYGON                 record: 1600 type:3    offset:  122000 rsize:     108
+U_EMR_BEGINPATH               record: 1641 type:59   offset:  126024 rsize:       8
+U_EMR_POLYGON                 record: 1642 type:3    offset:  126032 rsize:     108
    rclBounds:      {13269,2914,13615,3244} 
    cptl:           10
    Points:         [0]:{13547,3244} [1]:{13441,3151} [2]:{13333,3242} [3]:{13389,3113} [4]:{13269,3038} [5]:{13410,3052} [6]:{13443,2914} [7]:{13474,3052} [8]:{13615,3042} [9]:{13493,3114} 
-U_EMR_ENDPATH                 record: 1601 type:60   offset:  122108 rsize:       8
-U_EMR_STROKEANDFILLPATH       record: 1602 type:63   offset:  122116 rsize:      24
+U_EMR_ENDPATH                 record: 1643 type:60   offset:  126140 rsize:       8
+U_EMR_STROKEANDFILLPATH       record: 1644 type:63   offset:  126148 rsize:      24
    rclBox:         {0,0,29699,20999} 
-U_EMR_RESTOREDC               record: 1603 type:34   offset:  122140 rsize:      12
-   iRelative:      -1
-U_EMR_SETTEXTALIGN            record: 1604 type:22   offset:  122152 rsize:      12
+U_EMR_SETTEXTALIGN            record: 1645 type:22   offset:  126172 rsize:      12
    iMode:          0x00000000
-U_EMR_SELECTOBJECT            record: 1605 type:37   offset:  122164 rsize:      12
+U_EMR_SELECTOBJECT            record: 1646 type:37   offset:  126184 rsize:      12
    StockObject:    0x8000000E
-U_EMR_DELETEOBJECT            record: 1606 type:40   offset:  122176 rsize:      12
+U_EMR_DELETEOBJECT            record: 1647 type:40   offset:  126196 rsize:      12
    ihObject:       2
-U_EMR_EXTCREATEFONTINDIRECTW  record: 1607 type:82   offset:  122188 rsize:     332
+U_EMR_EXTCREATEFONTINDIRECTW  record: 1648 type:82   offset:  126208 rsize:     332
    ihFont:         2
    Font:           elfLogFont:lfHeight:-40 lfWidth:0 lfEscapement:0 lfOrientation:0 lfWeight:400 lfItalic:0x00 lfUnderline:0x00 lfStrikeOut:0x00 lfCharSet:0x00 lfOutPrecision:0x00 lfClipPrecision:0x00 lfQuality:0x00 lfPitchAndFamily:0x00 lfFaceName:Courier New elfFullName:Courier New elfStyle:Normal elfVersion:0 elfStyleSize:0 elfMatch:0 elfReserved:0 elfVendorId:00000000 elfCulture:0 elfPanose:bFamilyType:1 bSerifStyle:1 bWeight:1 bProportion:1 bContrast:1 bStrokeVariation:1 bArmStyle:1 bLetterform:1 bMidline:1 bXHeight:1 
-U_EMR_SELECTOBJECT            record: 1608 type:37   offset:  122520 rsize:      12
+U_EMR_SELECTOBJECT            record: 1649 type:37   offset:  126540 rsize:      12
    ihObject:       2
-U_EMR_EXTTEXTOUTW             record: 1609 type:84   offset:  122532 rsize:     216
+U_EMR_EXTTEXTOUTW             record: 1650 type:84   offset:  126552 rsize:     196
+   iGraphicsMode:  1
+   rclBounds:      {0,0,-1,-1} 
+   exScale:        1.000000
+   eyScale:        1.000000
+   emrtext:        ptlReference:{13220,3110} nChars:20 offString:76 string16:<TextAbove__StarTest2> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:116 Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
+U_EMR_RESTOREDC               record: 1651 type:34   offset:  126748 rsize:      12
+   iRelative:      -1
+U_EMR_SETTEXTALIGN            record: 1652 type:22   offset:  126760 rsize:      12
+   iMode:          0x00000000
+U_EMR_SELECTOBJECT            record: 1653 type:37   offset:  126772 rsize:      12
+   StockObject:    0x8000000E
+U_EMR_DELETEOBJECT            record: 1654 type:40   offset:  126784 rsize:      12
+   ihObject:       2
+U_EMR_EXTCREATEFONTINDIRECTW  record: 1655 type:82   offset:  126796 rsize:     332
+   ihFont:         2
+   Font:           elfLogFont:lfHeight:-40 lfWidth:0 lfEscapement:0 lfOrientation:0 lfWeight:400 lfItalic:0x00 lfUnderline:0x00 lfStrikeOut:0x00 lfCharSet:0x00 lfOutPrecision:0x00 lfClipPrecision:0x00 lfQuality:0x00 lfPitchAndFamily:0x00 lfFaceName:Courier New elfFullName:Courier New elfStyle:Normal elfVersion:0 elfStyleSize:0 elfMatch:0 elfReserved:0 elfVendorId:00000000 elfCulture:0 elfPanose:bFamilyType:1 bSerifStyle:1 bWeight:1 bProportion:1 bContrast:1 bStrokeVariation:1 bArmStyle:1 bLetterform:1 bMidline:1 bXHeight:1 
+U_EMR_SELECTOBJECT            record: 1656 type:37   offset:  127128 rsize:      12
+   ihObject:       2
+U_EMR_EXTTEXTOUTW             record: 1657 type:84   offset:  127140 rsize:     216
    iGraphicsMode:  1
    rclBounds:      {0,0,-1,-1} 
    exScale:        1.000000
    eyScale:        1.000000
    emrtext:        ptlReference:{13250,3340} nChars:23 offString:76 string16:<Rects (exclude,exclude)> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:124 Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
-U_EMR_SELECTOBJECT            record: 1610 type:37   offset:  122748 rsize:      12
+U_EMR_SELECTOBJECT            record: 1658 type:37   offset:  127356 rsize:      12
    ihObject:       5
-U_EMR_SELECTOBJECT            record: 1611 type:37   offset:  122760 rsize:      12
+U_EMR_SELECTOBJECT            record: 1659 type:37   offset:  127368 rsize:      12
    StockObject:    0x80000005
-U_EMR_RECTANGLE               record: 1612 type:43   offset:  122772 rsize:      24
+U_EMR_RECTANGLE               record: 1660 type:43   offset:  127380 rsize:      24
    rclBox:         {13250,3400,13450,3800} 
-U_EMR_RECTANGLE               record: 1613 type:43   offset:  122796 rsize:      24
+U_EMR_RECTANGLE               record: 1661 type:43   offset:  127404 rsize:      24
    rclBox:         {13250,3600,13650,3800} 
-U_EMR_SAVEDC                  record: 1614 type:33   offset:  122820 rsize:       8
-U_EMR_EXCLUDECLIPRECT         record: 1615 type:29   offset:  122828 rsize:      24
+U_EMR_SAVEDC                  record: 1662 type:33   offset:  127428 rsize:       8
+U_EMR_EXCLUDECLIPRECT         record: 1663 type:29   offset:  127436 rsize:      24
    rclBox:         {13250,3400,13450,3800} 
-U_EMR_EXCLUDECLIPRECT         record: 1616 type:29   offset:  122852 rsize:      24
+U_EMR_EXCLUDECLIPRECT         record: 1664 type:29   offset:  127460 rsize:      24
    rclBox:         {13250,3600,13650,3800} 
-U_EMR_SELECTOBJECT            record: 1617 type:37   offset:  122876 rsize:      12
+U_EMR_SETTEXTALIGN            record: 1665 type:22   offset:  127484 rsize:      12
+   iMode:          0x00000000
+U_EMR_SELECTOBJECT            record: 1666 type:37   offset:  127496 rsize:      12
+   StockObject:    0x8000000E
+U_EMR_DELETEOBJECT            record: 1667 type:40   offset:  127508 rsize:      12
+   ihObject:       2
+U_EMR_EXTCREATEFONTINDIRECTW  record: 1668 type:82   offset:  127520 rsize:     332
+   ihFont:         2
+   Font:           elfLogFont:lfHeight:-40 lfWidth:0 lfEscapement:0 lfOrientation:0 lfWeight:400 lfItalic:0x00 lfUnderline:0x00 lfStrikeOut:0x00 lfCharSet:0x00 lfOutPrecision:0x00 lfClipPrecision:0x00 lfQuality:0x00 lfPitchAndFamily:0x00 lfFaceName:Courier New elfFullName:Courier New elfStyle:Normal elfVersion:0 elfStyleSize:0 elfMatch:0 elfReserved:0 elfVendorId:00000000 elfCulture:0 elfPanose:bFamilyType:1 bSerifStyle:1 bWeight:1 bProportion:1 bContrast:1 bStrokeVariation:1 bArmStyle:1 bLetterform:1 bMidline:1 bXHeight:1 
+U_EMR_SELECTOBJECT            record: 1669 type:37   offset:  127852 rsize:      12
+   ihObject:       2
+U_EMR_EXTTEXTOUTW             record: 1670 type:84   offset:  127864 rsize:     196
+   iGraphicsMode:  1
+   rclBounds:      {0,0,-1,-1} 
+   exScale:        1.000000
+   eyScale:        1.000000
+   emrtext:        ptlReference:{13220,3460} nChars:20 offString:76 string16:<TextBeneathStarTest1> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:116 Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
+U_EMR_SELECTOBJECT            record: 1671 type:37   offset:  128060 rsize:      12
    StockObject:    0x80000007
-U_EMR_SELECTOBJECT            record: 1618 type:37   offset:  122888 rsize:      12
+U_EMR_SELECTOBJECT            record: 1672 type:37   offset:  128072 rsize:      12
    StockObject:    0x80000002
-U_EMR_SETPOLYFILLMODE         record: 1619 type:19   offset:  122900 rsize:      12
+U_EMR_SETPOLYFILLMODE         record: 1673 type:19   offset:  128084 rsize:      12
    iMode:          0x00000002
-U_EMR_BEGINPATH               record: 1620 type:59   offset:  122912 rsize:       8
-U_EMR_POLYGON                 record: 1621 type:3    offset:  122920 rsize:     108
+U_EMR_BEGINPATH               record: 1674 type:59   offset:  128096 rsize:       8
+U_EMR_POLYGON                 record: 1675 type:3    offset:  128104 rsize:     108
    rclBounds:      {13269,3414,13615,3744} 
    cptl:           10
    Points:         [0]:{13547,3744} [1]:{13441,3651} [2]:{13333,3742} [3]:{13389,3613} [4]:{13269,3538} [5]:{13410,3552} [6]:{13443,3414} [7]:{13474,3552} [8]:{13615,3542} [9]:{13493,3614} 
-U_EMR_ENDPATH                 record: 1622 type:60   offset:  123028 rsize:       8
-U_EMR_STROKEANDFILLPATH       record: 1623 type:63   offset:  123036 rsize:      24
+U_EMR_ENDPATH                 record: 1676 type:60   offset:  128212 rsize:       8
+U_EMR_STROKEANDFILLPATH       record: 1677 type:63   offset:  128220 rsize:      24
    rclBox:         {0,0,29699,20999} 
-U_EMR_RESTOREDC               record: 1624 type:34   offset:  123060 rsize:      12
-   iRelative:      -1
-U_EMR_SETTEXTALIGN            record: 1625 type:22   offset:  123072 rsize:      12
+U_EMR_SETTEXTALIGN            record: 1678 type:22   offset:  128244 rsize:      12
    iMode:          0x00000000
-U_EMR_SELECTOBJECT            record: 1626 type:37   offset:  123084 rsize:      12
+U_EMR_SELECTOBJECT            record: 1679 type:37   offset:  128256 rsize:      12
    StockObject:    0x8000000E
-U_EMR_DELETEOBJECT            record: 1627 type:40   offset:  123096 rsize:      12
+U_EMR_DELETEOBJECT            record: 1680 type:40   offset:  128268 rsize:      12
    ihObject:       2
-U_EMR_EXTCREATEFONTINDIRECTW  record: 1628 type:82   offset:  123108 rsize:     332
+U_EMR_EXTCREATEFONTINDIRECTW  record: 1681 type:82   offset:  128280 rsize:     332
    ihFont:         2
    Font:           elfLogFont:lfHeight:-40 lfWidth:0 lfEscapement:0 lfOrientation:0 lfWeight:400 lfItalic:0x00 lfUnderline:0x00 lfStrikeOut:0x00 lfCharSet:0x00 lfOutPrecision:0x00 lfClipPrecision:0x00 lfQuality:0x00 lfPitchAndFamily:0x00 lfFaceName:Courier New elfFullName:Courier New elfStyle:Normal elfVersion:0 elfStyleSize:0 elfMatch:0 elfReserved:0 elfVendorId:00000000 elfCulture:0 elfPanose:bFamilyType:1 bSerifStyle:1 bWeight:1 bProportion:1 bContrast:1 bStrokeVariation:1 bArmStyle:1 bLetterform:1 bMidline:1 bXHeight:1 
-U_EMR_SELECTOBJECT            record: 1629 type:37   offset:  123440 rsize:      12
+U_EMR_SELECTOBJECT            record: 1682 type:37   offset:  128612 rsize:      12
    ihObject:       2
-U_EMR_EXTTEXTOUTW             record: 1630 type:84   offset:  123452 rsize:     216
+U_EMR_EXTTEXTOUTW             record: 1683 type:84   offset:  128624 rsize:     196
+   iGraphicsMode:  1
+   rclBounds:      {0,0,-1,-1} 
+   exScale:        1.000000
+   eyScale:        1.000000
+   emrtext:        ptlReference:{13220,3610} nChars:20 offString:76 string16:<TextAbove__StarTest2> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:116 Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
+U_EMR_RESTOREDC               record: 1684 type:34   offset:  128820 rsize:      12
+   iRelative:      -1
+U_EMR_SETTEXTALIGN            record: 1685 type:22   offset:  128832 rsize:      12
+   iMode:          0x00000000
+U_EMR_SELECTOBJECT            record: 1686 type:37   offset:  128844 rsize:      12
+   StockObject:    0x8000000E
+U_EMR_DELETEOBJECT            record: 1687 type:40   offset:  128856 rsize:      12
+   ihObject:       2
+U_EMR_EXTCREATEFONTINDIRECTW  record: 1688 type:82   offset:  128868 rsize:     332
+   ihFont:         2
+   Font:           elfLogFont:lfHeight:-40 lfWidth:0 lfEscapement:0 lfOrientation:0 lfWeight:400 lfItalic:0x00 lfUnderline:0x00 lfStrikeOut:0x00 lfCharSet:0x00 lfOutPrecision:0x00 lfClipPrecision:0x00 lfQuality:0x00 lfPitchAndFamily:0x00 lfFaceName:Courier New elfFullName:Courier New elfStyle:Normal elfVersion:0 elfStyleSize:0 elfMatch:0 elfReserved:0 elfVendorId:00000000 elfCulture:0 elfPanose:bFamilyType:1 bSerifStyle:1 bWeight:1 bProportion:1 bContrast:1 bStrokeVariation:1 bArmStyle:1 bLetterform:1 bMidline:1 bXHeight:1 
+U_EMR_SELECTOBJECT            record: 1689 type:37   offset:  129200 rsize:      12
+   ihObject:       2
+U_EMR_EXTTEXTOUTW             record: 1690 type:84   offset:  129212 rsize:     216
    iGraphicsMode:  1
    rclBounds:      {0,0,-1,-1} 
    exScale:        1.000000
    eyScale:        1.000000
    emrtext:        ptlReference:{13250,3840} nChars:23 offString:76 string16:<Rect (include) AND path> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:124 Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
-U_EMR_SELECTOBJECT            record: 1631 type:37   offset:  123668 rsize:      12
+U_EMR_SELECTOBJECT            record: 1691 type:37   offset:  129428 rsize:      12
    ihObject:       5
-U_EMR_SELECTOBJECT            record: 1632 type:37   offset:  123680 rsize:      12
+U_EMR_SELECTOBJECT            record: 1692 type:37   offset:  129440 rsize:      12
    StockObject:    0x80000005
-U_EMR_RECTANGLE               record: 1633 type:43   offset:  123692 rsize:      24
+U_EMR_RECTANGLE               record: 1693 type:43   offset:  129452 rsize:      24
    rclBox:         {13250,3900,13450,4300} 
-U_EMR_SETPOLYFILLMODE         record: 1634 type:19   offset:  123716 rsize:      12
+U_EMR_SETPOLYFILLMODE         record: 1694 type:19   offset:  129476 rsize:      12
    iMode:          0x00000002
-U_EMR_BEGINPATH               record: 1635 type:59   offset:  123728 rsize:       8
-U_EMR_POLYGON                 record: 1636 type:3    offset:  123736 rsize:      84
+U_EMR_BEGINPATH               record: 1695 type:59   offset:  129488 rsize:       8
+U_EMR_POLYGON                 record: 1696 type:3    offset:  129496 rsize:      84
    rclBounds:      {13250,3900,13550,4300} 
    cptl:           7
    Points:         [0]:{13250,3900} [1]:{13350,3905} [2]:{13500,3950} [3]:{13550,4300} [4]:{13425,4250} [5]:{13325,4100} [6]:{13300,3950} 
-U_EMR_ENDPATH                 record: 1637 type:60   offset:  123820 rsize:       8
-U_EMR_STROKEPATH              record: 1638 type:64   offset:  123828 rsize:      24
+U_EMR_ENDPATH                 record: 1697 type:60   offset:  129580 rsize:       8
+U_EMR_STROKEPATH              record: 1698 type:64   offset:  129588 rsize:      24
    rclBox:         {0,0,29699,20999} 
-U_EMR_SAVEDC                  record: 1639 type:33   offset:  123852 rsize:       8
-U_EMR_INTERSECTCLIPRECT       record: 1640 type:30   offset:  123860 rsize:      24
+U_EMR_SAVEDC                  record: 1699 type:33   offset:  129612 rsize:       8
+U_EMR_INTERSECTCLIPRECT       record: 1700 type:30   offset:  129620 rsize:      24
    rclBox:         {13250,3900,13450,4300} 
-U_EMR_BEGINPATH               record: 1641 type:59   offset:  123884 rsize:       8
-U_EMR_POLYGON                 record: 1642 type:3    offset:  123892 rsize:      84
+U_EMR_BEGINPATH               record: 1701 type:59   offset:  129644 rsize:       8
+U_EMR_POLYGON                 record: 1702 type:3    offset:  129652 rsize:      84
    rclBounds:      {13250,3900,13550,4300} 
    cptl:           7
    Points:         [0]:{13250,3900} [1]:{13350,3905} [2]:{13500,3950} [3]:{13550,4300} [4]:{13425,4250} [5]:{13325,4100} [6]:{13300,3950} 
-U_EMR_ENDPATH                 record: 1643 type:60   offset:  123976 rsize:       8
-U_EMR_SELECTCLIPPATH          record: 1644 type:67   offset:  123984 rsize:      12
+U_EMR_ENDPATH                 record: 1703 type:60   offset:  129736 rsize:       8
+U_EMR_SELECTCLIPPATH          record: 1704 type:67   offset:  129744 rsize:      12
    iMode:          0x00000001
-U_EMR_SELECTOBJECT            record: 1645 type:37   offset:  123996 rsize:      12
+U_EMR_SETTEXTALIGN            record: 1705 type:22   offset:  129756 rsize:      12
+   iMode:          0x00000000
+U_EMR_SELECTOBJECT            record: 1706 type:37   offset:  129768 rsize:      12
+   StockObject:    0x8000000E
+U_EMR_DELETEOBJECT            record: 1707 type:40   offset:  129780 rsize:      12
+   ihObject:       2
+U_EMR_EXTCREATEFONTINDIRECTW  record: 1708 type:82   offset:  129792 rsize:     332
+   ihFont:         2
+   Font:           elfLogFont:lfHeight:-40 lfWidth:0 lfEscapement:0 lfOrientation:0 lfWeight:400 lfItalic:0x00 lfUnderline:0x00 lfStrikeOut:0x00 lfCharSet:0x00 lfOutPrecision:0x00 lfClipPrecision:0x00 lfQuality:0x00 lfPitchAndFamily:0x00 lfFaceName:Courier New elfFullName:Courier New elfStyle:Normal elfVersion:0 elfStyleSize:0 elfMatch:0 elfReserved:0 elfVendorId:00000000 elfCulture:0 elfPanose:bFamilyType:1 bSerifStyle:1 bWeight:1 bProportion:1 bContrast:1 bStrokeVariation:1 bArmStyle:1 bLetterform:1 bMidline:1 bXHeight:1 
+U_EMR_SELECTOBJECT            record: 1709 type:37   offset:  130124 rsize:      12
+   ihObject:       2
+U_EMR_EXTTEXTOUTW             record: 1710 type:84   offset:  130136 rsize:     196
+   iGraphicsMode:  1
+   rclBounds:      {0,0,-1,-1} 
+   exScale:        1.000000
+   eyScale:        1.000000
+   emrtext:        ptlReference:{13220,3960} nChars:20 offString:76 string16:<TextBeneathStarTest1> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:116 Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
+U_EMR_SELECTOBJECT            record: 1711 type:37   offset:  130332 rsize:      12
    StockObject:    0x80000007
-U_EMR_SELECTOBJECT            record: 1646 type:37   offset:  124008 rsize:      12
+U_EMR_SELECTOBJECT            record: 1712 type:37   offset:  130344 rsize:      12
    StockObject:    0x80000002
-U_EMR_SETPOLYFILLMODE         record: 1647 type:19   offset:  124020 rsize:      12
+U_EMR_SETPOLYFILLMODE         record: 1713 type:19   offset:  130356 rsize:      12
    iMode:          0x00000002
-U_EMR_BEGINPATH               record: 1648 type:59   offset:  124032 rsize:       8
-U_EMR_POLYGON                 record: 1649 type:3    offset:  124040 rsize:     108
+U_EMR_BEGINPATH               record: 1714 type:59   offset:  130368 rsize:       8
+U_EMR_POLYGON                 record: 1715 type:3    offset:  130376 rsize:     108
    rclBounds:      {13269,3914,13615,4244} 
    cptl:           10
    Points:         [0]:{13547,4244} [1]:{13441,4151} [2]:{13333,4242} [3]:{13389,4113} [4]:{13269,4038} [5]:{13410,4052} [6]:{13443,3914} [7]:{13474,4052} [8]:{13615,4042} [9]:{13493,4114} 
-U_EMR_ENDPATH                 record: 1650 type:60   offset:  124148 rsize:       8
-U_EMR_STROKEANDFILLPATH       record: 1651 type:63   offset:  124156 rsize:      24
+U_EMR_ENDPATH                 record: 1716 type:60   offset:  130484 rsize:       8
+U_EMR_STROKEANDFILLPATH       record: 1717 type:63   offset:  130492 rsize:      24
    rclBox:         {0,0,29699,20999} 
-U_EMR_RESTOREDC               record: 1652 type:34   offset:  124180 rsize:      12
-   iRelative:      -1
-U_EMR_SETTEXTALIGN            record: 1653 type:22   offset:  124192 rsize:      12
+U_EMR_SETTEXTALIGN            record: 1718 type:22   offset:  130516 rsize:      12
    iMode:          0x00000000
-U_EMR_SELECTOBJECT            record: 1654 type:37   offset:  124204 rsize:      12
+U_EMR_SELECTOBJECT            record: 1719 type:37   offset:  130528 rsize:      12
    StockObject:    0x8000000E
-U_EMR_DELETEOBJECT            record: 1655 type:40   offset:  124216 rsize:      12
+U_EMR_DELETEOBJECT            record: 1720 type:40   offset:  130540 rsize:      12
    ihObject:       2
-U_EMR_EXTCREATEFONTINDIRECTW  record: 1656 type:82   offset:  124228 rsize:     332
+U_EMR_EXTCREATEFONTINDIRECTW  record: 1721 type:82   offset:  130552 rsize:     332
    ihFont:         2
    Font:           elfLogFont:lfHeight:-40 lfWidth:0 lfEscapement:0 lfOrientation:0 lfWeight:400 lfItalic:0x00 lfUnderline:0x00 lfStrikeOut:0x00 lfCharSet:0x00 lfOutPrecision:0x00 lfClipPrecision:0x00 lfQuality:0x00 lfPitchAndFamily:0x00 lfFaceName:Courier New elfFullName:Courier New elfStyle:Normal elfVersion:0 elfStyleSize:0 elfMatch:0 elfReserved:0 elfVendorId:00000000 elfCulture:0 elfPanose:bFamilyType:1 bSerifStyle:1 bWeight:1 bProportion:1 bContrast:1 bStrokeVariation:1 bArmStyle:1 bLetterform:1 bMidline:1 bXHeight:1 
-U_EMR_SELECTOBJECT            record: 1657 type:37   offset:  124560 rsize:      12
+U_EMR_SELECTOBJECT            record: 1722 type:37   offset:  130884 rsize:      12
    ihObject:       2
-U_EMR_EXTTEXTOUTW             record: 1658 type:84   offset:  124572 rsize:     208
+U_EMR_EXTTEXTOUTW             record: 1723 type:84   offset:  130896 rsize:     196
+   iGraphicsMode:  1
+   rclBounds:      {0,0,-1,-1} 
+   exScale:        1.000000
+   eyScale:        1.000000
+   emrtext:        ptlReference:{13220,4110} nChars:20 offString:76 string16:<TextAbove__StarTest2> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:116 Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
+U_EMR_RESTOREDC               record: 1724 type:34   offset:  131092 rsize:      12
+   iRelative:      -1
+U_EMR_SETTEXTALIGN            record: 1725 type:22   offset:  131104 rsize:      12
+   iMode:          0x00000000
+U_EMR_SELECTOBJECT            record: 1726 type:37   offset:  131116 rsize:      12
+   StockObject:    0x8000000E
+U_EMR_DELETEOBJECT            record: 1727 type:40   offset:  131128 rsize:      12
+   ihObject:       2
+U_EMR_EXTCREATEFONTINDIRECTW  record: 1728 type:82   offset:  131140 rsize:     332
+   ihFont:         2
+   Font:           elfLogFont:lfHeight:-40 lfWidth:0 lfEscapement:0 lfOrientation:0 lfWeight:400 lfItalic:0x00 lfUnderline:0x00 lfStrikeOut:0x00 lfCharSet:0x00 lfOutPrecision:0x00 lfClipPrecision:0x00 lfQuality:0x00 lfPitchAndFamily:0x00 lfFaceName:Courier New elfFullName:Courier New elfStyle:Normal elfVersion:0 elfStyleSize:0 elfMatch:0 elfReserved:0 elfVendorId:00000000 elfCulture:0 elfPanose:bFamilyType:1 bSerifStyle:1 bWeight:1 bProportion:1 bContrast:1 bStrokeVariation:1 bArmStyle:1 bLetterform:1 bMidline:1 bXHeight:1 
+U_EMR_SELECTOBJECT            record: 1729 type:37   offset:  131472 rsize:      12
+   ihObject:       2
+U_EMR_EXTTEXTOUTW             record: 1730 type:84   offset:  131484 rsize:     208
    iGraphicsMode:  1
    rclBounds:      {0,0,-1,-1} 
    exScale:        1.000000
    eyScale:        1.000000
    emrtext:        ptlReference:{13250,4340} nChars:22 offString:76 string16:<Rect (include) OR path> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:120 Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
-U_EMR_SELECTOBJECT            record: 1659 type:37   offset:  124780 rsize:      12
+U_EMR_SELECTOBJECT            record: 1731 type:37   offset:  131692 rsize:      12
    ihObject:       5
-U_EMR_SELECTOBJECT            record: 1660 type:37   offset:  124792 rsize:      12
+U_EMR_SELECTOBJECT            record: 1732 type:37   offset:  131704 rsize:      12
    StockObject:    0x80000005
-U_EMR_RECTANGLE               record: 1661 type:43   offset:  124804 rsize:      24
+U_EMR_RECTANGLE               record: 1733 type:43   offset:  131716 rsize:      24
    rclBox:         {13250,4400,13450,4800} 
-U_EMR_SETPOLYFILLMODE         record: 1662 type:19   offset:  124828 rsize:      12
+U_EMR_SETPOLYFILLMODE         record: 1734 type:19   offset:  131740 rsize:      12
    iMode:          0x00000002
-U_EMR_BEGINPATH               record: 1663 type:59   offset:  124840 rsize:       8
-U_EMR_POLYGON                 record: 1664 type:3    offset:  124848 rsize:      84
+U_EMR_BEGINPATH               record: 1735 type:59   offset:  131752 rsize:       8
+U_EMR_POLYGON                 record: 1736 type:3    offset:  131760 rsize:      84
    rclBounds:      {13250,4400,13550,4800} 
    cptl:           7
    Points:         [0]:{13250,4400} [1]:{13350,4405} [2]:{13500,4450} [3]:{13550,4800} [4]:{13425,4750} [5]:{13325,4600} [6]:{13300,4450} 
-U_EMR_ENDPATH                 record: 1665 type:60   offset:  124932 rsize:       8
-U_EMR_STROKEPATH              record: 1666 type:64   offset:  124940 rsize:      24
+U_EMR_ENDPATH                 record: 1737 type:60   offset:  131844 rsize:       8
+U_EMR_STROKEPATH              record: 1738 type:64   offset:  131852 rsize:      24
    rclBox:         {0,0,29699,20999} 
-U_EMR_SAVEDC                  record: 1667 type:33   offset:  124964 rsize:       8
-U_EMR_INTERSECTCLIPRECT       record: 1668 type:30   offset:  124972 rsize:      24
+U_EMR_SAVEDC                  record: 1739 type:33   offset:  131876 rsize:       8
+U_EMR_INTERSECTCLIPRECT       record: 1740 type:30   offset:  131884 rsize:      24
    rclBox:         {13250,4400,13450,4800} 
-U_EMR_BEGINPATH               record: 1669 type:59   offset:  124996 rsize:       8
-U_EMR_POLYGON                 record: 1670 type:3    offset:  125004 rsize:      84
+U_EMR_BEGINPATH               record: 1741 type:59   offset:  131908 rsize:       8
+U_EMR_POLYGON                 record: 1742 type:3    offset:  131916 rsize:      84
    rclBounds:      {13250,4400,13550,4800} 
    cptl:           7
    Points:         [0]:{13250,4400} [1]:{13350,4405} [2]:{13500,4450} [3]:{13550,4800} [4]:{13425,4750} [5]:{13325,4600} [6]:{13300,4450} 
-U_EMR_ENDPATH                 record: 1671 type:60   offset:  125088 rsize:       8
-U_EMR_SELECTCLIPPATH          record: 1672 type:67   offset:  125096 rsize:      12
+U_EMR_ENDPATH                 record: 1743 type:60   offset:  132000 rsize:       8
+U_EMR_SELECTCLIPPATH          record: 1744 type:67   offset:  132008 rsize:      12
    iMode:          0x00000002
-U_EMR_SELECTOBJECT            record: 1673 type:37   offset:  125108 rsize:      12
+U_EMR_SETTEXTALIGN            record: 1745 type:22   offset:  132020 rsize:      12
+   iMode:          0x00000000
+U_EMR_SELECTOBJECT            record: 1746 type:37   offset:  132032 rsize:      12
+   StockObject:    0x8000000E
+U_EMR_DELETEOBJECT            record: 1747 type:40   offset:  132044 rsize:      12
+   ihObject:       2
+U_EMR_EXTCREATEFONTINDIRECTW  record: 1748 type:82   offset:  132056 rsize:     332
+   ihFont:         2
+   Font:           elfLogFont:lfHeight:-40 lfWidth:0 lfEscapement:0 lfOrientation:0 lfWeight:400 lfItalic:0x00 lfUnderline:0x00 lfStrikeOut:0x00 lfCharSet:0x00 lfOutPrecision:0x00 lfClipPrecision:0x00 lfQuality:0x00 lfPitchAndFamily:0x00 lfFaceName:Courier New elfFullName:Courier New elfStyle:Normal elfVersion:0 elfStyleSize:0 elfMatch:0 elfReserved:0 elfVendorId:00000000 elfCulture:0 elfPanose:bFamilyType:1 bSerifStyle:1 bWeight:1 bProportion:1 bContrast:1 bStrokeVariation:1 bArmStyle:1 bLetterform:1 bMidline:1 bXHeight:1 
+U_EMR_SELECTOBJECT            record: 1749 type:37   offset:  132388 rsize:      12
+   ihObject:       2
+U_EMR_EXTTEXTOUTW             record: 1750 type:84   offset:  132400 rsize:     196
+   iGraphicsMode:  1
+   rclBounds:      {0,0,-1,-1} 
+   exScale:        1.000000
+   eyScale:        1.000000
+   emrtext:        ptlReference:{13220,4460} nChars:20 offString:76 string16:<TextBeneathStarTest1> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:116 Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
+U_EMR_SELECTOBJECT            record: 1751 type:37   offset:  132596 rsize:      12
    StockObject:    0x80000007
-U_EMR_SELECTOBJECT            record: 1674 type:37   offset:  125120 rsize:      12
+U_EMR_SELECTOBJECT            record: 1752 type:37   offset:  132608 rsize:      12
    StockObject:    0x80000002
-U_EMR_SETPOLYFILLMODE         record: 1675 type:19   offset:  125132 rsize:      12
+U_EMR_SETPOLYFILLMODE         record: 1753 type:19   offset:  132620 rsize:      12
    iMode:          0x00000002
-U_EMR_BEGINPATH               record: 1676 type:59   offset:  125144 rsize:       8
-U_EMR_POLYGON                 record: 1677 type:3    offset:  125152 rsize:     108
+U_EMR_BEGINPATH               record: 1754 type:59   offset:  132632 rsize:       8
+U_EMR_POLYGON                 record: 1755 type:3    offset:  132640 rsize:     108
    rclBounds:      {13269,4414,13615,4744} 
    cptl:           10
    Points:         [0]:{13547,4744} [1]:{13441,4651} [2]:{13333,4742} [3]:{13389,4613} [4]:{13269,4538} [5]:{13410,4552} [6]:{13443,4414} [7]:{13474,4552} [8]:{13615,4542} [9]:{13493,4614} 
-U_EMR_ENDPATH                 record: 1678 type:60   offset:  125260 rsize:       8
-U_EMR_STROKEANDFILLPATH       record: 1679 type:63   offset:  125268 rsize:      24
+U_EMR_ENDPATH                 record: 1756 type:60   offset:  132748 rsize:       8
+U_EMR_STROKEANDFILLPATH       record: 1757 type:63   offset:  132756 rsize:      24
    rclBox:         {0,0,29699,20999} 
-U_EMR_RESTOREDC               record: 1680 type:34   offset:  125292 rsize:      12
-   iRelative:      -1
-U_EMR_SETTEXTALIGN            record: 1681 type:22   offset:  125304 rsize:      12
+U_EMR_SETTEXTALIGN            record: 1758 type:22   offset:  132780 rsize:      12
    iMode:          0x00000000
-U_EMR_SELECTOBJECT            record: 1682 type:37   offset:  125316 rsize:      12
+U_EMR_SELECTOBJECT            record: 1759 type:37   offset:  132792 rsize:      12
    StockObject:    0x8000000E
-U_EMR_DELETEOBJECT            record: 1683 type:40   offset:  125328 rsize:      12
+U_EMR_DELETEOBJECT            record: 1760 type:40   offset:  132804 rsize:      12
    ihObject:       2
-U_EMR_EXTCREATEFONTINDIRECTW  record: 1684 type:82   offset:  125340 rsize:     332
+U_EMR_EXTCREATEFONTINDIRECTW  record: 1761 type:82   offset:  132816 rsize:     332
    ihFont:         2
    Font:           elfLogFont:lfHeight:-40 lfWidth:0 lfEscapement:0 lfOrientation:0 lfWeight:400 lfItalic:0x00 lfUnderline:0x00 lfStrikeOut:0x00 lfCharSet:0x00 lfOutPrecision:0x00 lfClipPrecision:0x00 lfQuality:0x00 lfPitchAndFamily:0x00 lfFaceName:Courier New elfFullName:Courier New elfStyle:Normal elfVersion:0 elfStyleSize:0 elfMatch:0 elfReserved:0 elfVendorId:00000000 elfCulture:0 elfPanose:bFamilyType:1 bSerifStyle:1 bWeight:1 bProportion:1 bContrast:1 bStrokeVariation:1 bArmStyle:1 bLetterform:1 bMidline:1 bXHeight:1 
-U_EMR_SELECTOBJECT            record: 1685 type:37   offset:  125672 rsize:      12
+U_EMR_SELECTOBJECT            record: 1762 type:37   offset:  133148 rsize:      12
    ihObject:       2
-U_EMR_EXTTEXTOUTW             record: 1686 type:84   offset:  125684 rsize:     216
+U_EMR_EXTTEXTOUTW             record: 1763 type:84   offset:  133160 rsize:     196
+   iGraphicsMode:  1
+   rclBounds:      {0,0,-1,-1} 
+   exScale:        1.000000
+   eyScale:        1.000000
+   emrtext:        ptlReference:{13220,4610} nChars:20 offString:76 string16:<TextAbove__StarTest2> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:116 Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
+U_EMR_RESTOREDC               record: 1764 type:34   offset:  133356 rsize:      12
+   iRelative:      -1
+U_EMR_SETTEXTALIGN            record: 1765 type:22   offset:  133368 rsize:      12
+   iMode:          0x00000000
+U_EMR_SELECTOBJECT            record: 1766 type:37   offset:  133380 rsize:      12
+   StockObject:    0x8000000E
+U_EMR_DELETEOBJECT            record: 1767 type:40   offset:  133392 rsize:      12
+   ihObject:       2
+U_EMR_EXTCREATEFONTINDIRECTW  record: 1768 type:82   offset:  133404 rsize:     332
+   ihFont:         2
+   Font:           elfLogFont:lfHeight:-40 lfWidth:0 lfEscapement:0 lfOrientation:0 lfWeight:400 lfItalic:0x00 lfUnderline:0x00 lfStrikeOut:0x00 lfCharSet:0x00 lfOutPrecision:0x00 lfClipPrecision:0x00 lfQuality:0x00 lfPitchAndFamily:0x00 lfFaceName:Courier New elfFullName:Courier New elfStyle:Normal elfVersion:0 elfStyleSize:0 elfMatch:0 elfReserved:0 elfVendorId:00000000 elfCulture:0 elfPanose:bFamilyType:1 bSerifStyle:1 bWeight:1 bProportion:1 bContrast:1 bStrokeVariation:1 bArmStyle:1 bLetterform:1 bMidline:1 bXHeight:1 
+U_EMR_SELECTOBJECT            record: 1769 type:37   offset:  133736 rsize:      12
+   ihObject:       2
+U_EMR_EXTTEXTOUTW             record: 1770 type:84   offset:  133748 rsize:     216
    iGraphicsMode:  1
    rclBounds:      {0,0,-1,-1} 
    exScale:        1.000000
    eyScale:        1.000000
    emrtext:        ptlReference:{13250,4840} nChars:23 offString:76 string16:<Rect (include) XOR path> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:124 Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
-U_EMR_SELECTOBJECT            record: 1687 type:37   offset:  125900 rsize:      12
+U_EMR_SELECTOBJECT            record: 1771 type:37   offset:  133964 rsize:      12
    ihObject:       5
-U_EMR_SELECTOBJECT            record: 1688 type:37   offset:  125912 rsize:      12
+U_EMR_SELECTOBJECT            record: 1772 type:37   offset:  133976 rsize:      12
    StockObject:    0x80000005
-U_EMR_RECTANGLE               record: 1689 type:43   offset:  125924 rsize:      24
+U_EMR_RECTANGLE               record: 1773 type:43   offset:  133988 rsize:      24
    rclBox:         {13250,4900,13450,5300} 
-U_EMR_SETPOLYFILLMODE         record: 1690 type:19   offset:  125948 rsize:      12
+U_EMR_SETPOLYFILLMODE         record: 1774 type:19   offset:  134012 rsize:      12
    iMode:          0x00000002
-U_EMR_BEGINPATH               record: 1691 type:59   offset:  125960 rsize:       8
-U_EMR_POLYGON                 record: 1692 type:3    offset:  125968 rsize:      84
+U_EMR_BEGINPATH               record: 1775 type:59   offset:  134024 rsize:       8
+U_EMR_POLYGON                 record: 1776 type:3    offset:  134032 rsize:      84
    rclBounds:      {13250,4900,13550,5300} 
    cptl:           7
    Points:         [0]:{13250,4900} [1]:{13350,4905} [2]:{13500,4950} [3]:{13550,5300} [4]:{13425,5250} [5]:{13325,5100} [6]:{13300,4950} 
-U_EMR_ENDPATH                 record: 1693 type:60   offset:  126052 rsize:       8
-U_EMR_STROKEPATH              record: 1694 type:64   offset:  126060 rsize:      24
+U_EMR_ENDPATH                 record: 1777 type:60   offset:  134116 rsize:       8
+U_EMR_STROKEPATH              record: 1778 type:64   offset:  134124 rsize:      24
    rclBox:         {0,0,29699,20999} 
-U_EMR_SAVEDC                  record: 1695 type:33   offset:  126084 rsize:       8
-U_EMR_INTERSECTCLIPRECT       record: 1696 type:30   offset:  126092 rsize:      24
+U_EMR_SAVEDC                  record: 1779 type:33   offset:  134148 rsize:       8
+U_EMR_INTERSECTCLIPRECT       record: 1780 type:30   offset:  134156 rsize:      24
    rclBox:         {13250,4900,13450,5300} 
-U_EMR_BEGINPATH               record: 1697 type:59   offset:  126116 rsize:       8
-U_EMR_POLYGON                 record: 1698 type:3    offset:  126124 rsize:      84
+U_EMR_BEGINPATH               record: 1781 type:59   offset:  134180 rsize:       8
+U_EMR_POLYGON                 record: 1782 type:3    offset:  134188 rsize:      84
    rclBounds:      {13250,4900,13550,5300} 
    cptl:           7
    Points:         [0]:{13250,4900} [1]:{13350,4905} [2]:{13500,4950} [3]:{13550,5300} [4]:{13425,5250} [5]:{13325,5100} [6]:{13300,4950} 
-U_EMR_ENDPATH                 record: 1699 type:60   offset:  126208 rsize:       8
-U_EMR_SELECTCLIPPATH          record: 1700 type:67   offset:  126216 rsize:      12
+U_EMR_ENDPATH                 record: 1783 type:60   offset:  134272 rsize:       8
+U_EMR_SELECTCLIPPATH          record: 1784 type:67   offset:  134280 rsize:      12
    iMode:          0x00000003
-U_EMR_SELECTOBJECT            record: 1701 type:37   offset:  126228 rsize:      12
+U_EMR_SETTEXTALIGN            record: 1785 type:22   offset:  134292 rsize:      12
+   iMode:          0x00000000
+U_EMR_SELECTOBJECT            record: 1786 type:37   offset:  134304 rsize:      12
+   StockObject:    0x8000000E
+U_EMR_DELETEOBJECT            record: 1787 type:40   offset:  134316 rsize:      12
+   ihObject:       2
+U_EMR_EXTCREATEFONTINDIRECTW  record: 1788 type:82   offset:  134328 rsize:     332
+   ihFont:         2
+   Font:           elfLogFont:lfHeight:-40 lfWidth:0 lfEscapement:0 lfOrientation:0 lfWeight:400 lfItalic:0x00 lfUnderline:0x00 lfStrikeOut:0x00 lfCharSet:0x00 lfOutPrecision:0x00 lfClipPrecision:0x00 lfQuality:0x00 lfPitchAndFamily:0x00 lfFaceName:Courier New elfFullName:Courier New elfStyle:Normal elfVersion:0 elfStyleSize:0 elfMatch:0 elfReserved:0 elfVendorId:00000000 elfCulture:0 elfPanose:bFamilyType:1 bSerifStyle:1 bWeight:1 bProportion:1 bContrast:1 bStrokeVariation:1 bArmStyle:1 bLetterform:1 bMidline:1 bXHeight:1 
+U_EMR_SELECTOBJECT            record: 1789 type:37   offset:  134660 rsize:      12
+   ihObject:       2
+U_EMR_EXTTEXTOUTW             record: 1790 type:84   offset:  134672 rsize:     196
+   iGraphicsMode:  1
+   rclBounds:      {0,0,-1,-1} 
+   exScale:        1.000000
+   eyScale:        1.000000
+   emrtext:        ptlReference:{13220,4960} nChars:20 offString:76 string16:<TextBeneathStarTest1> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:116 Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
+U_EMR_SELECTOBJECT            record: 1791 type:37   offset:  134868 rsize:      12
    StockObject:    0x80000007
-U_EMR_SELECTOBJECT            record: 1702 type:37   offset:  126240 rsize:      12
+U_EMR_SELECTOBJECT            record: 1792 type:37   offset:  134880 rsize:      12
    StockObject:    0x80000002
-U_EMR_SETPOLYFILLMODE         record: 1703 type:19   offset:  126252 rsize:      12
+U_EMR_SETPOLYFILLMODE         record: 1793 type:19   offset:  134892 rsize:      12
    iMode:          0x00000002
-U_EMR_BEGINPATH               record: 1704 type:59   offset:  126264 rsize:       8
-U_EMR_POLYGON                 record: 1705 type:3    offset:  126272 rsize:     108
+U_EMR_BEGINPATH               record: 1794 type:59   offset:  134904 rsize:       8
+U_EMR_POLYGON                 record: 1795 type:3    offset:  134912 rsize:     108
    rclBounds:      {13269,4914,13615,5244} 
    cptl:           10
    Points:         [0]:{13547,5244} [1]:{13441,5151} [2]:{13333,5242} [3]:{13389,5113} [4]:{13269,5038} [5]:{13410,5052} [6]:{13443,4914} [7]:{13474,5052} [8]:{13615,5042} [9]:{13493,5114} 
-U_EMR_ENDPATH                 record: 1706 type:60   offset:  126380 rsize:       8
-U_EMR_STROKEANDFILLPATH       record: 1707 type:63   offset:  126388 rsize:      24
+U_EMR_ENDPATH                 record: 1796 type:60   offset:  135020 rsize:       8
+U_EMR_STROKEANDFILLPATH       record: 1797 type:63   offset:  135028 rsize:      24
    rclBox:         {0,0,29699,20999} 
-U_EMR_RESTOREDC               record: 1708 type:34   offset:  126412 rsize:      12
-   iRelative:      -1
-U_EMR_SETTEXTALIGN            record: 1709 type:22   offset:  126424 rsize:      12
+U_EMR_SETTEXTALIGN            record: 1798 type:22   offset:  135052 rsize:      12
    iMode:          0x00000000
-U_EMR_SELECTOBJECT            record: 1710 type:37   offset:  126436 rsize:      12
+U_EMR_SELECTOBJECT            record: 1799 type:37   offset:  135064 rsize:      12
    StockObject:    0x8000000E
-U_EMR_DELETEOBJECT            record: 1711 type:40   offset:  126448 rsize:      12
+U_EMR_DELETEOBJECT            record: 1800 type:40   offset:  135076 rsize:      12
    ihObject:       2
-U_EMR_EXTCREATEFONTINDIRECTW  record: 1712 type:82   offset:  126460 rsize:     332
+U_EMR_EXTCREATEFONTINDIRECTW  record: 1801 type:82   offset:  135088 rsize:     332
    ihFont:         2
    Font:           elfLogFont:lfHeight:-40 lfWidth:0 lfEscapement:0 lfOrientation:0 lfWeight:400 lfItalic:0x00 lfUnderline:0x00 lfStrikeOut:0x00 lfCharSet:0x00 lfOutPrecision:0x00 lfClipPrecision:0x00 lfQuality:0x00 lfPitchAndFamily:0x00 lfFaceName:Courier New elfFullName:Courier New elfStyle:Normal elfVersion:0 elfStyleSize:0 elfMatch:0 elfReserved:0 elfVendorId:00000000 elfCulture:0 elfPanose:bFamilyType:1 bSerifStyle:1 bWeight:1 bProportion:1 bContrast:1 bStrokeVariation:1 bArmStyle:1 bLetterform:1 bMidline:1 bXHeight:1 
-U_EMR_SELECTOBJECT            record: 1713 type:37   offset:  126792 rsize:      12
+U_EMR_SELECTOBJECT            record: 1802 type:37   offset:  135420 rsize:      12
    ihObject:       2
-U_EMR_EXTTEXTOUTW             record: 1714 type:84   offset:  126804 rsize:     220
+U_EMR_EXTTEXTOUTW             record: 1803 type:84   offset:  135432 rsize:     196
+   iGraphicsMode:  1
+   rclBounds:      {0,0,-1,-1} 
+   exScale:        1.000000
+   eyScale:        1.000000
+   emrtext:        ptlReference:{13220,5110} nChars:20 offString:76 string16:<TextAbove__StarTest2> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:116 Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
+U_EMR_RESTOREDC               record: 1804 type:34   offset:  135628 rsize:      12
+   iRelative:      -1
+U_EMR_SETTEXTALIGN            record: 1805 type:22   offset:  135640 rsize:      12
+   iMode:          0x00000000
+U_EMR_SELECTOBJECT            record: 1806 type:37   offset:  135652 rsize:      12
+   StockObject:    0x8000000E
+U_EMR_DELETEOBJECT            record: 1807 type:40   offset:  135664 rsize:      12
+   ihObject:       2
+U_EMR_EXTCREATEFONTINDIRECTW  record: 1808 type:82   offset:  135676 rsize:     332
+   ihFont:         2
+   Font:           elfLogFont:lfHeight:-40 lfWidth:0 lfEscapement:0 lfOrientation:0 lfWeight:400 lfItalic:0x00 lfUnderline:0x00 lfStrikeOut:0x00 lfCharSet:0x00 lfOutPrecision:0x00 lfClipPrecision:0x00 lfQuality:0x00 lfPitchAndFamily:0x00 lfFaceName:Courier New elfFullName:Courier New elfStyle:Normal elfVersion:0 elfStyleSize:0 elfMatch:0 elfReserved:0 elfVendorId:00000000 elfCulture:0 elfPanose:bFamilyType:1 bSerifStyle:1 bWeight:1 bProportion:1 bContrast:1 bStrokeVariation:1 bArmStyle:1 bLetterform:1 bMidline:1 bXHeight:1 
+U_EMR_SELECTOBJECT            record: 1809 type:37   offset:  136008 rsize:      12
+   ihObject:       2
+U_EMR_EXTTEXTOUTW             record: 1810 type:84   offset:  136020 rsize:     220
    iGraphicsMode:  1
    rclBounds:      {0,0,-1,-1} 
    exScale:        1.000000
    eyScale:        1.000000
    emrtext:        ptlReference:{13250,5340} nChars:24 offString:76 string16:<Rect (include) DIFF path> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:124 Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
-U_EMR_SELECTOBJECT            record: 1715 type:37   offset:  127024 rsize:      12
+U_EMR_SELECTOBJECT            record: 1811 type:37   offset:  136240 rsize:      12
    ihObject:       5
-U_EMR_SELECTOBJECT            record: 1716 type:37   offset:  127036 rsize:      12
+U_EMR_SELECTOBJECT            record: 1812 type:37   offset:  136252 rsize:      12
    StockObject:    0x80000005
-U_EMR_RECTANGLE               record: 1717 type:43   offset:  127048 rsize:      24
+U_EMR_RECTANGLE               record: 1813 type:43   offset:  136264 rsize:      24
    rclBox:         {13250,5400,13450,5800} 
-U_EMR_SETPOLYFILLMODE         record: 1718 type:19   offset:  127072 rsize:      12
+U_EMR_SETPOLYFILLMODE         record: 1814 type:19   offset:  136288 rsize:      12
    iMode:          0x00000002
-U_EMR_BEGINPATH               record: 1719 type:59   offset:  127084 rsize:       8
-U_EMR_POLYGON                 record: 1720 type:3    offset:  127092 rsize:      84
+U_EMR_BEGINPATH               record: 1815 type:59   offset:  136300 rsize:       8
+U_EMR_POLYGON                 record: 1816 type:3    offset:  136308 rsize:      84
    rclBounds:      {13250,5400,13550,5800} 
    cptl:           7
    Points:         [0]:{13250,5400} [1]:{13350,5405} [2]:{13500,5450} [3]:{13550,5800} [4]:{13425,5750} [5]:{13325,5600} [6]:{13300,5450} 
-U_EMR_ENDPATH                 record: 1721 type:60   offset:  127176 rsize:       8
-U_EMR_STROKEPATH              record: 1722 type:64   offset:  127184 rsize:      24
+U_EMR_ENDPATH                 record: 1817 type:60   offset:  136392 rsize:       8
+U_EMR_STROKEPATH              record: 1818 type:64   offset:  136400 rsize:      24
    rclBox:         {0,0,29699,20999} 
-U_EMR_SAVEDC                  record: 1723 type:33   offset:  127208 rsize:       8
-U_EMR_INTERSECTCLIPRECT       record: 1724 type:30   offset:  127216 rsize:      24
+U_EMR_SAVEDC                  record: 1819 type:33   offset:  136424 rsize:       8
+U_EMR_INTERSECTCLIPRECT       record: 1820 type:30   offset:  136432 rsize:      24
    rclBox:         {13250,5400,13450,5800} 
-U_EMR_BEGINPATH               record: 1725 type:59   offset:  127240 rsize:       8
-U_EMR_POLYGON                 record: 1726 type:3    offset:  127248 rsize:      84
+U_EMR_BEGINPATH               record: 1821 type:59   offset:  136456 rsize:       8
+U_EMR_POLYGON                 record: 1822 type:3    offset:  136464 rsize:      84
    rclBounds:      {13250,5400,13550,5800} 
    cptl:           7
    Points:         [0]:{13250,5400} [1]:{13350,5405} [2]:{13500,5450} [3]:{13550,5800} [4]:{13425,5750} [5]:{13325,5600} [6]:{13300,5450} 
-U_EMR_ENDPATH                 record: 1727 type:60   offset:  127332 rsize:       8
-U_EMR_SELECTCLIPPATH          record: 1728 type:67   offset:  127340 rsize:      12
+U_EMR_ENDPATH                 record: 1823 type:60   offset:  136548 rsize:       8
+U_EMR_SELECTCLIPPATH          record: 1824 type:67   offset:  136556 rsize:      12
    iMode:          0x00000004
-U_EMR_SELECTOBJECT            record: 1729 type:37   offset:  127352 rsize:      12
+U_EMR_SETTEXTALIGN            record: 1825 type:22   offset:  136568 rsize:      12
+   iMode:          0x00000000
+U_EMR_SELECTOBJECT            record: 1826 type:37   offset:  136580 rsize:      12
+   StockObject:    0x8000000E
+U_EMR_DELETEOBJECT            record: 1827 type:40   offset:  136592 rsize:      12
+   ihObject:       2
+U_EMR_EXTCREATEFONTINDIRECTW  record: 1828 type:82   offset:  136604 rsize:     332
+   ihFont:         2
+   Font:           elfLogFont:lfHeight:-40 lfWidth:0 lfEscapement:0 lfOrientation:0 lfWeight:400 lfItalic:0x00 lfUnderline:0x00 lfStrikeOut:0x00 lfCharSet:0x00 lfOutPrecision:0x00 lfClipPrecision:0x00 lfQuality:0x00 lfPitchAndFamily:0x00 lfFaceName:Courier New elfFullName:Courier New elfStyle:Normal elfVersion:0 elfStyleSize:0 elfMatch:0 elfReserved:0 elfVendorId:00000000 elfCulture:0 elfPanose:bFamilyType:1 bSerifStyle:1 bWeight:1 bProportion:1 bContrast:1 bStrokeVariation:1 bArmStyle:1 bLetterform:1 bMidline:1 bXHeight:1 
+U_EMR_SELECTOBJECT            record: 1829 type:37   offset:  136936 rsize:      12
+   ihObject:       2
+U_EMR_EXTTEXTOUTW             record: 1830 type:84   offset:  136948 rsize:     196
+   iGraphicsMode:  1
+   rclBounds:      {0,0,-1,-1} 
+   exScale:        1.000000
+   eyScale:        1.000000
+   emrtext:        ptlReference:{13220,5460} nChars:20 offString:76 string16:<TextBeneathStarTest1> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:116 Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
+U_EMR_SELECTOBJECT            record: 1831 type:37   offset:  137144 rsize:      12
    StockObject:    0x80000007
-U_EMR_SELECTOBJECT            record: 1730 type:37   offset:  127364 rsize:      12
+U_EMR_SELECTOBJECT            record: 1832 type:37   offset:  137156 rsize:      12
    StockObject:    0x80000002
-U_EMR_SETPOLYFILLMODE         record: 1731 type:19   offset:  127376 rsize:      12
+U_EMR_SETPOLYFILLMODE         record: 1833 type:19   offset:  137168 rsize:      12
    iMode:          0x00000002
-U_EMR_BEGINPATH               record: 1732 type:59   offset:  127388 rsize:       8
-U_EMR_POLYGON                 record: 1733 type:3    offset:  127396 rsize:     108
+U_EMR_BEGINPATH               record: 1834 type:59   offset:  137180 rsize:       8
+U_EMR_POLYGON                 record: 1835 type:3    offset:  137188 rsize:     108
    rclBounds:      {13269,5414,13615,5744} 
    cptl:           10
    Points:         [0]:{13547,5744} [1]:{13441,5651} [2]:{13333,5742} [3]:{13389,5613} [4]:{13269,5538} [5]:{13410,5552} [6]:{13443,5414} [7]:{13474,5552} [8]:{13615,5542} [9]:{13493,5614} 
-U_EMR_ENDPATH                 record: 1734 type:60   offset:  127504 rsize:       8
-U_EMR_STROKEANDFILLPATH       record: 1735 type:63   offset:  127512 rsize:      24
+U_EMR_ENDPATH                 record: 1836 type:60   offset:  137296 rsize:       8
+U_EMR_STROKEANDFILLPATH       record: 1837 type:63   offset:  137304 rsize:      24
    rclBox:         {0,0,29699,20999} 
-U_EMR_RESTOREDC               record: 1736 type:34   offset:  127536 rsize:      12
-   iRelative:      -1
-U_EMR_SETTEXTALIGN            record: 1737 type:22   offset:  127548 rsize:      12
+U_EMR_SETTEXTALIGN            record: 1838 type:22   offset:  137328 rsize:      12
    iMode:          0x00000000
-U_EMR_SELECTOBJECT            record: 1738 type:37   offset:  127560 rsize:      12
+U_EMR_SELECTOBJECT            record: 1839 type:37   offset:  137340 rsize:      12
    StockObject:    0x8000000E
-U_EMR_DELETEOBJECT            record: 1739 type:40   offset:  127572 rsize:      12
+U_EMR_DELETEOBJECT            record: 1840 type:40   offset:  137352 rsize:      12
    ihObject:       2
-U_EMR_EXTCREATEFONTINDIRECTW  record: 1740 type:82   offset:  127584 rsize:     332
+U_EMR_EXTCREATEFONTINDIRECTW  record: 1841 type:82   offset:  137364 rsize:     332
    ihFont:         2
    Font:           elfLogFont:lfHeight:-40 lfWidth:0 lfEscapement:0 lfOrientation:0 lfWeight:400 lfItalic:0x00 lfUnderline:0x00 lfStrikeOut:0x00 lfCharSet:0x00 lfOutPrecision:0x00 lfClipPrecision:0x00 lfQuality:0x00 lfPitchAndFamily:0x00 lfFaceName:Courier New elfFullName:Courier New elfStyle:Normal elfVersion:0 elfStyleSize:0 elfMatch:0 elfReserved:0 elfVendorId:00000000 elfCulture:0 elfPanose:bFamilyType:1 bSerifStyle:1 bWeight:1 bProportion:1 bContrast:1 bStrokeVariation:1 bArmStyle:1 bLetterform:1 bMidline:1 bXHeight:1 
-U_EMR_SELECTOBJECT            record: 1741 type:37   offset:  127916 rsize:      12
+U_EMR_SELECTOBJECT            record: 1842 type:37   offset:  137696 rsize:      12
    ihObject:       2
-U_EMR_EXTTEXTOUTW             record: 1742 type:84   offset:  127928 rsize:     220
+U_EMR_EXTTEXTOUTW             record: 1843 type:84   offset:  137708 rsize:     196
+   iGraphicsMode:  1
+   rclBounds:      {0,0,-1,-1} 
+   exScale:        1.000000
+   eyScale:        1.000000
+   emrtext:        ptlReference:{13220,5610} nChars:20 offString:76 string16:<TextAbove__StarTest2> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:116 Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
+U_EMR_RESTOREDC               record: 1844 type:34   offset:  137904 rsize:      12
+   iRelative:      -1
+U_EMR_SETTEXTALIGN            record: 1845 type:22   offset:  137916 rsize:      12
+   iMode:          0x00000000
+U_EMR_SELECTOBJECT            record: 1846 type:37   offset:  137928 rsize:      12
+   StockObject:    0x8000000E
+U_EMR_DELETEOBJECT            record: 1847 type:40   offset:  137940 rsize:      12
+   ihObject:       2
+U_EMR_EXTCREATEFONTINDIRECTW  record: 1848 type:82   offset:  137952 rsize:     332
+   ihFont:         2
+   Font:           elfLogFont:lfHeight:-40 lfWidth:0 lfEscapement:0 lfOrientation:0 lfWeight:400 lfItalic:0x00 lfUnderline:0x00 lfStrikeOut:0x00 lfCharSet:0x00 lfOutPrecision:0x00 lfClipPrecision:0x00 lfQuality:0x00 lfPitchAndFamily:0x00 lfFaceName:Courier New elfFullName:Courier New elfStyle:Normal elfVersion:0 elfStyleSize:0 elfMatch:0 elfReserved:0 elfVendorId:00000000 elfCulture:0 elfPanose:bFamilyType:1 bSerifStyle:1 bWeight:1 bProportion:1 bContrast:1 bStrokeVariation:1 bArmStyle:1 bLetterform:1 bMidline:1 bXHeight:1 
+U_EMR_SELECTOBJECT            record: 1849 type:37   offset:  138284 rsize:      12
+   ihObject:       2
+U_EMR_EXTTEXTOUTW             record: 1850 type:84   offset:  138296 rsize:     220
    iGraphicsMode:  1
    rclBounds:      {0,0,-1,-1} 
    exScale:        1.000000
    eyScale:        1.000000
    emrtext:        ptlReference:{13250,5840} nChars:24 offString:76 string16:<Rect (include) COPY path> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:124 Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
-U_EMR_SELECTOBJECT            record: 1743 type:37   offset:  128148 rsize:      12
+U_EMR_SELECTOBJECT            record: 1851 type:37   offset:  138516 rsize:      12
    ihObject:       5
-U_EMR_SELECTOBJECT            record: 1744 type:37   offset:  128160 rsize:      12
+U_EMR_SELECTOBJECT            record: 1852 type:37   offset:  138528 rsize:      12
    StockObject:    0x80000005
-U_EMR_RECTANGLE               record: 1745 type:43   offset:  128172 rsize:      24
+U_EMR_RECTANGLE               record: 1853 type:43   offset:  138540 rsize:      24
    rclBox:         {13250,5900,13450,6300} 
-U_EMR_SETPOLYFILLMODE         record: 1746 type:19   offset:  128196 rsize:      12
+U_EMR_SETPOLYFILLMODE         record: 1854 type:19   offset:  138564 rsize:      12
    iMode:          0x00000002
-U_EMR_BEGINPATH               record: 1747 type:59   offset:  128208 rsize:       8
-U_EMR_POLYGON                 record: 1748 type:3    offset:  128216 rsize:      84
+U_EMR_BEGINPATH               record: 1855 type:59   offset:  138576 rsize:       8
+U_EMR_POLYGON                 record: 1856 type:3    offset:  138584 rsize:      84
    rclBounds:      {13250,5900,13550,6300} 
    cptl:           7
    Points:         [0]:{13250,5900} [1]:{13350,5905} [2]:{13500,5950} [3]:{13550,6300} [4]:{13425,6250} [5]:{13325,6100} [6]:{13300,5950} 
-U_EMR_ENDPATH                 record: 1749 type:60   offset:  128300 rsize:       8
-U_EMR_STROKEPATH              record: 1750 type:64   offset:  128308 rsize:      24
+U_EMR_ENDPATH                 record: 1857 type:60   offset:  138668 rsize:       8
+U_EMR_STROKEPATH              record: 1858 type:64   offset:  138676 rsize:      24
    rclBox:         {0,0,29699,20999} 
-U_EMR_SAVEDC                  record: 1751 type:33   offset:  128332 rsize:       8
-U_EMR_INTERSECTCLIPRECT       record: 1752 type:30   offset:  128340 rsize:      24
+U_EMR_SAVEDC                  record: 1859 type:33   offset:  138700 rsize:       8
+U_EMR_INTERSECTCLIPRECT       record: 1860 type:30   offset:  138708 rsize:      24
    rclBox:         {13250,5900,13450,6300} 
-U_EMR_BEGINPATH               record: 1753 type:59   offset:  128364 rsize:       8
-U_EMR_POLYGON                 record: 1754 type:3    offset:  128372 rsize:      84
+U_EMR_BEGINPATH               record: 1861 type:59   offset:  138732 rsize:       8
+U_EMR_POLYGON                 record: 1862 type:3    offset:  138740 rsize:      84
    rclBounds:      {13250,5900,13550,6300} 
    cptl:           7
    Points:         [0]:{13250,5900} [1]:{13350,5905} [2]:{13500,5950} [3]:{13550,6300} [4]:{13425,6250} [5]:{13325,6100} [6]:{13300,5950} 
-U_EMR_ENDPATH                 record: 1755 type:60   offset:  128456 rsize:       8
-U_EMR_SELECTCLIPPATH          record: 1756 type:67   offset:  128464 rsize:      12
+U_EMR_ENDPATH                 record: 1863 type:60   offset:  138824 rsize:       8
+U_EMR_SELECTCLIPPATH          record: 1864 type:67   offset:  138832 rsize:      12
    iMode:          0x00000005
-U_EMR_SELECTOBJECT            record: 1757 type:37   offset:  128476 rsize:      12
+U_EMR_SETTEXTALIGN            record: 1865 type:22   offset:  138844 rsize:      12
+   iMode:          0x00000000
+U_EMR_SELECTOBJECT            record: 1866 type:37   offset:  138856 rsize:      12
+   StockObject:    0x8000000E
+U_EMR_DELETEOBJECT            record: 1867 type:40   offset:  138868 rsize:      12
+   ihObject:       2
+U_EMR_EXTCREATEFONTINDIRECTW  record: 1868 type:82   offset:  138880 rsize:     332
+   ihFont:         2
+   Font:           elfLogFont:lfHeight:-40 lfWidth:0 lfEscapement:0 lfOrientation:0 lfWeight:400 lfItalic:0x00 lfUnderline:0x00 lfStrikeOut:0x00 lfCharSet:0x00 lfOutPrecision:0x00 lfClipPrecision:0x00 lfQuality:0x00 lfPitchAndFamily:0x00 lfFaceName:Courier New elfFullName:Courier New elfStyle:Normal elfVersion:0 elfStyleSize:0 elfMatch:0 elfReserved:0 elfVendorId:00000000 elfCulture:0 elfPanose:bFamilyType:1 bSerifStyle:1 bWeight:1 bProportion:1 bContrast:1 bStrokeVariation:1 bArmStyle:1 bLetterform:1 bMidline:1 bXHeight:1 
+U_EMR_SELECTOBJECT            record: 1869 type:37   offset:  139212 rsize:      12
+   ihObject:       2
+U_EMR_EXTTEXTOUTW             record: 1870 type:84   offset:  139224 rsize:     196
+   iGraphicsMode:  1
+   rclBounds:      {0,0,-1,-1} 
+   exScale:        1.000000
+   eyScale:        1.000000
+   emrtext:        ptlReference:{13220,5960} nChars:20 offString:76 string16:<TextBeneathStarTest1> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:116 Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
+U_EMR_SELECTOBJECT            record: 1871 type:37   offset:  139420 rsize:      12
    StockObject:    0x80000007
-U_EMR_SELECTOBJECT            record: 1758 type:37   offset:  128488 rsize:      12
+U_EMR_SELECTOBJECT            record: 1872 type:37   offset:  139432 rsize:      12
    StockObject:    0x80000002
-U_EMR_SETPOLYFILLMODE         record: 1759 type:19   offset:  128500 rsize:      12
+U_EMR_SETPOLYFILLMODE         record: 1873 type:19   offset:  139444 rsize:      12
    iMode:          0x00000002
-U_EMR_BEGINPATH               record: 1760 type:59   offset:  128512 rsize:       8
-U_EMR_POLYGON                 record: 1761 type:3    offset:  128520 rsize:     108
+U_EMR_BEGINPATH               record: 1874 type:59   offset:  139456 rsize:       8
+U_EMR_POLYGON                 record: 1875 type:3    offset:  139464 rsize:     108
    rclBounds:      {13269,5914,13615,6244} 
    cptl:           10
    Points:         [0]:{13547,6244} [1]:{13441,6151} [2]:{13333,6242} [3]:{13389,6113} [4]:{13269,6038} [5]:{13410,6052} [6]:{13443,5914} [7]:{13474,6052} [8]:{13615,6042} [9]:{13493,6114} 
-U_EMR_ENDPATH                 record: 1762 type:60   offset:  128628 rsize:       8
-U_EMR_STROKEANDFILLPATH       record: 1763 type:63   offset:  128636 rsize:      24
+U_EMR_ENDPATH                 record: 1876 type:60   offset:  139572 rsize:       8
+U_EMR_STROKEANDFILLPATH       record: 1877 type:63   offset:  139580 rsize:      24
    rclBox:         {0,0,29699,20999} 
-U_EMR_RESTOREDC               record: 1764 type:34   offset:  128660 rsize:      12
-   iRelative:      -1
-U_EMR_SETTEXTALIGN            record: 1765 type:22   offset:  128672 rsize:      12
+U_EMR_SETTEXTALIGN            record: 1878 type:22   offset:  139604 rsize:      12
    iMode:          0x00000000
-U_EMR_SELECTOBJECT            record: 1766 type:37   offset:  128684 rsize:      12
+U_EMR_SELECTOBJECT            record: 1879 type:37   offset:  139616 rsize:      12
    StockObject:    0x8000000E
-U_EMR_DELETEOBJECT            record: 1767 type:40   offset:  128696 rsize:      12
+U_EMR_DELETEOBJECT            record: 1880 type:40   offset:  139628 rsize:      12
    ihObject:       2
-U_EMR_EXTCREATEFONTINDIRECTW  record: 1768 type:82   offset:  128708 rsize:     332
+U_EMR_EXTCREATEFONTINDIRECTW  record: 1881 type:82   offset:  139640 rsize:     332
    ihFont:         2
    Font:           elfLogFont:lfHeight:-40 lfWidth:0 lfEscapement:0 lfOrientation:0 lfWeight:400 lfItalic:0x00 lfUnderline:0x00 lfStrikeOut:0x00 lfCharSet:0x00 lfOutPrecision:0x00 lfClipPrecision:0x00 lfQuality:0x00 lfPitchAndFamily:0x00 lfFaceName:Courier New elfFullName:Courier New elfStyle:Normal elfVersion:0 elfStyleSize:0 elfMatch:0 elfReserved:0 elfVendorId:00000000 elfCulture:0 elfPanose:bFamilyType:1 bSerifStyle:1 bWeight:1 bProportion:1 bContrast:1 bStrokeVariation:1 bArmStyle:1 bLetterform:1 bMidline:1 bXHeight:1 
-U_EMR_SELECTOBJECT            record: 1769 type:37   offset:  129040 rsize:      12
+U_EMR_SELECTOBJECT            record: 1882 type:37   offset:  139972 rsize:      12
    ihObject:       2
-U_EMR_EXTTEXTOUTW             record: 1770 type:84   offset:  129052 rsize:     204
+U_EMR_EXTTEXTOUTW             record: 1883 type:84   offset:  139984 rsize:     196
+   iGraphicsMode:  1
+   rclBounds:      {0,0,-1,-1} 
+   exScale:        1.000000
+   eyScale:        1.000000
+   emrtext:        ptlReference:{13220,6110} nChars:20 offString:76 string16:<TextAbove__StarTest2> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:116 Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
+U_EMR_RESTOREDC               record: 1884 type:34   offset:  140180 rsize:      12
+   iRelative:      -1
+U_EMR_SETTEXTALIGN            record: 1885 type:22   offset:  140192 rsize:      12
+   iMode:          0x00000000
+U_EMR_SELECTOBJECT            record: 1886 type:37   offset:  140204 rsize:      12
+   StockObject:    0x8000000E
+U_EMR_DELETEOBJECT            record: 1887 type:40   offset:  140216 rsize:      12
+   ihObject:       2
+U_EMR_EXTCREATEFONTINDIRECTW  record: 1888 type:82   offset:  140228 rsize:     332
+   ihFont:         2
+   Font:           elfLogFont:lfHeight:-40 lfWidth:0 lfEscapement:0 lfOrientation:0 lfWeight:400 lfItalic:0x00 lfUnderline:0x00 lfStrikeOut:0x00 lfCharSet:0x00 lfOutPrecision:0x00 lfClipPrecision:0x00 lfQuality:0x00 lfPitchAndFamily:0x00 lfFaceName:Courier New elfFullName:Courier New elfStyle:Normal elfVersion:0 elfStyleSize:0 elfMatch:0 elfReserved:0 elfVendorId:00000000 elfCulture:0 elfPanose:bFamilyType:1 bSerifStyle:1 bWeight:1 bProportion:1 bContrast:1 bStrokeVariation:1 bArmStyle:1 bLetterform:1 bMidline:1 bXHeight:1 
+U_EMR_SELECTOBJECT            record: 1889 type:37   offset:  140560 rsize:      12
+   ihObject:       2
+U_EMR_EXTTEXTOUTW             record: 1890 type:84   offset:  140572 rsize:     204
    iGraphicsMode:  1
    rclBounds:      {0,0,-1,-1} 
    exScale:        1.000000
    eyScale:        1.000000
    emrtext:        ptlReference:{13250,6340} nChars:21 offString:76 string16:<Rect (include,offset)> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:120 Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
-U_EMR_SELECTOBJECT            record: 1771 type:37   offset:  129256 rsize:      12
+U_EMR_SELECTOBJECT            record: 1891 type:37   offset:  140776 rsize:      12
    ihObject:       5
-U_EMR_SELECTOBJECT            record: 1772 type:37   offset:  129268 rsize:      12
+U_EMR_SELECTOBJECT            record: 1892 type:37   offset:  140788 rsize:      12
    StockObject:    0x80000005
-U_EMR_RECTANGLE               record: 1773 type:43   offset:  129280 rsize:      24
+U_EMR_RECTANGLE               record: 1893 type:43   offset:  140800 rsize:      24
    rclBox:         {13250,6400,13450,6800} 
-U_EMR_RECTANGLE               record: 1774 type:43   offset:  129304 rsize:      24
+U_EMR_RECTANGLE               record: 1894 type:43   offset:  140824 rsize:      24
    rclBox:         {13350,6420,13550,6820} 
-U_EMR_SAVEDC                  record: 1775 type:33   offset:  129328 rsize:       8
-U_EMR_INTERSECTCLIPRECT       record: 1776 type:30   offset:  129336 rsize:      24
+U_EMR_SAVEDC                  record: 1895 type:33   offset:  140848 rsize:       8
+U_EMR_INTERSECTCLIPRECT       record: 1896 type:30   offset:  140856 rsize:      24
    rclBox:         {13250,6400,13450,6800} 
-U_EMR_OFFSETCLIPRGN           record: 1777 type:26   offset:  129360 rsize:      16
+U_EMR_OFFSETCLIPRGN           record: 1897 type:26   offset:  140880 rsize:      16
    ptl:            {100,20}
-U_EMR_SELECTOBJECT            record: 1778 type:37   offset:  129376 rsize:      12
+U_EMR_SETTEXTALIGN            record: 1898 type:22   offset:  140896 rsize:      12
+   iMode:          0x00000000
+U_EMR_SELECTOBJECT            record: 1899 type:37   offset:  140908 rsize:      12
+   StockObject:    0x8000000E
+U_EMR_DELETEOBJECT            record: 1900 type:40   offset:  140920 rsize:      12
+   ihObject:       2
+U_EMR_EXTCREATEFONTINDIRECTW  record: 1901 type:82   offset:  140932 rsize:     332
+   ihFont:         2
+   Font:           elfLogFont:lfHeight:-40 lfWidth:0 lfEscapement:0 lfOrientation:0 lfWeight:400 lfItalic:0x00 lfUnderline:0x00 lfStrikeOut:0x00 lfCharSet:0x00 lfOutPrecision:0x00 lfClipPrecision:0x00 lfQuality:0x00 lfPitchAndFamily:0x00 lfFaceName:Courier New elfFullName:Courier New elfStyle:Normal elfVersion:0 elfStyleSize:0 elfMatch:0 elfReserved:0 elfVendorId:00000000 elfCulture:0 elfPanose:bFamilyType:1 bSerifStyle:1 bWeight:1 bProportion:1 bContrast:1 bStrokeVariation:1 bArmStyle:1 bLetterform:1 bMidline:1 bXHeight:1 
+U_EMR_SELECTOBJECT            record: 1902 type:37   offset:  141264 rsize:      12
+   ihObject:       2
+U_EMR_EXTTEXTOUTW             record: 1903 type:84   offset:  141276 rsize:     196
+   iGraphicsMode:  1
+   rclBounds:      {0,0,-1,-1} 
+   exScale:        1.000000
+   eyScale:        1.000000
+   emrtext:        ptlReference:{13220,6460} nChars:20 offString:76 string16:<TextBeneathStarTest1> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:116 Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
+U_EMR_SELECTOBJECT            record: 1904 type:37   offset:  141472 rsize:      12
    StockObject:    0x80000007
-U_EMR_SELECTOBJECT            record: 1779 type:37   offset:  129388 rsize:      12
+U_EMR_SELECTOBJECT            record: 1905 type:37   offset:  141484 rsize:      12
    StockObject:    0x80000002
-U_EMR_SETPOLYFILLMODE         record: 1780 type:19   offset:  129400 rsize:      12
+U_EMR_SETPOLYFILLMODE         record: 1906 type:19   offset:  141496 rsize:      12
    iMode:          0x00000002
-U_EMR_BEGINPATH               record: 1781 type:59   offset:  129412 rsize:       8
-U_EMR_POLYGON                 record: 1782 type:3    offset:  129420 rsize:     108
+U_EMR_BEGINPATH               record: 1907 type:59   offset:  141508 rsize:       8
+U_EMR_POLYGON                 record: 1908 type:3    offset:  141516 rsize:     108
    rclBounds:      {13269,6414,13615,6744} 
    cptl:           10
    Points:         [0]:{13547,6744} [1]:{13441,6651} [2]:{13333,6742} [3]:{13389,6613} [4]:{13269,6538} [5]:{13410,6552} [6]:{13443,6414} [7]:{13474,6552} [8]:{13615,6542} [9]:{13493,6614} 
-U_EMR_ENDPATH                 record: 1783 type:60   offset:  129528 rsize:       8
-U_EMR_STROKEANDFILLPATH       record: 1784 type:63   offset:  129536 rsize:      24
+U_EMR_ENDPATH                 record: 1909 type:60   offset:  141624 rsize:       8
+U_EMR_STROKEANDFILLPATH       record: 1910 type:63   offset:  141632 rsize:      24
    rclBox:         {0,0,29699,20999} 
-U_EMR_RESTOREDC               record: 1785 type:34   offset:  129560 rsize:      12
-   iRelative:      -1
-U_EMR_SETTEXTALIGN            record: 1786 type:22   offset:  129572 rsize:      12
+U_EMR_SETTEXTALIGN            record: 1911 type:22   offset:  141656 rsize:      12
    iMode:          0x00000000
-U_EMR_SELECTOBJECT            record: 1787 type:37   offset:  129584 rsize:      12
+U_EMR_SELECTOBJECT            record: 1912 type:37   offset:  141668 rsize:      12
    StockObject:    0x8000000E
-U_EMR_DELETEOBJECT            record: 1788 type:40   offset:  129596 rsize:      12
+U_EMR_DELETEOBJECT            record: 1913 type:40   offset:  141680 rsize:      12
    ihObject:       2
-U_EMR_EXTCREATEFONTINDIRECTW  record: 1789 type:82   offset:  129608 rsize:     332
+U_EMR_EXTCREATEFONTINDIRECTW  record: 1914 type:82   offset:  141692 rsize:     332
    ihFont:         2
    Font:           elfLogFont:lfHeight:-40 lfWidth:0 lfEscapement:0 lfOrientation:0 lfWeight:400 lfItalic:0x00 lfUnderline:0x00 lfStrikeOut:0x00 lfCharSet:0x00 lfOutPrecision:0x00 lfClipPrecision:0x00 lfQuality:0x00 lfPitchAndFamily:0x00 lfFaceName:Courier New elfFullName:Courier New elfStyle:Normal elfVersion:0 elfStyleSize:0 elfMatch:0 elfReserved:0 elfVendorId:00000000 elfCulture:0 elfPanose:bFamilyType:1 bSerifStyle:1 bWeight:1 bProportion:1 bContrast:1 bStrokeVariation:1 bArmStyle:1 bLetterform:1 bMidline:1 bXHeight:1 
-U_EMR_SELECTOBJECT            record: 1790 type:37   offset:  129940 rsize:      12
+U_EMR_SELECTOBJECT            record: 1915 type:37   offset:  142024 rsize:      12
    ihObject:       2
-U_EMR_EXTTEXTOUTW             record: 1791 type:84   offset:  129952 rsize:     256
+U_EMR_EXTTEXTOUTW             record: 1916 type:84   offset:  142036 rsize:     196
+   iGraphicsMode:  1
+   rclBounds:      {0,0,-1,-1} 
+   exScale:        1.000000
+   eyScale:        1.000000
+   emrtext:        ptlReference:{13220,6610} nChars:20 offString:76 string16:<TextAbove__StarTest2> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:116 Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
+U_EMR_RESTOREDC               record: 1917 type:34   offset:  142232 rsize:      12
+   iRelative:      -1
+U_EMR_SETTEXTALIGN            record: 1918 type:22   offset:  142244 rsize:      12
+   iMode:          0x00000000
+U_EMR_SELECTOBJECT            record: 1919 type:37   offset:  142256 rsize:      12
+   StockObject:    0x8000000E
+U_EMR_DELETEOBJECT            record: 1920 type:40   offset:  142268 rsize:      12
+   ihObject:       2
+U_EMR_EXTCREATEFONTINDIRECTW  record: 1921 type:82   offset:  142280 rsize:     332
+   ihFont:         2
+   Font:           elfLogFont:lfHeight:-40 lfWidth:0 lfEscapement:0 lfOrientation:0 lfWeight:400 lfItalic:0x00 lfUnderline:0x00 lfStrikeOut:0x00 lfCharSet:0x00 lfOutPrecision:0x00 lfClipPrecision:0x00 lfQuality:0x00 lfPitchAndFamily:0x00 lfFaceName:Courier New elfFullName:Courier New elfStyle:Normal elfVersion:0 elfStyleSize:0 elfMatch:0 elfReserved:0 elfVendorId:00000000 elfCulture:0 elfPanose:bFamilyType:1 bSerifStyle:1 bWeight:1 bProportion:1 bContrast:1 bStrokeVariation:1 bArmStyle:1 bLetterform:1 bMidline:1 bXHeight:1 
+U_EMR_SELECTOBJECT            record: 1922 type:37   offset:  142612 rsize:      12
+   ihObject:       2
+U_EMR_EXTTEXTOUTW             record: 1923 type:84   offset:  142624 rsize:     256
    iGraphicsMode:  1
    rclBounds:      {0,0,-1,-1} 
    exScale:        1.000000
    eyScale:        1.000000
    emrtext:        ptlReference:{13250,6840} nChars:30 offString:76 string16:<Rects (include,include,offset)> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:136 Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
-U_EMR_SELECTOBJECT            record: 1792 type:37   offset:  130208 rsize:      12
+U_EMR_SELECTOBJECT            record: 1924 type:37   offset:  142880 rsize:      12
    ihObject:       5
-U_EMR_SELECTOBJECT            record: 1793 type:37   offset:  130220 rsize:      12
+U_EMR_SELECTOBJECT            record: 1925 type:37   offset:  142892 rsize:      12
    StockObject:    0x80000005
-U_EMR_RECTANGLE               record: 1794 type:43   offset:  130232 rsize:      24
+U_EMR_RECTANGLE               record: 1926 type:43   offset:  142904 rsize:      24
    rclBox:         {13250,6900,13450,7300} 
-U_EMR_RECTANGLE               record: 1795 type:43   offset:  130256 rsize:      24
+U_EMR_RECTANGLE               record: 1927 type:43   offset:  142928 rsize:      24
    rclBox:         {13250,7100,13650,7300} 
-U_EMR_RECTANGLE               record: 1796 type:43   offset:  130280 rsize:      24
+U_EMR_RECTANGLE               record: 1928 type:43   offset:  142952 rsize:      24
    rclBox:         {13350,7120,13550,7320} 
-U_EMR_SAVEDC                  record: 1797 type:33   offset:  130304 rsize:       8
-U_EMR_INTERSECTCLIPRECT       record: 1798 type:30   offset:  130312 rsize:      24
+U_EMR_SAVEDC                  record: 1929 type:33   offset:  142976 rsize:       8
+U_EMR_INTERSECTCLIPRECT       record: 1930 type:30   offset:  142984 rsize:      24
    rclBox:         {13250,6900,13450,7300} 
-U_EMR_INTERSECTCLIPRECT       record: 1799 type:30   offset:  130336 rsize:      24
+U_EMR_INTERSECTCLIPRECT       record: 1931 type:30   offset:  143008 rsize:      24
    rclBox:         {13250,7100,13650,7300} 
-U_EMR_OFFSETCLIPRGN           record: 1800 type:26   offset:  130360 rsize:      16
+U_EMR_OFFSETCLIPRGN           record: 1932 type:26   offset:  143032 rsize:      16
    ptl:            {100,20}
-U_EMR_SELECTOBJECT            record: 1801 type:37   offset:  130376 rsize:      12
+U_EMR_SETTEXTALIGN            record: 1933 type:22   offset:  143048 rsize:      12
+   iMode:          0x00000000
+U_EMR_SELECTOBJECT            record: 1934 type:37   offset:  143060 rsize:      12
+   StockObject:    0x8000000E
+U_EMR_DELETEOBJECT            record: 1935 type:40   offset:  143072 rsize:      12
+   ihObject:       2
+U_EMR_EXTCREATEFONTINDIRECTW  record: 1936 type:82   offset:  143084 rsize:     332
+   ihFont:         2
+   Font:           elfLogFont:lfHeight:-40 lfWidth:0 lfEscapement:0 lfOrientation:0 lfWeight:400 lfItalic:0x00 lfUnderline:0x00 lfStrikeOut:0x00 lfCharSet:0x00 lfOutPrecision:0x00 lfClipPrecision:0x00 lfQuality:0x00 lfPitchAndFamily:0x00 lfFaceName:Courier New elfFullName:Courier New elfStyle:Normal elfVersion:0 elfStyleSize:0 elfMatch:0 elfReserved:0 elfVendorId:00000000 elfCulture:0 elfPanose:bFamilyType:1 bSerifStyle:1 bWeight:1 bProportion:1 bContrast:1 bStrokeVariation:1 bArmStyle:1 bLetterform:1 bMidline:1 bXHeight:1 
+U_EMR_SELECTOBJECT            record: 1937 type:37   offset:  143416 rsize:      12
+   ihObject:       2
+U_EMR_EXTTEXTOUTW             record: 1938 type:84   offset:  143428 rsize:     196
+   iGraphicsMode:  1
+   rclBounds:      {0,0,-1,-1} 
+   exScale:        1.000000
+   eyScale:        1.000000
+   emrtext:        ptlReference:{13220,6960} nChars:20 offString:76 string16:<TextBeneathStarTest1> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:116 Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
+U_EMR_SELECTOBJECT            record: 1939 type:37   offset:  143624 rsize:      12
    StockObject:    0x80000007
-U_EMR_SELECTOBJECT            record: 1802 type:37   offset:  130388 rsize:      12
+U_EMR_SELECTOBJECT            record: 1940 type:37   offset:  143636 rsize:      12
    StockObject:    0x80000002
-U_EMR_SETPOLYFILLMODE         record: 1803 type:19   offset:  130400 rsize:      12
+U_EMR_SETPOLYFILLMODE         record: 1941 type:19   offset:  143648 rsize:      12
    iMode:          0x00000002
-U_EMR_BEGINPATH               record: 1804 type:59   offset:  130412 rsize:       8
-U_EMR_POLYGON                 record: 1805 type:3    offset:  130420 rsize:     108
+U_EMR_BEGINPATH               record: 1942 type:59   offset:  143660 rsize:       8
+U_EMR_POLYGON                 record: 1943 type:3    offset:  143668 rsize:     108
    rclBounds:      {13269,6914,13615,7244} 
    cptl:           10
    Points:         [0]:{13547,7244} [1]:{13441,7151} [2]:{13333,7242} [3]:{13389,7113} [4]:{13269,7038} [5]:{13410,7052} [6]:{13443,6914} [7]:{13474,7052} [8]:{13615,7042} [9]:{13493,7114} 
-U_EMR_ENDPATH                 record: 1806 type:60   offset:  130528 rsize:       8
-U_EMR_STROKEANDFILLPATH       record: 1807 type:63   offset:  130536 rsize:      24
+U_EMR_ENDPATH                 record: 1944 type:60   offset:  143776 rsize:       8
+U_EMR_STROKEANDFILLPATH       record: 1945 type:63   offset:  143784 rsize:      24
    rclBox:         {0,0,29699,20999} 
-U_EMR_RESTOREDC               record: 1808 type:34   offset:  130560 rsize:      12
+U_EMR_SETTEXTALIGN            record: 1946 type:22   offset:  143808 rsize:      12
+   iMode:          0x00000000
+U_EMR_SELECTOBJECT            record: 1947 type:37   offset:  143820 rsize:      12
+   StockObject:    0x8000000E
+U_EMR_DELETEOBJECT            record: 1948 type:40   offset:  143832 rsize:      12
+   ihObject:       2
+U_EMR_EXTCREATEFONTINDIRECTW  record: 1949 type:82   offset:  143844 rsize:     332
+   ihFont:         2
+   Font:           elfLogFont:lfHeight:-40 lfWidth:0 lfEscapement:0 lfOrientation:0 lfWeight:400 lfItalic:0x00 lfUnderline:0x00 lfStrikeOut:0x00 lfCharSet:0x00 lfOutPrecision:0x00 lfClipPrecision:0x00 lfQuality:0x00 lfPitchAndFamily:0x00 lfFaceName:Courier New elfFullName:Courier New elfStyle:Normal elfVersion:0 elfStyleSize:0 elfMatch:0 elfReserved:0 elfVendorId:00000000 elfCulture:0 elfPanose:bFamilyType:1 bSerifStyle:1 bWeight:1 bProportion:1 bContrast:1 bStrokeVariation:1 bArmStyle:1 bLetterform:1 bMidline:1 bXHeight:1 
+U_EMR_SELECTOBJECT            record: 1950 type:37   offset:  144176 rsize:      12
+   ihObject:       2
+U_EMR_EXTTEXTOUTW             record: 1951 type:84   offset:  144188 rsize:     196
+   iGraphicsMode:  1
+   rclBounds:      {0,0,-1,-1} 
+   exScale:        1.000000
+   eyScale:        1.000000
+   emrtext:        ptlReference:{13220,7110} nChars:20 offString:76 string16:<TextAbove__StarTest2> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:116 Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
+U_EMR_RESTOREDC               record: 1952 type:34   offset:  144384 rsize:      12
    iRelative:      -1
-U_EMR_EOF                     record: 1809 type:14   offset:  130572 rsize:      20
+U_EMR_EOF                     record: 1953 type:14   offset:  144396 rsize:      20
    cbPalEntries:   0
    offPalEntries:  0

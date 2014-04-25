@@ -5,6 +5,7 @@
    1  Disable tests that block WMF import into PowerPoint (JPG/PNG images)
    2  Enable tests that block WMF being displayed in Windows Preview (none currently)
    4  Disable tests that block WMF import into LODraw (JPG/PNG images, Bitmap16 images)
+   8  Disable clipping tests.
    Default is 0, neither option set.
 
  Compile with 
@@ -24,8 +25,8 @@
 /* If Version or Date are changed also edit the text labels for the output.
 
 File:      testbed_wmf.c
-Version:   0.0.23
-Date:      29-JAN-2014
+Version:   0.0.24
+Date:      25-JUL-2014
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2014 David Mathog and California Institute of Technology (Caltech)
@@ -41,6 +42,7 @@ Copyright: 2014 David Mathog and California Institute of Technology (Caltech)
 #define PPT_BLOCKERS     1
 #define PREVIEW_BLOCKERS 2
 #define LODRAW_BLOCKERS  4
+#define NO_CLIP_TEST     8
 
 // noa special conditions:
 // 1 then s2 is expected to have zero in the "a" channel
@@ -337,7 +339,7 @@ void not_in_wmf(double scale, int x, int y, int pen, int brush, WMFTRACK *wt, WM
     free(point16);
 }
 
-void draw_star(WMFTRACK *wt, WMFHANDLES *wht, int pen_black_1, int brush_gray, int x, int y){
+void draw_star(WMFTRACK *wt, WMFHANDLES *wht, int font, int pen_black_1, int brush_gray, int x, int y){
    U_POINT16  Star[] = {
       {593,688},
       {381,501},
@@ -353,6 +355,7 @@ void draw_star(WMFTRACK *wt, WMFHANDLES *wht, int pen_black_1, int brush_gray, i
    U_POINT16 *points;
    char *rec;
 
+   textlabel(40, "TextBeneathStarTest1", x -30 , y + 60, font, wt, wht);
    points = point16_transform(Star, 10, xform_alt_set(0.5, 1.0, 0.0, 0.0, x, y));
    rec = wselectobject_set(pen_black_1, wht);         taf(rec,wt,"wselectobject_set");
    rec = wselectobject_set(brush_gray, wht);          taf(rec,wt,"wselectobject_set");
@@ -360,6 +363,7 @@ void draw_star(WMFTRACK *wt, WMFHANDLES *wht, int pen_black_1, int brush_gray, i
    rec = wbegin_path_set();                           taf(rec,wt,"wbegin_path_set");
    rec = U_WMRPOLYGON_set(10, points);                taf(rec,wt,"U_WMRPOLYGON_set");
    rec = wend_path_set();                             taf(rec,wt,"wend_path_set");
+   textlabel(40, "TextAbove__StarTest2", x -30 , y + 210, font, wt, wht);
 
    free(points);
 }
@@ -368,7 +372,7 @@ void test_clips(int x, int y, const int font, int pen_red_1, int pen_black_1, in
    char *rec;
 
    textlabel(40, "NoClip", x , y - 60, font, wt, wht);
-   draw_star(wt, wht, pen_black_1, brush_gray, x, y);
+   draw_star(wt, wht, font, pen_black_1, brush_gray, x, y);
 
    /* rectangle clipping */
    y += 500;
@@ -378,7 +382,7 @@ void test_clips(int x, int y, const int font, int pen_red_1, int pen_black_1, in
    rec = U_WMRRECTANGLE_set((U_RECT16){x, y, x+200, y+400});             taf(rec,wt,"U_WMRRECTANGLE_set");
    rec = U_WMRSAVEDC_set();                                              taf(rec,wt,"U_WMRSAVEDC_set");
    rec = U_WMRINTERSECTCLIPRECT_set((U_RECT16){x, y, x+200, y+400});     taf(rec,wt,"U_WMRINTERSECTCLIPRECT_set");
-   draw_star(wt, wht, pen_black_1, brush_gray, x, y);
+   draw_star(wt, wht, font, pen_black_1, brush_gray, x, y);
    rec = U_WMRRESTOREDC_set(-1);                                         taf(rec,wt,"U_WMRSAVEDC_set");
 
    /* double rectangle clipping */
@@ -391,7 +395,7 @@ void test_clips(int x, int y, const int font, int pen_red_1, int pen_black_1, in
    rec = U_WMRSAVEDC_set();                                              taf(rec,wt,"U_WMRSAVEDC_set");
    rec = U_WMRINTERSECTCLIPRECT_set((U_RECT16){x, y, x+200, y+400});     taf(rec,wt,"U_WMRINTERSECTCLIPRECT_set");
    rec = U_WMRINTERSECTCLIPRECT_set((U_RECT16){x, y+200, x+400, y+400}); taf(rec,wt,"U_WMRINTERSECTCLIPRECT_set");
-   draw_star(wt, wht, pen_black_1, brush_gray, x, y);
+   draw_star(wt, wht, font, pen_black_1, brush_gray, x, y);
    rec = U_WMRRESTOREDC_set(-1);                                         taf(rec,wt,"U_WMRSAVEDC_set");
 
    /* excluded rectangle clipping */
@@ -402,7 +406,7 @@ void test_clips(int x, int y, const int font, int pen_red_1, int pen_black_1, in
    rec = U_WMRRECTANGLE_set((U_RECT16){x, y, x+200, y+400});             taf(rec,wt,"U_WMRRECTANGLE_set");
    rec = U_WMRSAVEDC_set();                                              taf(rec,wt,"U_WMRSAVEDC_set");
    rec = U_WMREXCLUDECLIPRECT_set((U_RECT16){x, y, x+200, y+400});       taf(rec,wt,"U_WMRINTERSECTCLIPRECT_set");
-   draw_star(wt, wht, pen_black_1, brush_gray, x, y);
+   draw_star(wt, wht, font, pen_black_1, brush_gray, x, y);
    rec = U_WMRRESTOREDC_set(-1);                                         taf(rec,wt,"U_WMRSAVEDC_set");
 
    /* double excluded rectangle clipping */
@@ -415,7 +419,7 @@ void test_clips(int x, int y, const int font, int pen_red_1, int pen_black_1, in
    rec = U_WMRSAVEDC_set();                                              taf(rec,wt,"U_WMRSAVEDC_set");
    rec = U_WMREXCLUDECLIPRECT_set((U_RECT16){x, y, x+200, y+400});       taf(rec,wt,"U_WMRINTERSECTCLIPRECT_set");
    rec = U_WMREXCLUDECLIPRECT_set((U_RECT16){x, y+200, x+400, y+400});   taf(rec,wt,"U_WMRINTERSECTCLIPRECT_set");
-   draw_star(wt, wht, pen_black_1, brush_gray, x, y);
+   draw_star(wt, wht, font, pen_black_1, brush_gray, x, y);
    rec = U_WMRRESTOREDC_set(-1);                                         taf(rec,wt,"U_WMRSAVEDC_set");
 
 
@@ -441,7 +445,7 @@ void test_clips(int x, int y, const int font, int pen_red_1, int pen_black_1, in
    rec = U_WMRSAVEDC_set();                                              taf(rec,wt,"U_WMRSAVEDC_set");
    rec = U_WMRINTERSECTCLIPRECT_set((U_RECT16){x, y, x+200, y+400});     taf(rec,wt,"U_WWMRINTERSECTCLIPRECT_set");
    rec = U_WMROFFSETCLIPRGN_set((U_POINT16){ox,oy});                     taf(rec,wt,"U_WMROFFSETCLIPRGN_set");
-   draw_star(wt, wht, pen_black_1, brush_gray, x, y);
+   draw_star(wt, wht, font, pen_black_1, brush_gray, x, y);
    rec = U_WMRRESTOREDC_set(-1);                                         taf(rec,wt,"U_WMRSAVEDC_set");
 
    /* double rectangle clipping  then offset */
@@ -458,7 +462,7 @@ void test_clips(int x, int y, const int font, int pen_red_1, int pen_black_1, in
    rec = U_WMRINTERSECTCLIPRECT_set((U_RECT16){x, y, x+200, y+400});     taf(rec,wt,"U_WWMRINTERSECTCLIPRECT_set");
    rec = U_WMRINTERSECTCLIPRECT_set((U_RECT16){x, y+200, x+400, y+400}); taf(rec,wt,"U_WWMRINTERSECTCLIPRECT_set");
    rec = U_WMROFFSETCLIPRGN_set((U_POINT16){ox,oy});                     taf(rec,wt,"U_WMROFFSETCLIPRGN_set");
-   draw_star(wt, wht, pen_black_1, brush_gray, x, y);
+   draw_star(wt, wht, font, pen_black_1, brush_gray, x, y);
    rec = U_WMRRESTOREDC_set(-1);                                         taf(rec,wt,"U_WMRSAVEDC_set");
 }
 
@@ -627,6 +631,7 @@ int main(int argc, char *argv[]){
       printf("   1  Disable tests that block WMF import into PowerPoint (JPG/PNG compression)\n");
       printf("   2  Enable tests that block WMF being displayed in Windows Preview (none currently)\n");
       printf("   4  Disable tests that block WMF import into LibreOffice Draw (JPG/PNG compression, Bitmap16 images)\n");
+      printf("   8  Disable clipping tests.\n");
       exit(EXIT_FAILURE);
     } 
  
@@ -787,8 +792,8 @@ int main(int argc, char *argv[]){
 
     /* label the drawing */
     
-    textlabel(400, "libUEMF v0.1.16",      9700, 200, font_courier_400, wt, wht);
-    textlabel(400, "April 11, 2014",       9700, 500, font_courier_400, wt, wht);
+    textlabel(400, "libUEMF v0.1.17",      9700, 200, font_courier_400, wt, wht);
+    textlabel(400, "July 25, 2014",       9700, 500, font_courier_400, wt, wht);
     rec = malloc(128);
     (void)sprintf(rec,"WMF test: %2.2X",mode);
     textlabel(400, rec,                    9700, 800, font_courier_400, wt, wht);
@@ -1744,7 +1749,9 @@ int main(int argc, char *argv[]){
 
 
     /* Test clipping regions */
-    test_clips(13250, 1400, font_courier_30, pen_red_1, pen_black_1, brush_gray, brush_null, wt, wht);
+    if(!(mode & NO_CLIP_TEST)){
+      test_clips(13250, 1400, font_courier_30, pen_red_1, pen_black_1, brush_gray, brush_null, wt, wht);
+    }
 
 /* ************************************************* */
 

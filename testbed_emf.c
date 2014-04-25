@@ -5,6 +5,7 @@
    1  Disable tests that block EMF import into PowerPoint (dotted lines)
    2  Enable tests that block EMF being displayed in Windows Preview (currently, GradientFill)
    4  Use a rotated, scaled, offset world transform
+   8  Disable clipping tests.
    Default is 0, no option set.
 
  Compile with 
@@ -24,8 +25,8 @@
 /* If Version or Date are changed also edit the text labels for the output.
 
 File:      testbed_emf.c
-Version:   0.0.22
-Date:      04-APR-2014
+Version:   0.0.23
+Date:      25-JUL-2014
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2014 David Mathog and California Institute of Technology (Caltech)
@@ -40,6 +41,7 @@ Copyright: 2014 David Mathog and California Institute of Technology (Caltech)
 #define PPT_BLOCKERS     1
 #define PREVIEW_BLOCKERS 2
 #define WORLDXFORM_TEST  4
+#define NO_CLIP_TEST     8
 
 // noa special conditions:
 // 1 then s2 is expected to have zero in the "a" channel
@@ -498,7 +500,7 @@ void image_column(EMFTRACK *et, int x1, int y1, int w, int h, PU_BITMAPINFO Bmi,
 
 }
 
-void draw_star(EMFTRACK *et, EMFHANDLES *eht, U_RECTL rclFrame, int x, int y){
+void draw_star(EMFTRACK *et, EMFHANDLES *eht, uint32_t *font, U_RECTL rclFrame, int x, int y){
    U_POINT Star[] = {
       {593,688},
       {381,501},
@@ -514,6 +516,7 @@ void draw_star(EMFTRACK *et, EMFHANDLES *eht, U_RECTL rclFrame, int x, int y){
    U_POINT *points;
    char *rec;
 
+   textlabel(40, "TextBeneathStarTest1", x -30 , y + 60, font, et, eht);
    points = points_transform( Star, 10, xform_alt_set(0.5, 1.0, 0.0, 0.0, x, y));
    rec = selectobject_set(U_BLACK_PEN, eht);                       taf(rec,et,"selectobject_set");
    rec = selectobject_set(U_GRAY_BRUSH, eht);                      taf(rec,et,"selectobject_set");
@@ -522,6 +525,7 @@ void draw_star(EMFTRACK *et, EMFHANDLES *eht, U_RECTL rclFrame, int x, int y){
    rec = U_EMRPOLYGON_set(findbounds(10, points, 0), 10, points);  taf(rec,et,"U_EMRPOLYGON_set");
    rec = U_EMRENDPATH_set();                                       taf(rec,et,"U_EMRENDPATH_set");
    rec = U_EMRSTROKEANDFILLPATH_set(rclFrame);                     taf(rec,et,"U_EMRSTROKEANDFILLPATH_set");
+   textlabel(40, "TextAbove__StarTest2", x -30 , y + 210, font, et, eht);
    free(points);
 }
 
@@ -548,7 +552,7 @@ void test_clips(int x, int y, uint32_t *font, U_RECTL rclFrame, EMFTRACK *et, EM
    free(elp);
 
    textlabel(40, "NoClip", x , y - 60, font, et, eht);
-   draw_star(et,eht, rclFrame, x,y);
+   draw_star(et,eht,font, rclFrame, x,y);
 
    /* rectangle clipping */
    y += 500;
@@ -559,7 +563,7 @@ void test_clips(int x, int y, uint32_t *font, U_RECTL rclFrame, EMFTRACK *et, EM
 
    rec = U_EMRSAVEDC_set();                                         taf(rec,et,"U_EMRSAVEDC_set");
    rec = U_EMRINTERSECTCLIPRECT_set((U_RECTL){x, y, x+200, y+400}); taf(rec,et,"U_EMRINTERSECTCLIPRECT_set");
-   draw_star(et,eht, rclFrame, x,y);
+   draw_star(et,eht,font, rclFrame, x,y);
    rec = U_EMRRESTOREDC_set(-1);                                    taf(rec,et,"U_EMRSAVEDC_set");
 
    /* double rectangle clipping */
@@ -573,7 +577,7 @@ void test_clips(int x, int y, uint32_t *font, U_RECTL rclFrame, EMFTRACK *et, EM
    rec = U_EMRSAVEDC_set();                                         taf(rec,et,"U_EMRSAVEDC_set");
    rec = U_EMRINTERSECTCLIPRECT_set((U_RECTL){x, y, x+200, y+400}); taf(rec,et,"U_EMRINTERSECTCLIPRECT_set");
    rec = U_EMRINTERSECTCLIPRECT_set((U_RECTL){x,y+200,x+400,y+400});taf(rec,et,"U_EMRINTERSECTCLIPRECT_set");
-   draw_star(et,eht, rclFrame, x,y);
+   draw_star(et,eht,font, rclFrame, x,y);
    rec = U_EMRRESTOREDC_set(-1);                                    taf(rec,et,"U_EMRSAVEDC_set");
 
    /* excluded rectangle clipping */
@@ -585,7 +589,7 @@ void test_clips(int x, int y, uint32_t *font, U_RECTL rclFrame, EMFTRACK *et, EM
 
    rec = U_EMRSAVEDC_set();                                         taf(rec,et,"U_EMRSAVEDC_set");
    rec = U_EMREXCLUDECLIPRECT_set((U_RECTL){x, y, x+200, y+400});   taf(rec,et,"U_EMREXCLUDECLIPRECT_set");
-   draw_star(et,eht, rclFrame, x,y);
+   draw_star(et,eht,font, rclFrame, x,y);
    rec = U_EMRRESTOREDC_set(-1);                                    taf(rec,et,"U_EMRSAVEDC_set");
 
    /* double excluded rectangle clipping */
@@ -599,7 +603,7 @@ void test_clips(int x, int y, uint32_t *font, U_RECTL rclFrame, EMFTRACK *et, EM
    rec = U_EMRSAVEDC_set();                                         taf(rec,et,"U_EMRSAVEDC_set");
    rec = U_EMREXCLUDECLIPRECT_set((U_RECTL){x, y, x+200, y+400});   taf(rec,et,"U_EMREXCLUDECLIPRECT_set");
    rec = U_EMREXCLUDECLIPRECT_set((U_RECTL){x,y+200,x+400,y+400});  taf(rec,et,"U_EMREXCLUDECLIPRECT_set");
-   draw_star(et,eht, rclFrame, x,y);
+   draw_star(et,eht,font, rclFrame, x,y);
    rec = U_EMRRESTOREDC_set(-1);                                    taf(rec,et,"U_EMRSAVEDC_set");
 
    /* rectangle clipping then path LOGIC */
@@ -634,7 +638,7 @@ void test_clips(int x, int y, uint32_t *font, U_RECTL rclFrame, EMFTRACK *et, EM
       rec = U_EMRPOLYGON_set(findbounds(7, points, 0), 7, points);     taf(rec,et,"U_EMRPOLYGON_set");
       rec = U_EMRENDPATH_set();                                        taf(rec,et,"U_EMRENDPATH_set");
       rec = U_EMRSELECTCLIPPATH_set(i);                                taf(rec,et,"U_EMRSELECTCLIPPATH_set");
-      draw_star(et,eht, rclFrame, x,y);
+      draw_star(et,eht,font, rclFrame, x,y);
       rec = U_EMRRESTOREDC_set(-1);                                    taf(rec,et,"U_EMRSAVEDC_set");
       free(points);
    }
@@ -652,7 +656,7 @@ void test_clips(int x, int y, uint32_t *font, U_RECTL rclFrame, EMFTRACK *et, EM
    rec = U_EMRSAVEDC_set();                                         taf(rec,et,"U_EMRSAVEDC_set");
    rec = U_EMRINTERSECTCLIPRECT_set((U_RECTL){x, y, x+200, y+400}); taf(rec,et,"U_EMRINTERSECTCLIPRECT_set");
    rec = U_EMROFFSETCLIPRGN_set((U_POINTL){ox,oy});                 taf(rec,et,"U_EMROFFSETCLIPRGN_set");
-   draw_star(et,eht, rclFrame, x,y);
+   draw_star(et,eht,font, rclFrame, x,y);
    rec = U_EMRRESTOREDC_set(-1);                                    taf(rec,et,"U_EMRSAVEDC_set");
 
    /* double rectangle clipping  then offset */
@@ -669,9 +673,8 @@ void test_clips(int x, int y, uint32_t *font, U_RECTL rclFrame, EMFTRACK *et, EM
    rec = U_EMRINTERSECTCLIPRECT_set((U_RECTL){x, y, x+200, y+400}); taf(rec,et,"U_EMRINTERSECTCLIPRECT_set");
    rec = U_EMRINTERSECTCLIPRECT_set((U_RECTL){x,y+200,x+400,y+400});taf(rec,et,"U_EMRINTERSECTCLIPRECT_set");
    rec = U_EMROFFSETCLIPRGN_set((U_POINTL){ox,oy});                 taf(rec,et,"U_EMROFFSETCLIPRGN_set");
-   draw_star(et,eht, rclFrame, x,y);
+   draw_star(et,eht,font, rclFrame, x,y);
    rec = U_EMRRESTOREDC_set(-1);                                    taf(rec,et,"U_EMRSAVEDC_set");
-
 
 }
 
@@ -833,6 +836,7 @@ int main(int argc, char *argv[]){
       printf("   1  Disable tests that block EMF import into PowerPoint (dotted lines)\n");
       printf("   2  Enable tests that block EMF being displayed in Windows Preview (currently, none)\n");
       printf("   4  Rotate and scale the test image within the page.\n");
+      printf("   8  Disable clipping tests.\n");
       exit(EXIT_FAILURE);
     }
 
@@ -950,8 +954,8 @@ int main(int argc, char *argv[]){
 
     /* label the drawing */
     
-    textlabel(400, "libUEMF v0.1.15",     9700, 200, &font, et, eht);
-    textlabel(400, "April 4, 2014",       9700, 500, &font, et, eht);
+    textlabel(400, "libUEMF v0.1.17",     9700, 200, &font, et, eht);
+    textlabel(400, "July 25, 2014",       9700, 500, &font, et, eht);
     rec = malloc(128);
     (void)sprintf(rec,"EMF test: %2.2X",mode);
     textlabel(400, rec,                   9700, 800, &font, et, eht);
@@ -2262,8 +2266,9 @@ if(!(mode & PPT_BLOCKERS)){
 
 
     /* Test clipping regions */
-    test_clips(13250, 1400, &font, rclFrame, et,eht);
-
+    if(!(mode & NO_CLIP_TEST)){
+       test_clips(13250, 1400, &font, rclFrame, et,eht);
+    }
 
 /* ************************************************* */
 

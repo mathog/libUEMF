@@ -12,11 +12,11 @@ U_EMRBITBLT_set, U_EMRBITBLT_print,  and U_EMRBITBLT_swap. A few additional func
 assembling the EMF in memory, debugging, and converting the EMF file to/from Little Endian representation.
 (EMF files' internal data representation is always Little Endian.)
 
-This code has been tested on 32 bit Ubuntu (LE), 32 bit Mingw, 64 bit Manriva, and 64 bit Solaris (BE).
+This code has been tested on 32 bit Ubuntu (LE), 32 bit Mingw, 64 bit Mageia, and 64 bit Solaris (BE).
 
 libUEMF is released under the GPL 2 license, read the file 'COPYING' for more information
 
-Version 0.1.16, released Apr 14, 2014.
+Version 0.1.17, released July 25, 2014.
 
 To report bugs or provide feedback send email to David Mathog, mathog@caltech.edu.
 
@@ -365,6 +365,10 @@ History
 
   (Note, version numbers in files represent the libUEMF release where it was last modified, so not
   all files will show the same version numbers in each release.)
+
+0.1.17 2014_04_25
+  Added text clipping tests to testbed_emf.c, testbed_wmf.c, and testbed_pmf.c.
+  Added option to omit clipping tests in testbed's.
 
 0.1.16 2014_04_14
   Fixed bug in U_WMRRESTOREDC_set.
