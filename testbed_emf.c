@@ -25,11 +25,11 @@
 /* If Version or Date are changed also edit the text labels for the output.
 
 File:      testbed_emf.c
-Version:   0.0.23
-Date:      25-JUL-2014
+Version:   0.0.25
+Date:      19-MAR-2015
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
-Copyright: 2014 David Mathog and California Institute of Technology (Caltech)
+Copyright: 2015 David Mathog and California Institute of Technology (Caltech)
 */
 
 #include <stdlib.h>
@@ -46,18 +46,20 @@ Copyright: 2014 David Mathog and California Institute of Technology (Caltech)
 // noa special conditions:
 // 1 then s2 is expected to have zero in the "a" channel
 // 2 then s2 is expected to have zero in the "a" channel AND only top 5 bits are meaningful
+// on failure returns 1 more than the byte which did not match.  1 more so that no failure can pass back 0.
 int rgba_diff(char *s1, char *s2, uint32_t size, int noa){
+   uint32_t hsize=size;
    for( ; size ; size--, s1++, s2++){
      if(noa==1){
        if(*s1 != *s2){
          if(noa && !(*s2) && (1 == size % 4))continue;
-         return(1);
+         return(hsize-size+1);
        }
      }
      if(noa==2){
        if((0xF8 & *s1) != (0xF8 &*s2)){
          if(noa && !(*s2) && (1 == size % 4))continue;
-         return(1);
+         return(hsize-size+1);
        }
      }
      else {
@@ -529,6 +531,51 @@ void draw_star(EMFTRACK *et, EMFHANDLES *eht, uint32_t *font, U_RECTL rclFrame, 
    free(points);
 }
 
+void draw_rect_regions(int x, int y, uint32_t redpen, EMFTRACK *et, EMFHANDLES *eht){
+   char *rec;
+   int i=0;
+   rec = selectobject_set(redpen, eht);                             taf(rec,et,"selectobject_set");
+   rec = selectobject_set(U_NULL_BRUSH, eht);                       taf(rec,et,"selectobject_set");
+   rec = U_EMRRECTANGLE_set((U_RECTL){x, y, x+200, y+400});         taf(rec,et,"U_EMRRECTANGLE_set");
+   for(i=0;i<=200;i+=100){
+      rec = U_EMRRECTANGLE_set((U_RECTL){x+i, y+i, x+i+225,y+i+75});    taf(rec,et,"U_EMRRECTANGLE_set");
+   }   
+}
+
+void set_extselectcliprgns(int x1, int y1, int mode, EMFTRACK *et){
+   int x2 = x1+200;
+   int y2 = y1+400;
+   U_RGNDATAHEADER rdh;
+   PU_RECTL        rectarray;
+   PU_RGNDATA      RgnData;
+   U_RECTL         rclBox;
+   char *rec;
+   int j=0;
+   int i;
+   U_POINTL ul,lr;
+   /* set the bounds to match the companion rectangle.  The bounds apparently does nothing, no
+   region is affected in the least.  */
+   ul = pointl_set(x1,y1);
+   lr = pointl_set(x2,y2);
+
+/*
+  This works too, apparently because the bounds are ignored
+   ul = pointl_set(0,0);
+   lr = pointl_set(1,1);
+*/
+   rclBox = rectl_set(ul,lr);
+   rdh = rgndataheader_set(3,rclBox);
+   rectarray=malloc(sizeof(U_RECTL)*3);
+   for(j=0;j<3;j++){
+      i=j*100;
+      rectli_set(rectarray,j, pointl_set(x1+i,y1+i),pointl_set(x1+i+225,y1+i+75));
+   }   
+   RgnData = rgndata_set(rdh, rectarray);
+   rec = U_EMREXTSELECTCLIPRGN_set(mode, RgnData);   taf(rec,et,"U_EMREXTSELECTCLIPRGN_set");
+   free(RgnData);
+   free(rectarray);
+}
+
 void test_clips(int x, int y, uint32_t *font, U_RECTL rclFrame, EMFTRACK *et, EMFHANDLES *eht){
    char *rec;
    uint32_t      redpen;
@@ -676,7 +723,28 @@ void test_clips(int x, int y, uint32_t *font, U_RECTL rclFrame, EMFTRACK *et, EM
    draw_star(et,eht,font, rclFrame, x,y);
    rec = U_EMRRESTOREDC_set(-1);                                    taf(rec,et,"U_EMRSAVEDC_set");
 
+   /* rectangle clipping with RegionData, all 5 modes */
+   for(i=U_RGN_MIN; i<=U_RGN_MAX; i++){
+      y += 500;
+      char abuf[100];
+      switch(i){
+         case U_RGN_AND:  strcpy(abuf,"Rect (include),RgnData AND");  break;
+         case U_RGN_OR:   strcpy(abuf,"Rect (include),RgnData OR");   break;
+         case U_RGN_XOR:  strcpy(abuf,"Rect (include),RgnData XOR");  break;
+         case U_RGN_DIFF: strcpy(abuf,"Rect (include),RgnData DIFF"); break;
+         case U_RGN_COPY: strcpy(abuf,"Rect (include),RgnData COPY"); break;
+      }
+      textlabel(40, abuf, x , y - 60, font, et, eht);
+      draw_rect_regions(x, y, redpen, et,eht);
+
+      rec = U_EMRSAVEDC_set();                                         taf(rec,et,"U_EMRSAVEDC_set");
+      rec = U_EMRINTERSECTCLIPRECT_set((U_RECTL){x, y, x+200, y+400}); taf(rec,et,"U_EMRINTERSECTCLIPRECT_set");
+      set_extselectcliprgns(x, y, i, et);
+      draw_star(et,eht,font, rclFrame, x,y);
+      rec = U_EMRRESTOREDC_set(-1);                                    taf(rec,et,"U_EMRSAVEDC_set");
+   }
 }
+
 
 int main(int argc, char *argv[]){
     EMFTRACK            *et;
@@ -954,8 +1022,8 @@ int main(int argc, char *argv[]){
 
     /* label the drawing */
     
-    textlabel(400, "libUEMF v0.1.17",     9700, 200, &font, et, eht);
-    textlabel(400, "July 25, 2014",       9700, 500, &font, et, eht);
+    textlabel(400, "libUEMF v0.2.0",      9700, 200, &font, et, eht);
+    textlabel(400, "March 20, 2015",      9700, 500, &font, et, eht);
     rec = malloc(128);
     (void)sprintf(rec,"EMF test: %2.2X",mode);
     textlabel(400, rec,                   9700, 800, &font, et, eht);
@@ -2264,11 +2332,79 @@ if(!(mode & PPT_BLOCKERS)){
     rec = U_EMRSETBKCOLOR_set(colorref_set(0,255,255));      taf(rec,et,"U_EMRSETBKCOLOR_set");
     rec = U_EMRSETTEXTALIGN_set(U_TA_DEFAULT);               taf(rec,et,"U_EMRSETTEXTALIGN_set");
 
-
     /* Test clipping regions */
     if(!(mode & NO_CLIP_TEST)){
        test_clips(13250, 1400, &font, rclFrame, et,eht);
     }
+    
+    /* Test RGN records */
+    rec = selectobject_set(U_BLACK_PEN, eht);     taf(rec,et,"selectobject_set");
+    rec = selectobject_set(U_NULL_BRUSH, eht);    taf(rec,et,"selectobject_set");
+
+    int x1,x2,y1,y2; 
+    U_RGNDATAHEADER rdh;
+    PU_RECTL rectarray;
+    PU_RGNDATA RgnData;
+    x1=12000;
+    x2=12500;
+    y1=1400;
+    y2=1600;
+    ul = pointl_set(x1,y1);
+    lr = pointl_set(x2,y2);
+    rclBox = rectl_set(ul,lr);
+    rec = U_EMRRECTANGLE_set(rclBox);             taf(rec,et,"U_EMRRECTANGLE_set");
+    rdh = rgndataheader_set(3,rclBox);
+    rectarray=malloc(sizeof(U_RECTL)*3);
+    for(i=0;i<3;i++){ rectli_set(rectarray,i, pointl_set(x1+i*200,y1+i*56),pointl_set(x1+i*200+150,y1+i*56+50));  }
+    RgnData = rgndata_set(rdh, rectarray);
+    rec = U_EMRFILLRGN_set(rclBox, U_GRAY_BRUSH, RgnData);   taf(rec,et,"U_EMRFILLRGN_set");
+    free(RgnData);
+    free(rectarray);
+    
+    y1+=300;
+    y2+=300;
+    ul = pointl_set(x1,y1);
+    lr = pointl_set(x2,y2);
+    rclBox = rectl_set(ul,lr);
+    rec = U_EMRRECTANGLE_set(rclBox);             taf(rec,et,"U_EMRRECTANGLE_set");
+    rdh = rgndataheader_set(3,rclBox);
+    rectarray=malloc(sizeof(U_RECTL)*3);
+    for(i=0;i<3;i++){ rectli_set(rectarray,i, pointl_set(x1+i*200,y1+i*56),pointl_set(x1+i*200+150,y1+i*56+50));  }
+    RgnData = rgndata_set(rdh, rectarray);
+    U_SIZEL szl=sizel_set(5,5);
+    rec = U_EMRFRAMERGN_set(rclBox, U_GRAY_BRUSH, szl, RgnData);   taf(rec,et,"U_EMRFRAMERGN_set");
+    free(RgnData);
+    free(rectarray);
+    
+    y1+=300;
+    y2+=300;
+    ul = pointl_set(x1,y1);
+    lr = pointl_set(x2,y2);
+    rclBox = rectl_set(ul,lr);
+    rec = U_EMRRECTANGLE_set(rclBox);             taf(rec,et,"U_EMRRECTANGLE_set");
+    rdh = rgndataheader_set(3,rclBox);
+    rectarray=malloc(sizeof(U_RECTL)*3);
+    for(i=0;i<3;i++){ rectli_set(rectarray,i, pointl_set(x1+i*200,y1+i*56),pointl_set(x1+i*200+150,y1+i*56+50));  }
+    RgnData = rgndata_set(rdh, rectarray);
+    rec = U_EMRINVERTRGN_set(RgnData);   taf(rec,et,"U_EMRINVERTRGN_set");
+    free(RgnData);
+    free(rectarray);
+    
+    y1+=300;
+    y2+=300;
+    ul = pointl_set(x1,y1);
+    lr = pointl_set(x2,y2);
+    rclBox = rectl_set(ul,lr);
+    rec = U_EMRRECTANGLE_set(rclBox);             taf(rec,et,"U_EMRRECTANGLE_set");
+    rdh = rgndataheader_set(3,rclBox);
+    rectarray=malloc(sizeof(U_RECTL)*3);
+    for(i=0;i<3;i++){ rectli_set(rectarray,i, pointl_set(x1+i*200,y1+i*56),pointl_set(x1+i*200+150,y1+i*56+50));  }
+    RgnData = rgndata_set(rdh, rectarray);
+    rec = selectobject_set(U_GRAY_BRUSH, eht);    taf(rec,et,"selectobject_set");
+    rec = U_EMRPAINTRGN_set(RgnData);   taf(rec,et,"U_EMRPAINTRGN_set");
+    free(RgnData);
+    free(rectarray);
+    
 
 /* ************************************************* */
 
@@ -2280,7 +2416,7 @@ if(!(mode & PPT_BLOCKERS)){
     taf(rec,et,"U_EMREOF_set");
 
     /* Test the endian routines (on either Big or Little Endian machines).
-    This must be done befoe the call to emf_finish, as that will swap the byte
+    This must be done before the call to emf_finish, as that will swap the byte
     order of the EMF data before it writes it out on a BE machine.  */
     
 #if 1
@@ -2297,8 +2433,10 @@ if(!(mode & PPT_BLOCKERS)){
        if(!U_emf_endian(et->buf,et->used,0)){
           printf("Error in byte swapping of completed EMF, reverse -> native\n");
        }
-       if(rgba_diff(string, et->buf, et->used, 0)){ 
+       int oops_byte=rgba_diff(string, et->buf, et->used, 0);
+       if(oops_byte){ 
           printf("Error in u_emf_endian() function, round trip byte swapping does not match original\n");
+          printf("Error in u_emf_endian() function at byte %d\n",oops_byte);
        }
        free(string);
     }

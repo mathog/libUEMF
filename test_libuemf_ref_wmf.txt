@@ -2,7 +2,7 @@ WMF, Placeable: HWmf:0 Box:LTRB{0,0,14031,9921} Inch:1200 Checksum:17327 Calcula
    RecType:1
    16bit words in record:9
    Version:768
-   16bit words in file:18616
+   16bit words in file:18617
    Objects:20
    Largest Record:372
    nMembers:0
@@ -80,7 +80,7 @@ U_WMR_EXTTEXTOUT              record:   32 type:50   offset:     560 rsize:     
    X,Y:{9700,200}
    Length:15
    Opts:0000
-   String:<libUEMF v0.1.17>
+   String:<libUEMF v0.1.18>
    Dx:240:240:240:240:240:240:240:240:240:240:240:240:240:240:240:
 U_WMR_SETTEXTALIGN            record:   33 type:46   offset:     620 rsize:      10
    iMode:          0x0000
@@ -90,7 +90,7 @@ U_WMR_EXTTEXTOUT              record:   35 type:50   offset:     638 rsize:     
    X,Y:{9700,500}
    Length:13
    Opts:0000
-   String:<July 25, 2014>
+   String:<July 28, 2014>
    Dx:240:240:240:240:240:240:240:240:240:240:240:240:240:
 U_WMR_SETTEXTALIGN            record:   36 type:46   offset:     692 rsize:      10
    iMode:          0x0000
@@ -3337,264 +3337,264 @@ U_WMR_SETTEXTALIGN            record: 1196 type:46   offset:   35260 rsize:     
    iMode:          0x0000
 U_WMR_SELECTOBJECT            record: 1197 type:45   offset:   35270 rsize:       8
    Object:         16
-U_WMR_EXTTEXTOUT              record: 1198 type:50   offset:   35278 rsize:      78
+U_WMR_EXTTEXTOUT              record: 1198 type:50   offset:   35278 rsize:      80
    X,Y:{13250,3340}
-   Length:21
+   Length:22
    Opts:0000
-   String:<Rect (include,inlude)>
-   Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
-U_WMR_SELECTOBJECT            record: 1199 type:45   offset:   35356 rsize:       8
+   String:<Rect (exclude,exclude)>
+   Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
+U_WMR_SELECTOBJECT            record: 1199 type:45   offset:   35358 rsize:       8
    Object:         8
-U_WMR_SELECTOBJECT            record: 1200 type:45   offset:   35364 rsize:       8
+U_WMR_SELECTOBJECT            record: 1200 type:45   offset:   35366 rsize:       8
    Object:         4
-U_WMR_RECTANGLE               record: 1201 type:27   offset:   35372 rsize:      14
+U_WMR_RECTANGLE               record: 1201 type:27   offset:   35374 rsize:      14
    Rect:LTRB{13250,3400,13450,3800} 
-U_WMR_RECTANGLE               record: 1202 type:27   offset:   35386 rsize:      14
+U_WMR_RECTANGLE               record: 1202 type:27   offset:   35388 rsize:      14
    Rect:LTRB{13250,3600,13650,3800} 
-U_WMR_SAVEDC                  record: 1203 type:30   offset:   35400 rsize:       6
-U_WMR_EXCLUDECLIPRECT         record: 1204 type:21   offset:   35406 rsize:      14
+U_WMR_SAVEDC                  record: 1203 type:30   offset:   35402 rsize:       6
+U_WMR_EXCLUDECLIPRECT         record: 1204 type:21   offset:   35408 rsize:      14
    Rect:LTRB{13250,3400,13450,3800} 
-U_WMR_EXCLUDECLIPRECT         record: 1205 type:21   offset:   35420 rsize:      14
+U_WMR_EXCLUDECLIPRECT         record: 1205 type:21   offset:   35422 rsize:      14
    Rect:LTRB{13250,3600,13650,3800} 
-U_WMR_SETTEXTALIGN            record: 1206 type:46   offset:   35434 rsize:      10
+U_WMR_SETTEXTALIGN            record: 1206 type:46   offset:   35436 rsize:      10
    iMode:          0x0000
-U_WMR_SELECTOBJECT            record: 1207 type:45   offset:   35444 rsize:       8
+U_WMR_SELECTOBJECT            record: 1207 type:45   offset:   35446 rsize:       8
    Object:         16
-U_WMR_EXTTEXTOUT              record: 1208 type:50   offset:   35452 rsize:      74
+U_WMR_EXTTEXTOUT              record: 1208 type:50   offset:   35454 rsize:      74
    X,Y:{13220,3460}
    Length:20
    Opts:0000
    String:<TextBeneathStarTest1>
    Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
-U_WMR_SELECTOBJECT            record: 1209 type:45   offset:   35526 rsize:       8
+U_WMR_SELECTOBJECT            record: 1209 type:45   offset:   35528 rsize:       8
    Object:         5
-U_WMR_SELECTOBJECT            record: 1210 type:45   offset:   35534 rsize:       8
+U_WMR_SELECTOBJECT            record: 1210 type:45   offset:   35536 rsize:       8
    Object:         2
-U_WMR_SETPOLYFILLMODE         record: 1211 type:6    offset:   35542 rsize:      10
+U_WMR_SETPOLYFILLMODE         record: 1211 type:6    offset:   35544 rsize:      10
    iMode:          0x0002
-U_WMR_ESCAPE                  record: 1212 type:38   offset:   35552 rsize:      10
+U_WMR_ESCAPE                  record: 1212 type:38   offset:   35554 rsize:      10
    EscType:BEGIN_PATH
    nBytes:0
    Data: (not shown)
-U_WMR_POLYGON                 record: 1213 type:36   offset:   35562 rsize:      48
+U_WMR_POLYGON                 record: 1213 type:36   offset:   35564 rsize:      48
   Points: [0]:{13547,3744} [1]:{13441,3651} [2]:{13333,3742} [3]:{13389,3613} [4]:{13269,3538} [5]:{13410,3552} [6]:{13443,3414} [7]:{13474,3552} [8]:{13615,3542} [9]:{13493,3614} 
-U_WMR_ESCAPE                  record: 1214 type:38   offset:   35610 rsize:      10
+U_WMR_ESCAPE                  record: 1214 type:38   offset:   35612 rsize:      10
    EscType:END_PATH
    nBytes:0
    Data: (not shown)
-U_WMR_SETTEXTALIGN            record: 1215 type:46   offset:   35620 rsize:      10
+U_WMR_SETTEXTALIGN            record: 1215 type:46   offset:   35622 rsize:      10
    iMode:          0x0000
-U_WMR_SELECTOBJECT            record: 1216 type:45   offset:   35630 rsize:       8
+U_WMR_SELECTOBJECT            record: 1216 type:45   offset:   35632 rsize:       8
    Object:         16
-U_WMR_EXTTEXTOUT              record: 1217 type:50   offset:   35638 rsize:      74
+U_WMR_EXTTEXTOUT              record: 1217 type:50   offset:   35640 rsize:      74
    X,Y:{13220,3610}
    Length:20
    Opts:0000
    String:<TextAbove__StarTest2>
    Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
-U_WMR_RESTOREDC               record: 1218 type:39   offset:   35712 rsize:       8
-U_WMR_SETTEXTALIGN            record: 1219 type:46   offset:   35720 rsize:      10
+U_WMR_RESTOREDC               record: 1218 type:39   offset:   35714 rsize:       8
+U_WMR_SETTEXTALIGN            record: 1219 type:46   offset:   35722 rsize:      10
    iMode:          0x0000
-U_WMR_SELECTOBJECT            record: 1220 type:45   offset:   35730 rsize:       8
+U_WMR_SELECTOBJECT            record: 1220 type:45   offset:   35732 rsize:       8
    Object:         16
-U_WMR_EXTTEXTOUT              record: 1221 type:50   offset:   35738 rsize:      60
+U_WMR_EXTTEXTOUT              record: 1221 type:50   offset:   35740 rsize:      60
    X,Y:{13250,3840}
    Length:15
    Opts:0000
    String:<not implemented>
    Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
-U_WMR_SELECTOBJECT            record: 1222 type:45   offset:   35798 rsize:       8
+U_WMR_SELECTOBJECT            record: 1222 type:45   offset:   35800 rsize:       8
    Object:         8
-U_WMR_SELECTOBJECT            record: 1223 type:45   offset:   35806 rsize:       8
+U_WMR_SELECTOBJECT            record: 1223 type:45   offset:   35808 rsize:       8
    Object:         4
-U_WMR_RECTANGLE               record: 1224 type:27   offset:   35814 rsize:      14
+U_WMR_RECTANGLE               record: 1224 type:27   offset:   35816 rsize:      14
    Rect:LTRB{13250,3900,13550,4200} 
-U_WMR_SETTEXTALIGN            record: 1225 type:46   offset:   35828 rsize:      10
+U_WMR_SETTEXTALIGN            record: 1225 type:46   offset:   35830 rsize:      10
    iMode:          0x0000
-U_WMR_SELECTOBJECT            record: 1226 type:45   offset:   35838 rsize:       8
+U_WMR_SELECTOBJECT            record: 1226 type:45   offset:   35840 rsize:       8
    Object:         16
-U_WMR_EXTTEXTOUT              record: 1227 type:50   offset:   35846 rsize:      60
+U_WMR_EXTTEXTOUT              record: 1227 type:50   offset:   35848 rsize:      60
    X,Y:{13250,4340}
    Length:15
    Opts:0000
    String:<not implemented>
    Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
-U_WMR_SELECTOBJECT            record: 1228 type:45   offset:   35906 rsize:       8
+U_WMR_SELECTOBJECT            record: 1228 type:45   offset:   35908 rsize:       8
    Object:         8
-U_WMR_SELECTOBJECT            record: 1229 type:45   offset:   35914 rsize:       8
+U_WMR_SELECTOBJECT            record: 1229 type:45   offset:   35916 rsize:       8
    Object:         4
-U_WMR_RECTANGLE               record: 1230 type:27   offset:   35922 rsize:      14
+U_WMR_RECTANGLE               record: 1230 type:27   offset:   35924 rsize:      14
    Rect:LTRB{13250,4400,13550,4700} 
-U_WMR_SETTEXTALIGN            record: 1231 type:46   offset:   35936 rsize:      10
+U_WMR_SETTEXTALIGN            record: 1231 type:46   offset:   35938 rsize:      10
    iMode:          0x0000
-U_WMR_SELECTOBJECT            record: 1232 type:45   offset:   35946 rsize:       8
+U_WMR_SELECTOBJECT            record: 1232 type:45   offset:   35948 rsize:       8
    Object:         16
-U_WMR_EXTTEXTOUT              record: 1233 type:50   offset:   35954 rsize:      60
+U_WMR_EXTTEXTOUT              record: 1233 type:50   offset:   35956 rsize:      60
    X,Y:{13250,4840}
    Length:15
    Opts:0000
    String:<not implemented>
    Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
-U_WMR_SELECTOBJECT            record: 1234 type:45   offset:   36014 rsize:       8
+U_WMR_SELECTOBJECT            record: 1234 type:45   offset:   36016 rsize:       8
    Object:         8
-U_WMR_SELECTOBJECT            record: 1235 type:45   offset:   36022 rsize:       8
+U_WMR_SELECTOBJECT            record: 1235 type:45   offset:   36024 rsize:       8
    Object:         4
-U_WMR_RECTANGLE               record: 1236 type:27   offset:   36030 rsize:      14
+U_WMR_RECTANGLE               record: 1236 type:27   offset:   36032 rsize:      14
    Rect:LTRB{13250,4900,13550,5200} 
-U_WMR_SETTEXTALIGN            record: 1237 type:46   offset:   36044 rsize:      10
+U_WMR_SETTEXTALIGN            record: 1237 type:46   offset:   36046 rsize:      10
    iMode:          0x0000
-U_WMR_SELECTOBJECT            record: 1238 type:45   offset:   36054 rsize:       8
+U_WMR_SELECTOBJECT            record: 1238 type:45   offset:   36056 rsize:       8
    Object:         16
-U_WMR_EXTTEXTOUT              record: 1239 type:50   offset:   36062 rsize:      60
+U_WMR_EXTTEXTOUT              record: 1239 type:50   offset:   36064 rsize:      60
    X,Y:{13250,5340}
    Length:15
    Opts:0000
    String:<not implemented>
    Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
-U_WMR_SELECTOBJECT            record: 1240 type:45   offset:   36122 rsize:       8
+U_WMR_SELECTOBJECT            record: 1240 type:45   offset:   36124 rsize:       8
    Object:         8
-U_WMR_SELECTOBJECT            record: 1241 type:45   offset:   36130 rsize:       8
+U_WMR_SELECTOBJECT            record: 1241 type:45   offset:   36132 rsize:       8
    Object:         4
-U_WMR_RECTANGLE               record: 1242 type:27   offset:   36138 rsize:      14
+U_WMR_RECTANGLE               record: 1242 type:27   offset:   36140 rsize:      14
    Rect:LTRB{13250,5400,13550,5700} 
-U_WMR_SETTEXTALIGN            record: 1243 type:46   offset:   36152 rsize:      10
+U_WMR_SETTEXTALIGN            record: 1243 type:46   offset:   36154 rsize:      10
    iMode:          0x0000
-U_WMR_SELECTOBJECT            record: 1244 type:45   offset:   36162 rsize:       8
+U_WMR_SELECTOBJECT            record: 1244 type:45   offset:   36164 rsize:       8
    Object:         16
-U_WMR_EXTTEXTOUT              record: 1245 type:50   offset:   36170 rsize:      60
+U_WMR_EXTTEXTOUT              record: 1245 type:50   offset:   36172 rsize:      60
    X,Y:{13250,5840}
    Length:15
    Opts:0000
    String:<not implemented>
    Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
-U_WMR_SELECTOBJECT            record: 1246 type:45   offset:   36230 rsize:       8
+U_WMR_SELECTOBJECT            record: 1246 type:45   offset:   36232 rsize:       8
    Object:         8
-U_WMR_SELECTOBJECT            record: 1247 type:45   offset:   36238 rsize:       8
+U_WMR_SELECTOBJECT            record: 1247 type:45   offset:   36240 rsize:       8
    Object:         4
-U_WMR_RECTANGLE               record: 1248 type:27   offset:   36246 rsize:      14
+U_WMR_RECTANGLE               record: 1248 type:27   offset:   36248 rsize:      14
    Rect:LTRB{13250,5900,13550,6200} 
-U_WMR_SETTEXTALIGN            record: 1249 type:46   offset:   36260 rsize:      10
+U_WMR_SETTEXTALIGN            record: 1249 type:46   offset:   36262 rsize:      10
    iMode:          0x0000
-U_WMR_SELECTOBJECT            record: 1250 type:45   offset:   36270 rsize:       8
+U_WMR_SELECTOBJECT            record: 1250 type:45   offset:   36272 rsize:       8
    Object:         16
-U_WMR_EXTTEXTOUT              record: 1251 type:50   offset:   36278 rsize:      78
+U_WMR_EXTTEXTOUT              record: 1251 type:50   offset:   36280 rsize:      78
    X,Y:{13250,6340}
    Length:21
    Opts:0000
    String:<Rect (include,offset)>
    Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
-U_WMR_SELECTOBJECT            record: 1252 type:45   offset:   36356 rsize:       8
+U_WMR_SELECTOBJECT            record: 1252 type:45   offset:   36358 rsize:       8
    Object:         8
-U_WMR_SELECTOBJECT            record: 1253 type:45   offset:   36364 rsize:       8
+U_WMR_SELECTOBJECT            record: 1253 type:45   offset:   36366 rsize:       8
    Object:         4
-U_WMR_RECTANGLE               record: 1254 type:27   offset:   36372 rsize:      14
+U_WMR_RECTANGLE               record: 1254 type:27   offset:   36374 rsize:      14
    Rect:LTRB{13250,6400,13450,6800} 
-U_WMR_RECTANGLE               record: 1255 type:27   offset:   36386 rsize:      14
+U_WMR_RECTANGLE               record: 1255 type:27   offset:   36388 rsize:      14
    Rect:LTRB{13350,6420,13550,6820} 
-U_WMR_SAVEDC                  record: 1256 type:30   offset:   36400 rsize:       6
-U_WMR_INTERSECTCLIPRECT       record: 1257 type:22   offset:   36406 rsize:      14
+U_WMR_SAVEDC                  record: 1256 type:30   offset:   36402 rsize:       6
+U_WMR_INTERSECTCLIPRECT       record: 1257 type:22   offset:   36408 rsize:      14
    Rect:LTRB{13250,6400,13450,6800} 
-U_WMR_OFFSETCLIPRGN           record: 1258 type:32   offset:   36420 rsize:      10
+U_WMR_OFFSETCLIPRGN           record: 1258 type:32   offset:   36422 rsize:      10
    X,Y             {100,20}
-U_WMR_SETTEXTALIGN            record: 1259 type:46   offset:   36430 rsize:      10
+U_WMR_SETTEXTALIGN            record: 1259 type:46   offset:   36432 rsize:      10
    iMode:          0x0000
-U_WMR_SELECTOBJECT            record: 1260 type:45   offset:   36440 rsize:       8
+U_WMR_SELECTOBJECT            record: 1260 type:45   offset:   36442 rsize:       8
    Object:         16
-U_WMR_EXTTEXTOUT              record: 1261 type:50   offset:   36448 rsize:      74
+U_WMR_EXTTEXTOUT              record: 1261 type:50   offset:   36450 rsize:      74
    X,Y:{13220,6460}
    Length:20
    Opts:0000
    String:<TextBeneathStarTest1>
    Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
-U_WMR_SELECTOBJECT            record: 1262 type:45   offset:   36522 rsize:       8
+U_WMR_SELECTOBJECT            record: 1262 type:45   offset:   36524 rsize:       8
    Object:         5
-U_WMR_SELECTOBJECT            record: 1263 type:45   offset:   36530 rsize:       8
+U_WMR_SELECTOBJECT            record: 1263 type:45   offset:   36532 rsize:       8
    Object:         2
-U_WMR_SETPOLYFILLMODE         record: 1264 type:6    offset:   36538 rsize:      10
+U_WMR_SETPOLYFILLMODE         record: 1264 type:6    offset:   36540 rsize:      10
    iMode:          0x0002
-U_WMR_ESCAPE                  record: 1265 type:38   offset:   36548 rsize:      10
+U_WMR_ESCAPE                  record: 1265 type:38   offset:   36550 rsize:      10
    EscType:BEGIN_PATH
    nBytes:0
    Data: (not shown)
-U_WMR_POLYGON                 record: 1266 type:36   offset:   36558 rsize:      48
+U_WMR_POLYGON                 record: 1266 type:36   offset:   36560 rsize:      48
   Points: [0]:{13547,6744} [1]:{13441,6651} [2]:{13333,6742} [3]:{13389,6613} [4]:{13269,6538} [5]:{13410,6552} [6]:{13443,6414} [7]:{13474,6552} [8]:{13615,6542} [9]:{13493,6614} 
-U_WMR_ESCAPE                  record: 1267 type:38   offset:   36606 rsize:      10
+U_WMR_ESCAPE                  record: 1267 type:38   offset:   36608 rsize:      10
    EscType:END_PATH
    nBytes:0
    Data: (not shown)
-U_WMR_SETTEXTALIGN            record: 1268 type:46   offset:   36616 rsize:      10
+U_WMR_SETTEXTALIGN            record: 1268 type:46   offset:   36618 rsize:      10
    iMode:          0x0000
-U_WMR_SELECTOBJECT            record: 1269 type:45   offset:   36626 rsize:       8
+U_WMR_SELECTOBJECT            record: 1269 type:45   offset:   36628 rsize:       8
    Object:         16
-U_WMR_EXTTEXTOUT              record: 1270 type:50   offset:   36634 rsize:      74
+U_WMR_EXTTEXTOUT              record: 1270 type:50   offset:   36636 rsize:      74
    X,Y:{13220,6610}
    Length:20
    Opts:0000
    String:<TextAbove__StarTest2>
    Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
-U_WMR_RESTOREDC               record: 1271 type:39   offset:   36708 rsize:       8
-U_WMR_SETTEXTALIGN            record: 1272 type:46   offset:   36716 rsize:      10
+U_WMR_RESTOREDC               record: 1271 type:39   offset:   36710 rsize:       8
+U_WMR_SETTEXTALIGN            record: 1272 type:46   offset:   36718 rsize:      10
    iMode:          0x0000
-U_WMR_SELECTOBJECT            record: 1273 type:45   offset:   36726 rsize:       8
+U_WMR_SELECTOBJECT            record: 1273 type:45   offset:   36728 rsize:       8
    Object:         16
-U_WMR_EXTTEXTOUT              record: 1274 type:50   offset:   36734 rsize:     104
+U_WMR_EXTTEXTOUT              record: 1274 type:50   offset:   36736 rsize:     104
    X,Y:{13250,6840}
    Length:30
    Opts:0000
    String:<Rects (include,include,offset)>
    Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
-U_WMR_SELECTOBJECT            record: 1275 type:45   offset:   36838 rsize:       8
+U_WMR_SELECTOBJECT            record: 1275 type:45   offset:   36840 rsize:       8
    Object:         8
-U_WMR_SELECTOBJECT            record: 1276 type:45   offset:   36846 rsize:       8
+U_WMR_SELECTOBJECT            record: 1276 type:45   offset:   36848 rsize:       8
    Object:         4
-U_WMR_RECTANGLE               record: 1277 type:27   offset:   36854 rsize:      14
+U_WMR_RECTANGLE               record: 1277 type:27   offset:   36856 rsize:      14
    Rect:LTRB{13250,6900,13450,7300} 
-U_WMR_RECTANGLE               record: 1278 type:27   offset:   36868 rsize:      14
+U_WMR_RECTANGLE               record: 1278 type:27   offset:   36870 rsize:      14
    Rect:LTRB{13250,7100,13650,7300} 
-U_WMR_RECTANGLE               record: 1279 type:27   offset:   36882 rsize:      14
+U_WMR_RECTANGLE               record: 1279 type:27   offset:   36884 rsize:      14
    Rect:LTRB{13350,7120,13550,7320} 
-U_WMR_SAVEDC                  record: 1280 type:30   offset:   36896 rsize:       6
-U_WMR_INTERSECTCLIPRECT       record: 1281 type:22   offset:   36902 rsize:      14
+U_WMR_SAVEDC                  record: 1280 type:30   offset:   36898 rsize:       6
+U_WMR_INTERSECTCLIPRECT       record: 1281 type:22   offset:   36904 rsize:      14
    Rect:LTRB{13250,6900,13450,7300} 
-U_WMR_INTERSECTCLIPRECT       record: 1282 type:22   offset:   36916 rsize:      14
+U_WMR_INTERSECTCLIPRECT       record: 1282 type:22   offset:   36918 rsize:      14
    Rect:LTRB{13250,7100,13650,7300} 
-U_WMR_OFFSETCLIPRGN           record: 1283 type:32   offset:   36930 rsize:      10
+U_WMR_OFFSETCLIPRGN           record: 1283 type:32   offset:   36932 rsize:      10
    X,Y             {100,20}
-U_WMR_SETTEXTALIGN            record: 1284 type:46   offset:   36940 rsize:      10
+U_WMR_SETTEXTALIGN            record: 1284 type:46   offset:   36942 rsize:      10
    iMode:          0x0000
-U_WMR_SELECTOBJECT            record: 1285 type:45   offset:   36950 rsize:       8
+U_WMR_SELECTOBJECT            record: 1285 type:45   offset:   36952 rsize:       8
    Object:         16
-U_WMR_EXTTEXTOUT              record: 1286 type:50   offset:   36958 rsize:      74
+U_WMR_EXTTEXTOUT              record: 1286 type:50   offset:   36960 rsize:      74
    X,Y:{13220,6960}
    Length:20
    Opts:0000
    String:<TextBeneathStarTest1>
    Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
-U_WMR_SELECTOBJECT            record: 1287 type:45   offset:   37032 rsize:       8
+U_WMR_SELECTOBJECT            record: 1287 type:45   offset:   37034 rsize:       8
    Object:         5
-U_WMR_SELECTOBJECT            record: 1288 type:45   offset:   37040 rsize:       8
+U_WMR_SELECTOBJECT            record: 1288 type:45   offset:   37042 rsize:       8
    Object:         2
-U_WMR_SETPOLYFILLMODE         record: 1289 type:6    offset:   37048 rsize:      10
+U_WMR_SETPOLYFILLMODE         record: 1289 type:6    offset:   37050 rsize:      10
    iMode:          0x0002
-U_WMR_ESCAPE                  record: 1290 type:38   offset:   37058 rsize:      10
+U_WMR_ESCAPE                  record: 1290 type:38   offset:   37060 rsize:      10
    EscType:BEGIN_PATH
    nBytes:0
    Data: (not shown)
-U_WMR_POLYGON                 record: 1291 type:36   offset:   37068 rsize:      48
+U_WMR_POLYGON                 record: 1291 type:36   offset:   37070 rsize:      48
   Points: [0]:{13547,7244} [1]:{13441,7151} [2]:{13333,7242} [3]:{13389,7113} [4]:{13269,7038} [5]:{13410,7052} [6]:{13443,6914} [7]:{13474,7052} [8]:{13615,7042} [9]:{13493,7114} 
-U_WMR_ESCAPE                  record: 1292 type:38   offset:   37116 rsize:      10
+U_WMR_ESCAPE                  record: 1292 type:38   offset:   37118 rsize:      10
    EscType:END_PATH
    nBytes:0
    Data: (not shown)
-U_WMR_SETTEXTALIGN            record: 1293 type:46   offset:   37126 rsize:      10
+U_WMR_SETTEXTALIGN            record: 1293 type:46   offset:   37128 rsize:      10
    iMode:          0x0000
-U_WMR_SELECTOBJECT            record: 1294 type:45   offset:   37136 rsize:       8
+U_WMR_SELECTOBJECT            record: 1294 type:45   offset:   37138 rsize:       8
    Object:         16
-U_WMR_EXTTEXTOUT              record: 1295 type:50   offset:   37144 rsize:      74
+U_WMR_EXTTEXTOUT              record: 1295 type:50   offset:   37146 rsize:      74
    X,Y:{13220,7110}
    Length:20
    Opts:0000
    String:<TextAbove__StarTest2>
    Dx:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:24:
-U_WMR_RESTOREDC               record: 1296 type:39   offset:   37218 rsize:       8
-U_WMR_EOF                     record: 1297 type:0    offset:   37226 rsize:       6
+U_WMR_RESTOREDC               record: 1296 type:39   offset:   37220 rsize:       8
+U_WMR_EOF                     record: 1297 type:0    offset:   37228 rsize:       6

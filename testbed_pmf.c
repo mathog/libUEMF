@@ -2880,6 +2880,35 @@ int main(int argc, char *argv[]){
     rec = U_EMREOF_set(0,NULL,et);
     taf(rec,et,"U_EMREOF_set");
 
+    /* Test the endian routines (on either Big or Little Endian machines).
+    This must be done before the call to emf_finish, as that will swap the byte
+    order of the EMF data before it writes it out on a BE machine.  The PMF data
+    should always be in the same byte order, and it should not change, as it is
+    hidden away inside the comment payloads, which are not swapped.  */
+    
+#if 1
+    string = (char *) malloc(et->used);
+    if(!string){
+       printf("Could not allocate enough memory to test u_emf_endian() function\n");
+    }
+    else {
+       memcpy(string,et->buf,et->used);
+       status = 0;
+       if(!U_emf_endian(et->buf,et->used,1)){
+          printf("Error in byte swapping of completed EMF, native -> reverse\n");
+       }
+       if(!U_emf_endian(et->buf,et->used,0)){
+          printf("Error in byte swapping of completed EMF, reverse -> native\n");
+       }
+       int oops_byte=rgba_diff(string, et->buf, et->used, 0);
+       if(oops_byte){ 
+          printf("Error in u_emf_endian() function, round trip byte swapping does not match original\n");
+          printf("Error in u_emf_endian() function at byte %d\n",oops_byte);
+       }
+       free(string);
+    }
+#endif // swap testing
+
     status=emf_finish(et, eht);
     if(status){ printf("emf_finish failed: %d\n", status); }
     else {      printf("emf_finish sucess\n");             }

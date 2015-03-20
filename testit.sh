@@ -22,7 +22,7 @@ mv test_libuemf.emf test_libuemf30.emf
 ./testbed_pmf 0 >/dev/null
 ./reademf test_libuemf_p.emf >test_libuemf_p_emf.txt
 ls -1 test*ref* | \
-  $EXTRACT -fmt " $USEDIFF -s [1,] [rtds_ref:1,]" | \
+  $EXTRACT -fmt " $USEDIFF -bqs [1,] [rtds_ref:1,]" | \
   $EXECINPUT
 #
 # clean up

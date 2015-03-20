@@ -25,8 +25,8 @@
 /* If Version or Date are changed also edit the text labels for the output.
 
 File:      testbed_wmf.c
-Version:   0.0.24
-Date:      25-JUL-2014
+Version:   0.0.25
+Date:      28-JUL-2014
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2014 David Mathog and California Institute of Technology (Caltech)
@@ -411,7 +411,7 @@ void test_clips(int x, int y, const int font, int pen_red_1, int pen_black_1, in
 
    /* double excluded rectangle clipping */
    y += 500;
-   textlabel(40, "Rect (include,inlude)", x , y - 60, font, wt, wht);
+   textlabel(40, "Rect (exclude,exclude)", x , y - 60, font, wt, wht);
    rec = wselectobject_set(pen_red_1, wht);                              taf(rec,wt,"selectobject_set");
    rec = wselectobject_set(brush_null, wht);                             taf(rec,wt,"selectobject_set");
    rec = U_WMRRECTANGLE_set((U_RECT16){x, y, x+200, y+400});             taf(rec,wt,"U_WMRRECTANGLE_set");
@@ -792,8 +792,8 @@ int main(int argc, char *argv[]){
 
     /* label the drawing */
     
-    textlabel(400, "libUEMF v0.1.17",      9700, 200, font_courier_400, wt, wht);
-    textlabel(400, "July 25, 2014",       9700, 500, font_courier_400, wt, wht);
+    textlabel(400, "libUEMF v0.1.18",      9700, 200, font_courier_400, wt, wht);
+    textlabel(400, "July 28, 2014",       9700, 500, font_courier_400, wt, wht);
     rec = malloc(128);
     (void)sprintf(rec,"WMF test: %2.2X",mode);
     textlabel(400, rec,                    9700, 800, font_courier_400, wt, wht);
