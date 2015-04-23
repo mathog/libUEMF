@@ -95,8 +95,8 @@ these WMF enumerations is by referencing the following table:
 
 /*
 File:      uemf.h
-Version:   0.0.30
-Date:      25-MAR-2015
+Version:   0.0.31
+Date:      23-APR-2015
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2015 David Mathog and California Institute of Technology (Caltech)
@@ -2892,7 +2892,8 @@ typedef struct {
     U_LOGFONT_PANOSE    elfw;               //!< Font parameters, either U_LOGFONT or U_LOGFONT_PANOSE, the latter is bigger so use that type here
 } U_EMREXTCREATEFONTINDIRECTW,
   *PU_EMREXTCREATEFONTINDIRECTW;            //!< EMF manual 2.3.7.8
-#define U_SIZE_EMREXTCREATEFONTINDIRECTW (sizeof(U_EMREXTCREATEFONTINDIRECTW))
+#define U_SIZE_EMREXTCREATEFONTINDIRECTW_LOGFONT_PANOSE  (sizeof(U_EMR) + 4 + sizeof(U_LOGFONT_PANOSE))
+#define U_SIZE_EMREXTCREATEFONTINDIRECTW_LOGFONT (sizeof(U_EMR) + 4 + sizeof(U_LOGFONT))
 
 /* Index  83,84  */
 /** EMF manual 2.3.5.7           

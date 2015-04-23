@@ -24,11 +24,11 @@
 /* If Version or Date are changed also edit the text labels for the output.
 
 File:      testbed_pmf.c
-Version:   0.0.3
-Date:      24-MAR-2014
+Version:   0.0.4
+Date:      23-APR-2015
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
-Copyright: 2014 David Mathog and California Institute of Technology (Caltech)
+Copyright: 2015 David Mathog and California Institute of Technology (Caltech)
 */
 
 #include <stdlib.h>
@@ -1686,8 +1686,8 @@ int main(int argc, char *argv[]){
     
     poColor   = U_PMF_ARGB_set(255,0,0,0);
 
-    textlabel(poac, 400, "libUEMF v0.1.17",     9700, 200, U_SA_Near, U_SA_Near, poColor, et);
-    textlabel(poac, 400, "July 25, 2014",        9700, 500, U_SA_Near, U_SA_Near, poColor, et);
+    textlabel(poac, 400, "libUEMF v0.2.1",     9700, 200, U_SA_Near, U_SA_Near, poColor, et);
+    textlabel(poac, 400, "April 23, 2015",     9700, 500, U_SA_Near, U_SA_Near, poColor, et);
     rec = malloc(128);
     (void)sprintf(rec,"EMF+ test: %2.2X",mode);
     textlabel(poac, 400, rec,                   9700, 800, U_SA_Near, U_SA_Near, poColor, et);

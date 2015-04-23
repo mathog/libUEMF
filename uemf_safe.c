@@ -15,8 +15,8 @@
 
 /*
 File:      uemf_safe.c
-Version:   0.0.3
-Date:      26-MAR-2015
+Version:   0.0.4
+Date:      23-APR-2015
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2015 David Mathog and California Institute of Technology (Caltech)
@@ -327,7 +327,7 @@ They are listed in order by the corresponding U_EMR_* index number.
     \param torev    1 for native to reversed, 0 for reversed to native
 */
 int U_EMRNOTIMPLEMENTED_safe(const char *record){
-   printf("WARNING:  could not convert data in record type that has not been implemented!\n");
+   fprintf(stderr,"EMF WARNING:  could not safety check record because that type has not been implemented!\n");
    return(core5_safe(record, sizeof(U_EMR)));
 }
 
@@ -837,7 +837,9 @@ int U_EMRSTRETCHDIBITS_safe(const char *record){
 
 // U_EMREXTCREATEFONTINDIRECTW    82
 int U_EMREXTCREATEFONTINDIRECTW_safe(const char *record){
-   return(core5_safe(record, U_SIZE_EMREXTCREATEFONTINDIRECTW));
+   /* Panose or logfont, LogFontExDv is not supported.  Test smallest to largest */
+   if(core5_safe(record, U_SIZE_EMREXTCREATEFONTINDIRECTW_LOGFONT))return(1);
+   return(core5_safe(record, U_SIZE_EMREXTCREATEFONTINDIRECTW_LOGFONT_PANOSE));
 }
 
 // U_EMREXTTEXTOUTA          83

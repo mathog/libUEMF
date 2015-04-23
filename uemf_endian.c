@@ -19,8 +19,8 @@
 
 /*
 File:      uemf_endian.c
-Version:   0.0.20
-Date:      26-MAR-2015
+Version:   0.0.21
+Date:      23-APR-2015
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2015 David Mathog and California Institute of Technology (Caltech)
@@ -784,7 +784,7 @@ They are listed in order by the corresponding U_EMR_* index number.
     \param torev    1 for native to reversed, 0 for reversed to native
 */
 int U_EMRNOTIMPLEMENTED_swap(char *record, int torev){
-   printf("WARNING:  could not convert data in record type that has not been implemented!\n");
+   fprintf(stderr,"EMF WARNING:  could not swap data bytes on record because that type has not been implemented!\n");
    return(core5_swap(record, torev));
 }
 
@@ -1638,10 +1638,10 @@ int U_EMREXTCREATEFONTINDIRECTW_swap(char *record, int torev){
    if(!torev){
       nSize = pEmr->emr.nSize;
    }
-   if(nSize == sizeof(U_EMREXTCREATEFONTINDIRECTW)){
+   if(nSize == U_SIZE_EMREXTCREATEFONTINDIRECTW_LOGFONT_PANOSE){
       logfont_panose_swap(&(pEmr->elfw));
    }
-   else {
+   else { // logfont or logfontExDv (which starts with logfont, which can be swapped, and the rest is already in byte order
       logfont_swap( (PU_LOGFONT) &(pEmr->elfw));
    }
    return(1);
@@ -2048,7 +2048,7 @@ int U_emf_record_sizeok(const char *record, const char *blimit, uint32_t  *nSize
        case U_EMR_PLGBLT:                  rsize = U_SIZE_EMRPLGBLT;                  break;
        case U_EMR_SETDIBITSTODEVICE:       rsize = U_SIZE_EMRSETDIBITSTODEVICE;       break;
        case U_EMR_STRETCHDIBITS:           rsize = U_SIZE_EMRSTRETCHDIBITS;           break;
-       case U_EMR_EXTCREATEFONTINDIRECTW:  rsize = U_SIZE_EMREXTCREATEFONTINDIRECTW;  break;
+       case U_EMR_EXTCREATEFONTINDIRECTW:  rsize = U_SIZE_EMREXTCREATEFONTINDIRECTW_LOGFONT;  break;
        case U_EMR_EXTTEXTOUTA:             rsize = U_SIZE_EMREXTTEXTOUTA;             break;
        case U_EMR_EXTTEXTOUTW:             rsize = U_SIZE_EMREXTTEXTOUTW;             break;
        case U_EMR_POLYBEZIER16:            rsize = U_SIZE_EMRPOLYBEZIER16;            break;

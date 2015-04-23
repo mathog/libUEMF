@@ -80,7 +80,7 @@ U_EMR_EXTTEXTOUTW             record:   23 type:84   offset:     944 rsize:     
    rclBounds:      {0,0,-1,-1} 
    exScale:        1.000000
    eyScale:        1.000000
-   emrtext:        ptlReference:{9700,200} nChars:14 offString:76 string16:<libUEMF v0.2.0> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:104 Dx:240:240:240:240:240:240:240:240:240:240:240:240:240:240:
+   emrtext:        ptlReference:{9700,200} nChars:14 offString:76 string16:<libUEMF v0.2.1> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:104 Dx:240:240:240:240:240:240:240:240:240:240:240:240:240:240:
 U_EMR_SETTEXTALIGN            record:   24 type:22   offset:    1104 rsize:      12
    iMode:          0x00000000
 U_EMR_SELECTOBJECT            record:   25 type:37   offset:    1116 rsize:      12
@@ -97,7 +97,7 @@ U_EMR_EXTTEXTOUTW             record:   29 type:84   offset:    1484 rsize:     
    rclBounds:      {0,0,-1,-1} 
    exScale:        1.000000
    eyScale:        1.000000
-   emrtext:        ptlReference:{9700,500} nChars:14 offString:76 string16:<March 20, 2015> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:104 Dx:240:240:240:240:240:240:240:240:240:240:240:240:240:240:
+   emrtext:        ptlReference:{9700,500} nChars:14 offString:76 string16:<April 23, 2015> fOptions:0x00000000 rcl{0,0,-1,-1} offDx:104 Dx:240:240:240:240:240:240:240:240:240:240:240:240:240:240:
 U_EMR_SETTEXTALIGN            record:   30 type:22   offset:    1644 rsize:      12
    iMode:          0x00000000
 U_EMR_SELECTOBJECT            record:   31 type:37   offset:    1656 rsize:      12

@@ -19,7 +19,7 @@ bit Solaris (BE).
 
 libUEMF is released under the GPL 2 license, read the file 'COPYING' for more information
 
-Version 0.2.0, released March 26, 2015.
+Version 0.2.1, released April 23, 2015.
 
 To report bugs or provide feedback send email to David Mathog, mathog@caltech.edu.
 
@@ -376,6 +376,12 @@ History
   (Note, version numbers in files represent the libUEMF release where it was last modified, so not
   all files will show the same version numbers in each release.)
 
+0.2.1.2015_04_23
+  Bug in safety check on EMREXTCREATEFONTINDIRECTW because it had alternative "standard" record sizes.
+  Changed warnings on unimplemented EMF record types encounterd in swap or safe from stdout to stderr.
+  Added memory checking for WMF polyline and polygon records, for the variable part and some others.
+  Note:  U_WMRCREATEREGION_get does not check that the variable part stays within the record.  Current
+    implementation seems to be broken since it does not show up in XP preview.
 0.2.0 2015_03_20
   Added  UEMF _safe functions to better handle corrupt records, where variable sizes fields might
     have been specified to read past the end of memory. These are records with offsets, arrays

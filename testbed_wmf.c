@@ -25,11 +25,11 @@
 /* If Version or Date are changed also edit the text labels for the output.
 
 File:      testbed_wmf.c
-Version:   0.0.25
-Date:      28-JUL-2014
+Version:   0.0.26
+Date:      23-APR-2015
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
-Copyright: 2014 David Mathog and California Institute of Technology (Caltech)
+Copyright: 2015 David Mathog and California Institute of Technology (Caltech)
 */
 
 #include <stdlib.h>
@@ -792,8 +792,8 @@ int main(int argc, char *argv[]){
 
     /* label the drawing */
     
-    textlabel(400, "libUEMF v0.1.18",      9700, 200, font_courier_400, wt, wht);
-    textlabel(400, "July 28, 2014",       9700, 500, font_courier_400, wt, wht);
+    textlabel(400, "libUEMF v0.2.1",      9700, 200, font_courier_400, wt, wht);
+    textlabel(400, "April 23, 2015",       9700, 500, font_courier_400, wt, wht);
     rec = malloc(128);
     (void)sprintf(rec,"WMF test: %2.2X",mode);
     textlabel(400, rec,                    9700, 800, font_courier_400, wt, wht);

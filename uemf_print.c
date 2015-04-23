@@ -2084,18 +2084,18 @@ void U_EMRSTRETCHDIBITS_print(const char *contents){
 */
 void U_EMREXTCREATEFONTINDIRECTW_print(const char *contents){
    PU_EMREXTCREATEFONTINDIRECTW pEmr = (PU_EMREXTCREATEFONTINDIRECTW) (contents);
-   if(pEmr->emr.nSize < sizeof(U_EMREXTCREATEFONTINDIRECTW)){
+   if(pEmr->emr.nSize < U_SIZE_EMREXTCREATEFONTINDIRECTW_LOGFONT){ // smallest variant
       printf("   record corruption HERE\n");
       return;
    }
    const char *blimit = contents + pEmr->emr.nSize;
    printf("   ihFont:         %u\n",pEmr->ihFont );
    printf("   Font:           ");
-   if(pEmr->emr.nSize == sizeof(U_EMREXTCREATEFONTINDIRECTW)){ // holds logfont_panose
+   if(pEmr->emr.nSize == U_SIZE_EMREXTCREATEFONTINDIRECTW_LOGFONT_PANOSE){ // holds logfont_panose
       IF_MEM_UNSAFE_PRINT_AND_RETURN(&(pEmr->elfw), sizeof(U_PANOSE), blimit);
       logfont_panose_print(pEmr->elfw);
    }
-   else { // holds logfont
+   else { // holds logfont or logfontExDv.  The latter isn't supported but it starts with logfont, so use that
       IF_MEM_UNSAFE_PRINT_AND_RETURN(&(pEmr->elfw), sizeof(U_LOGFONT), blimit);
       logfont_print( *(PU_LOGFONT) &(pEmr->elfw));
    }

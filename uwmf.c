@@ -5557,7 +5557,11 @@ int U_WMRPOLYGON_get(
       uint16_t     *Length, 
       const char  **Data
     ){
-    return U_WMRCORE_2U16_N16_get(contents, (U_SIZE_WMRPOLYGON), NULL, Length, Data);
+    int size = U_WMRCORE_2U16_N16_get(contents, (U_SIZE_WMRPOLYGON), NULL, Length, Data);
+    if(size){
+        if(IS_MEM_UNSAFE(*Data, (*Length)*sizeof(U_POINT16), contents+size))return(0);
+    }
+    return size;
 }
 
 /**
@@ -5572,7 +5576,11 @@ int U_WMRPOLYLINE_get(
       uint16_t    *Length, 
       const char **Data
     ){
-    return U_WMRCORE_2U16_N16_get(contents, (U_SIZE_WMRPOLYLINE), NULL, Length, Data);
+    int size = U_WMRCORE_2U16_N16_get(contents, (U_SIZE_WMRPOLYGON), NULL, Length, Data);
+    if(size){
+        if(IS_MEM_UNSAFE(*Data, (*Length)*sizeof(U_POINT16), contents+size))return(0);
+    }
+    return size;
 }
 
 /**
@@ -5595,7 +5603,11 @@ int U_WMRESCAPE_get(
       uint16_t    *Length, 
       const char **Data
    ){
-   return U_WMRCORE_2U16_N16_get(contents, (U_SIZE_WMRESCAPE), Escape, Length, Data);
+   int size = U_WMRCORE_2U16_N16_get(contents, (U_SIZE_WMRESCAPE), Escape, Length, Data);
+   if(size){
+       if(IS_MEM_UNSAFE(*Data, *Length, contents+size))return(0);
+   }
+   return size;
 }
 
 /**
@@ -6965,7 +6977,12 @@ int U_WMRCREATEFONTINDIRECT_get(
       const char   *contents,
       const char  **font
    ){
-   return U_WMRCORE_2U16_N16_get(contents, (U_SIZE_WMRCREATEFONTINDIRECT), NULL, NULL, font);
+   int size = U_WMRCORE_2U16_N16_get(contents, (U_SIZE_WMRCREATEFONTINDIRECT), NULL, NULL, font);
+   if(size){
+       if(IS_MEM_UNSAFE(*font, U_SIZE_FONT_CORE, contents+size))return(0);
+       if(contents + size - *font > U_SIZE_FONT_CORE + 32)return(0); // font name must fit in a 32 bit field
+   }
+   return size;
 }
 
 /**
@@ -6978,6 +6995,7 @@ int U_WMRCREATEBRUSHINDIRECT_get(
       const char   *contents,
       const char  **brush
     ){
+    // U_SIZE_WMRCREATEBRUSHINDIRECT is everything, no variable part, so the test below is sufficient
     return U_WMRCORE_2U16_N16_get(contents, (U_SIZE_WMRCREATEBRUSHINDIRECT), NULL, NULL, brush);
 }
 
@@ -6998,12 +7016,14 @@ int U_WMRCREATEBITMAP_get(void){
     \return length of the U_WMRCREATEREGION record in bytes, or 0 on error
     \param  contents   record to extract data from
     \param  Region     pointer to U_REGION structure in memory.  Pointer may not be aligned properly for structure.
+    
+    Caller must check at the returned Region does not extend outside of the record!
 */
 int U_WMRCREATEREGION_get(
       const char   *contents,
       const char  **Region
     ){
-    return U_WMRCORE_2U16_N16_get(contents, (U_SIZE_WMRCREATEREGION), NULL, NULL, Region);
+   return U_WMRCORE_2U16_N16_get(contents, (U_SIZE_WMRCREATEREGION), NULL, NULL, Region);
 }
 
 

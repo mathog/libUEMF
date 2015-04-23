@@ -25,8 +25,8 @@
 /* If Version or Date are changed also edit the text labels for the output.
 
 File:      testbed_emf.c
-Version:   0.0.25
-Date:      19-MAR-2015
+Version:   0.0.26
+Date:      23-APR-2015
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2015 David Mathog and California Institute of Technology (Caltech)
@@ -1022,8 +1022,8 @@ int main(int argc, char *argv[]){
 
     /* label the drawing */
     
-    textlabel(400, "libUEMF v0.2.0",      9700, 200, &font, et, eht);
-    textlabel(400, "March 20, 2015",      9700, 500, &font, et, eht);
+    textlabel(400, "libUEMF v0.2.1",      9700, 200, &font, et, eht);
+    textlabel(400, "April 23, 2015",      9700, 500, &font, et, eht);
     rec = malloc(128);
     (void)sprintf(rec,"EMF test: %2.2X",mode);
     textlabel(400, rec,                   9700, 800, &font, et, eht);
