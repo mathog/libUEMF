@@ -24,8 +24,8 @@
 /* If Version or Date are changed also edit the text labels for the output.
 
 File:      testbed_pmf.c
-Version:   0.0.4
-Date:      23-APR-2015
+Version:   0.0.5
+Date:      28-APR-2015
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2015 David Mathog and California Institute of Technology (Caltech)
@@ -89,7 +89,7 @@ void DumpPo(U_PSEUDO_OBJ *po, char *text){
   unsigned long int us,uu;
   uint8_t *ptr = (uint8_t *)po->Data;
   printf("DEBUG %s\n", text); fflush(stdout);
-  us = po->Size; /* printing size_t portably is a paint, this avoids the issue */
+  us = po->Size; /* printing size_t portably is a pain, this avoids the issue */
   uu = po->Used;
   printf("DEBUG Data:%p Size:%lu Used:%lu",po->Data, us, uu);fflush(stdout);
   for(i=0; i < po->Used; i++, ptr++){
@@ -917,7 +917,6 @@ void test_clips(EMFTRACK *et, int x, int y, U_PSEUDO_OBJ *poac){
    grad_star(et, x+800, y, 0, poac);
    grad_star(et, x+800, y+700, 1, poac);
    
-printf("DEBUG test_clip 100\n");fflush(stdout);
    /* NOW reset the clipping */
    po = U_PMR_RESETCLIP_set();
        IfNullPtr(po,__LINE__,"OOPS on U_PMR_RESETCLIP\n");

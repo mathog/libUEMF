@@ -4,6 +4,9 @@
 # Test all programs against reference.  If all is working correctly
 # each output line should end with "are identical".
 #
+# NOTE! On windows text files may differ by having \n\r instead of \n, which is
+# why there is a "b" in the diff.
+#
 # Edit the following 3 lines as needed.
 #    gdiff is gnu diff
 #    extract & execinput are from http://sourceforge.net/projects/drmtools/

@@ -25,8 +25,8 @@
 /* If Version or Date are changed also edit the text labels for the output.
 
 File:      testbed_emf.c
-Version:   0.0.26
-Date:      23-APR-2015
+Version:   0.0.27
+Date:      21-MAY-2015
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2015 David Mathog and California Institute of Technology (Caltech)
@@ -206,6 +206,99 @@ void spintext(uint32_t x, uint32_t y, uint32_t textalign, uint32_t *font, EMFTRA
     free(FontStyle);
     free(string);
 }
+    
+/* text formatting varients */
+void textvariants(uint32_t x, uint32_t y, uint32_t textalign, uint32_t *font, EMFTRACK *et, EMFHANDLES *eht){
+    char               *rec;
+    char               *rec2;
+    int                 i;
+    char               *string;
+    uint16_t            *FontName;
+    uint16_t            *FontStyle;
+    uint16_t            *text16;
+    U_LOGFONT            lf;
+    U_LOGFONT_PANOSE     elfw;
+    int                  slen;
+    uint32_t            *dx;
+    
+    
+    rec = U_EMRSETTEXTALIGN_set(textalign);
+    taf(rec,et,"U_EMRSETTEXTALIGN_set");
+    string = (char *) malloc(32);
+    FontName = U_Utf8ToUtf16le("Courier New", 0, NULL);  // Helvetica originally, but that does not work
+    FontStyle = U_Utf8ToUtf16le("Normal", 0, NULL);
+    for(i=0; i<=900; i+=100){ /* weights */
+       rec = selectobject_set(U_DEVICE_DEFAULT_FONT, eht); // Release current font
+       taf(rec,et,"selectobject_set");
+
+       if(*font){
+          rec  = deleteobject_set(font, eht);  // then delete it
+          taf(rec,et,"deleteobject_set");
+       }
+
+       lf   = logfont_set( -30, 0, 0, 0, 
+                         i, U_FW_NOITALIC, U_FW_NOUNDERLINE, U_FW_NOSTRIKEOUT,
+                         U_ANSI_CHARSET, U_OUT_DEFAULT_PRECIS, U_CLIP_DEFAULT_PRECIS, 
+                         U_DEFAULT_QUALITY, U_DEFAULT_PITCH, FontName);
+       elfw = logfont_panose_set(lf, FontName, FontStyle, 0, U_PAN_ALL1);  // U_PAN_ALL1 is all U_PAN_NO_FIT, this is what createfont() would have made
+       rec  = extcreatefontindirectw_set(font, eht,  NULL, (char *) &elfw);
+       taf(rec,et,"extcreatefontindirectw_set");
+       rec = selectobject_set(*font, eht); // make this font active
+       taf(rec,et,"selectobject_set");
+
+       sprintf(string,"weight %d:",i);
+       text16 = U_Utf8ToUtf16le(string, 0, NULL);
+       slen   = wchar16len(text16);
+       dx = dx_set(-30,  U_FW_NORMAL, slen);
+       rec2 = emrtext_set( pointl_set(x,y), slen, 2, text16, U_ETO_NONE, U_RCL_DEF, dx);
+       free(text16);
+       free(dx);
+       rec = U_EMREXTTEXTOUTW_set(U_RCL_DEF,U_GM_COMPATIBLE,1.0,1.0,(PU_EMRTEXT)rec2); 
+       taf(rec,et,"U_EMREXTTEXTOUTW_set");
+       free(rec2);
+       y+=35;
+    }
+    for(i=0; i<8; i++){ /* single bit settings  */
+       rec = selectobject_set(U_DEVICE_DEFAULT_FONT, eht); // Release current font
+       taf(rec,et,"selectobject_set");
+
+       if(*font){
+          rec  = deleteobject_set(font, eht);  // then delete it
+          taf(rec,et,"deleteobject_set");
+       }
+
+       lf   = logfont_set( -30, 0, 0, 0, 
+                         U_FW_NORMAL,
+                         (i&4 ? U_FW_ITALIC:    U_FW_NOITALIC), 
+                         (i&2 ? U_FW_UNDERLINE: U_FW_NOUNDERLINE), 
+                         (i&1 ? U_FW_STRIKEOUT: U_FW_NOSTRIKEOUT), 
+                         U_ANSI_CHARSET, 
+                         U_OUT_DEFAULT_PRECIS, 
+                         U_CLIP_DEFAULT_PRECIS, 
+                         U_DEFAULT_QUALITY, U_DEFAULT_PITCH, FontName);
+       elfw = logfont_panose_set(lf, FontName, FontStyle, 0, U_PAN_ALL1);  // U_PAN_ALL1 is all U_PAN_NO_FIT, this is what createfont() would have made
+       rec  = extcreatefontindirectw_set(font, eht,  NULL, (char *) &elfw);
+       taf(rec,et,"extcreatefontindirectw_set");
+       rec = selectobject_set(*font, eht); // make this font active
+       taf(rec,et,"selectobject_set");
+
+       sprintf(string,"%sItalic %sUnderline %sStrikeout",(i&4 ? "" : "No"),(i&2 ? "" : "No"),(i&1 ? "" : "No"));
+       text16 = U_Utf8ToUtf16le(string, 0, NULL);
+       slen   = wchar16len(text16);
+       dx = dx_set(-30,  U_FW_NORMAL, slen);
+       rec2 = emrtext_set( pointl_set(x,y), slen, 2, text16, U_ETO_NONE, U_RCL_DEF, dx);
+       free(text16);
+       free(dx);
+       rec = U_EMREXTTEXTOUTW_set(U_RCL_DEF,U_GM_COMPATIBLE,1.0,1.0,(PU_EMRTEXT)rec2); 
+       taf(rec,et,"U_EMREXTTEXTOUTW_set");
+       free(rec2);
+       y+=35;
+    }
+    free(FontName);
+    free(FontStyle);
+    free(string);
+}
+    
     
 void draw_textrect(int xul, int yul, int width, int height, char *string, int size, EMFTRACK *et){
     char               *rec;
@@ -1022,8 +1115,8 @@ int main(int argc, char *argv[]){
 
     /* label the drawing */
     
-    textlabel(400, "libUEMF v0.2.1",      9700, 200, &font, et, eht);
-    textlabel(400, "April 23, 2015",      9700, 500, &font, et, eht);
+    textlabel(400, "libUEMF v0.2.2",      9700, 200, &font, et, eht);
+    textlabel(400, "May 21, 2015",        9700, 500, &font, et, eht);
     rec = malloc(128);
     (void)sprintf(rec,"EMF test: %2.2X",mode);
     textlabel(400, rec,                   9700, 800, &font, et, eht);
@@ -1991,8 +2084,10 @@ if(!(mode & PPT_BLOCKERS)){
     spintext(9200, 300,U_TA_BOTTOM,  &font,et,eht);
     rec = U_EMRSETTEXTALIGN_set(U_TA_BASELINE); // go back to baseline
     taf(rec,et,"U_EMRSETTEXTALIGN_set");
-    
 
+    /* ***************    test text formatting variants  *************** */
+    textvariants(7700, 650,U_TA_BASELINE,&font,et,eht);
+    
     /* ***************    test hatched fill and stroke (standard patterns)  *************** */
     
     // use BLACK_PEN (edge on drawn rectangle)

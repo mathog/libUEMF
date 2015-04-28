@@ -25,8 +25,8 @@
 /* If Version or Date are changed also edit the text labels for the output.
 
 File:      testbed_wmf.c
-Version:   0.0.26
-Date:      23-APR-2015
+Version:   0.0.27
+Date:      21-MAY-2015
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2015 David Mathog and California Institute of Technology (Caltech)
@@ -197,6 +197,69 @@ void spintext(uint32_t x, uint32_t y, uint32_t textalign, WMFTRACK *wt, WMFHANDL
     free(string);
 }
     
+void textvariants(uint32_t x, uint32_t y, uint32_t textalign, WMFTRACK *wt, WMFHANDLES *wht){
+    char               *rec;
+    int                 i;
+    char               *string;
+    int                 slen;
+    int16_t            *dx;
+    uint32_t            font=0;
+    U_FONT             *puf;
+    
+    
+    
+    rec = U_WMRSETTEXTALIGN_set(textalign);  taf(rec,wt,"U_WMRSETTEXTALIGN_set");
+    string = (char *) malloc(32);
+    for(i=0; i<=900; i+=100){
+
+       // set escapement and orientation in tenths of a degree counter clockwise rotation
+       puf = U_FONT_set(  -30, 0, 0, 0, 
+                         i, U_FW_NOITALIC, U_FW_NOUNDERLINE, U_FW_NOSTRIKEOUT,
+                         U_ANSI_CHARSET, U_OUT_DEFAULT_PRECIS, U_CLIP_DEFAULT_PRECIS, 
+                         U_DEFAULT_QUALITY, U_DEFAULT_PITCH, "Courier New");
+       rec  = wcreatefontindirect_set( &font, wht, puf); taf(rec,wt,"wextcreatefontindirect_set");
+       free(puf);
+       rec = wselectobject_set(font, wht);  taf(rec,wt,"wselectobject_set");
+
+       sprintf(string,"weight %d:",i);
+       slen=strlen(string);
+       dx = dx16_set(-30,  U_FW_NORMAL, slen);
+       rec = U_WMREXTTEXTOUT_set(point16_set(x,y), slen, U_ETO_NONE, string, dx, U_RCL16_DEF);
+       taf(rec,wt,"U_WMREXTTEXTOUT_set");
+       free(dx);
+       rec = wdeleteobject_set(&font, wht);  taf(rec,wt,"wdeleteobject_set");
+       y+=35;
+    }
+
+    for(i=0; i<8; i++){ /* single bit settings  */
+
+       // set escapement and orientation in tenths of a degree counter clockwise rotation
+       puf = U_FONT_set(  -30, 0, 0, 0, 
+                         U_FW_NORMAL, 
+                         (i&4 ? U_FW_ITALIC:    U_FW_NOITALIC), 
+                         (i&2 ? U_FW_UNDERLINE: U_FW_NOUNDERLINE), 
+                         (i&1 ? U_FW_STRIKEOUT: U_FW_NOSTRIKEOUT), 
+                         U_ANSI_CHARSET,
+                         U_OUT_DEFAULT_PRECIS,
+                         U_CLIP_DEFAULT_PRECIS, 
+                         U_DEFAULT_QUALITY, U_DEFAULT_PITCH, "Courier New");
+       rec  = wcreatefontindirect_set( &font, wht, puf); taf(rec,wt,"wextcreatefontindirect_set");
+       free(puf);
+       rec = wselectobject_set(font, wht);  taf(rec,wt,"wselectobject_set");
+
+       sprintf(string,"%sItalic %sUnderline %sStrikeout",(i&4 ? "" : "No"),(i&2 ? "" : "No"),(i&1 ? "" : "No"));
+       slen=strlen(string);
+       dx = dx16_set(-30,  U_FW_NORMAL, slen);
+       rec = U_WMREXTTEXTOUT_set(point16_set(x,y), slen, U_ETO_NONE, string, dx, U_RCL16_DEF);
+       taf(rec,wt,"U_WMREXTTEXTOUT_set");
+       free(dx);
+       rec = wdeleteobject_set(&font, wht);  taf(rec,wt,"wdeleteobject_set");
+       y+=35;
+    }
+
+    free(string);
+}
+
 void draw_textrect(int xul, int yul, int width, int height, char *string, int size, WMFTRACK *wt){
     char                *rec;
     int                  slen;
@@ -792,8 +855,8 @@ int main(int argc, char *argv[]){
 
     /* label the drawing */
     
-    textlabel(400, "libUEMF v0.2.1",      9700, 200, font_courier_400, wt, wht);
-    textlabel(400, "April 23, 2015",       9700, 500, font_courier_400, wt, wht);
+    textlabel(400, "libUEMF v0.2.2",       9700, 200, font_courier_400, wt, wht);
+    textlabel(400, "May 21, 2015",         9700, 500, font_courier_400, wt, wht);
     rec = malloc(128);
     (void)sprintf(rec,"WMF test: %2.2X",mode);
     textlabel(400, rec,                    9700, 800, font_courier_400, wt, wht);
@@ -1391,7 +1454,9 @@ int main(int argc, char *argv[]){
     rec = U_WMRSETTEXTALIGN_set(U_TA_BASELINE); // go back to baseline
     taf(rec,wt,"U_WMRSETTEXTALIGN_set");
     
-
+    /* ***************    test text formatting variants  *************** */
+    textvariants(7700, 650,U_TA_BASELINE, wt,wht);
+    
     /* ***************    test hatched fill and stroke (standard patterns)  *************** */
     
     // use BLACK_PEN (edge on drawn rectangle)
@@ -1774,10 +1839,10 @@ int main(int argc, char *argv[]){
     else {
        memcpy(string,wt->buf,wt->used);
        status = 0;
-       if(!U_wmf_endian(wt->buf,wt->used,1)){
+       if(!U_wmf_endian(wt->buf,wt->used,1,1)){
           printf("Error in byte swapping of completed WMF, native -> reverse\n");
        }
-       if(!U_wmf_endian(wt->buf,wt->used,0)){
+       if(!U_wmf_endian(wt->buf,wt->used,0,1)){
           printf("Error in byte swapping of completed WMF, reverse -> native\n");
        }
        if(rgba_diff(string,wt->buf,wt->used, 0)){ 
