@@ -25,8 +25,8 @@
 /* If Version or Date are changed also edit the text labels for the output.
 
 File:      testbed_emf.c
-Version:   0.0.27
-Date:      21-MAY-2015
+Version:   0.0.28
+Date:      28-MAY-2015
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2015 David Mathog and California Institute of Technology (Caltech)
@@ -384,7 +384,7 @@ void label_column(int x1, int y1, uint32_t *font, EMFTRACK *et, EMFHANDLES *eht)
     textlabel(40, "STRETCHBLT    3", x1, y1, font, et, eht);          y1 += 240;
     textlabel(40, "STRETCHDIBITS 4", x1, y1, font, et, eht);          y1 += 220;
     textlabel(40, "BITBLT        4", x1, y1, font, et, eht);          y1 += 220;
-    textlabel(40, "STRETCHBLT    4", x1, y1, font, et, eht);          y1 += 220;
+    textlabel(40, "STRETCHBLT    4", x1, y1, font, et, eht);        //y1 += 220; //clang static analyzer complains about this
     return;
 }
 
@@ -399,7 +399,7 @@ void label_row(int x1, int y1, uint32_t *font, EMFTRACK *et, EMFHANDLES *eht){
     textlabel(30, "-MONO    ", x1, y1, font, et, eht);          x1 += 220;
     textlabel(30, "+COLOR8 0", x1, y1, font, et, eht);          x1 += 220;
     textlabel(30, "+COLOR4 0", x1, y1, font, et, eht);          x1 += 220;
-    textlabel(30, "+MONO   0", x1, y1, font, et, eht);          x1 += 220;
+    textlabel(30, "+MONO   0", x1, y1, font, et, eht);        //x1 += 220; //clang static analyzer complains about this
     return;
 }
 
@@ -591,7 +591,7 @@ void image_column(EMFTRACK *et, int x1, int y1, int w, int h, PU_BITMAPINFO Bmi,
        cbPx, 
        px);
     taf(rec,et,"U_EMRSTRETCHBLT_set");
-    step += 220;
+//    step += 220;
 
 }
 
@@ -1038,7 +1038,9 @@ int main(int argc, char *argv[]){
     // set up and begin the EMF
  
     status=emf_start("test_libuemf.emf",1000000, 250000, &et);  // space allocation initial and increment 
+    if(status)printf("error in emf_start\n"); fflush(stdout);
     status=emf_htable_create(128, 128, &eht);
+    if(status)printf("error in emf_htable\n"); fflush(stdout);
 
     (void) device_size(216, 279, 47.244094, &szlDev, &szlMm); // Example: device is Letter vertical, 1200 dpi = 47.244 DPmm
     (void) drawing_size(297, 210, 47.244094, &rclBounds, &rclFrame);  // Example: drawing is A4 horizontal,  1200 dpi = 47.244 DPmm
@@ -1686,8 +1688,10 @@ int main(int argc, char *argv[]){
 
     colortype = U_BCBM_COLOR32;
     status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  10, 10, 40, colortype, U_CT_NO, U_ROW_ORDER_INVERT);
+    if(status)printf("Error in RGBA->DIB for U_BCBM_COLOR32\n"); fflush(stdout);
        //  Test the inverse operation - this does not affect the EMF contents
     status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 10, 10,     colortype, U_CT_NO, U_ROW_ORDER_INVERT);
+    if(status)printf("Error in DIB->RGBA for U_BCBM_COLOR32\n"); fflush(stdout);
     if(rgba_diff(rgba_px, rgba_px2, 10 * 10 * 4, 0))printf("Error in RGBA->DIB->RGBA for U_BCBM_COLOR32\n"); fflush(stdout);
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(10, 10, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
@@ -1715,8 +1719,10 @@ int main(int argc, char *argv[]){
 
     colortype = U_BCBM_COLOR24;
     status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  10, 10, 40, colortype, U_CT_NO, U_ROW_ORDER_INVERT);
+    if(status)printf("Error in RGBA->DIB for U_BCBM_COLOR24\n"); fflush(stdout);
        //  Test the inverse operation - this does not affect the EMF contents
     status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 10, 10,     colortype, U_CT_NO, U_ROW_ORDER_INVERT);
+    if(status)printf("Error in DIB->RGBA for U_BCBM_COLOR24\n"); fflush(stdout);
     if(rgba_diff(rgba_px, rgba_px2, 10 * 10 * 4, 1))printf("Error in RGBA->DIB->RGBA for U_BCBM_COLOR24\n"); fflush(stdout);
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(10, 10, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
@@ -1729,8 +1735,10 @@ int main(int argc, char *argv[]){
     // 16 bit, 5 bits per color, no table
     colortype = U_BCBM_COLOR16;
     status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  10, 10, 40, colortype, U_CT_NO, U_ROW_ORDER_INVERT);
+    if(status)printf("Error in RGBA->DIB for U_BCBM_COLOR16\n"); fflush(stdout);
        //  Test the inverse operation - this does not affect the EMF contents
     status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 10, 10,     colortype, U_CT_NO, U_ROW_ORDER_INVERT);
+    if(status)printf("Error in DIB->RGBA for U_BCBM_COLOR16\n"); fflush(stdout);
     if(rgba_diff(rgba_px, rgba_px2, 10 * 10 * 4,2))printf("Error in RGBA->DIB->RGBA for U_BCBM_COLOR16\n"); fflush(stdout);
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(10, 10, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
@@ -1749,8 +1757,10 @@ int main(int argc, char *argv[]){
 
     colortype = U_BCBM_COLOR8;
     status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  10, 10, 40, colortype, U_CT_BGRA, U_ROW_ORDER_SAME);
+    if(status)printf("Error in RGBA->DIB for U_BCBM_COLOR8\n"); fflush(stdout);
        //  Test the inverse operation - this does not affect the EMF contents
     status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 10, 10,     colortype, U_CT_BGRA, U_ROW_ORDER_SAME);
+    if(status)printf("Error in DIB->RGBA for U_BCBM_COLOR8\n"); fflush(stdout);
     if(rgba_diff(rgba_px, rgba_px2, 10 * 10 * 4, 0))printf("Error in RGBA->DIB->RGBA for U_BCBM_COLOR8\n"); fflush(stdout);
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(10, 10, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
@@ -1776,8 +1786,10 @@ int main(int argc, char *argv[]){
 
     colortype = U_BCBM_COLOR4;
     status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  4, 4, 16, colortype, U_CT_BGRA, U_ROW_ORDER_SAME);
+    if(status)printf("Error in RGBA->DIB for U_BCBM_COLOR4\n"); fflush(stdout);
        //  Test the inverse operation - this does not affect the EMF contents
     status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 4, 4,     colortype, U_CT_BGRA, U_ROW_ORDER_SAME);
+    if(status)printf("Error in DIB->RGBA for U_BCBM_COLOR4\n"); fflush(stdout);
     if(rgba_diff(rgba_px, rgba_px2, 4 * 4 * 4, 0))printf("Error in RGBA->DIB->RGBA for U_BCBM_COLOR4\n"); fflush(stdout);
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(4, 4, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
@@ -1801,8 +1813,10 @@ int main(int argc, char *argv[]){
 
     colortype = U_BCBM_MONOCHROME;
     status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  4, 4, 16, colortype, U_CT_BGRA, U_ROW_ORDER_SAME);
+    if(status)printf("Error in RGBA->DIB for U_BCBM_MONOCHROME\n"); fflush(stdout);
        //  Test the inverse operation - this does not affect the EMF contents
     status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 4, 4,     colortype, U_CT_BGRA, U_ROW_ORDER_SAME);
+    if(status)printf("Error in DIB->RGBA for U_BCBM_MONOCHROME\n"); fflush(stdout);
     if(rgba_diff(rgba_px, rgba_px2, 4 * 4 * 4, 0))printf("Error in RGBA->DIB->RGBA for U_BCBM_MONOCHROME\n"); fflush(stdout);
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(4, 4, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
@@ -2162,6 +2176,7 @@ if(!(mode & PPT_BLOCKERS)){
 
     colortype = U_BCBM_COLOR32;
     status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  5, 5, 20, colortype, U_CT_NO, U_ROW_ORDER_INVERT);
+    if(status)printf("Error in RGBA->DIB for U_BCBM_COLOR32\n"); fflush(stdout);
     Bmih = bitmapinfoheader_set(5, 5, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
     Bmi = bitmapinfo_set(Bmih, ct);
     if(brush){ rec = deleteobject_set(&brush, eht);  taf(rec,et,"deleteobject_set"); }
@@ -2251,6 +2266,7 @@ if(!(mode & PPT_BLOCKERS)){
     memset(rgba_px, 0xAA, 4*4*2);
     colortype = U_BCBM_MONOCHROME;
     status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  4, 4, 16, colortype, U_CT_BGRA, U_ROW_ORDER_SAME);  // Must use color tables!
+    if(status)printf("Error in RGBA->DIB for U_BCBM_MONOCHROME\n"); fflush(stdout);
     Bmih = bitmapinfoheader_set(4, 4, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
     Bmi = bitmapinfo_set(Bmih, ct);
     free(ct);
@@ -2521,7 +2537,6 @@ if(!(mode & PPT_BLOCKERS)){
     }
     else {
        memcpy(string,et->buf,et->used);
-       status = 0;
        if(!U_emf_endian(et->buf,et->used,1)){
           printf("Error in byte swapping of completed EMF, native -> reverse\n");
        }

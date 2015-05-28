@@ -12,11 +12,11 @@
 
 /*
 File:      cutemf.c
-Version:   0.0.11
-Date:      19-MAR-2014
+Version:   0.0.12
+Date:      28-MAY-2015
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
-Copyright: 2014 David Mathog and California Institute of Technology (Caltech)
+Copyright: 2015 David Mathog and California Institute of Technology (Caltech)
 */
 
 #include <stdlib.h>
@@ -148,7 +148,15 @@ int main(int argc, char *argv[]){
    }
    
    status=emf_start(argv[3],length, 4096, &et); // space allocation initial, increment will never be used
+   if(status){
+      printf("cutemf: fatal error: in emf_start\n");
+      exit(EXIT_FAILURE);
+   }
    status=htable_create(128, 128, &eht);
+   if(status){
+      printf("cutemf: fatal error: in htable_create\n");
+      exit(EXIT_FAILURE);
+   }
 
    get_ints(argv[1],&cutem[0],&cutN);
    if(!cutN || cutem[0] <=1){

@@ -25,8 +25,8 @@
 /* If Version or Date are changed also edit the text labels for the output.
 
 File:      testbed_wmf.c
-Version:   0.0.27
-Date:      21-MAY-2015
+Version:   0.0.28
+Date:      28-MAY-2015
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2015 David Mathog and California Institute of Technology (Caltech)
@@ -298,7 +298,7 @@ void label_column(int x1, int y1, uint32_t font, WMFTRACK *wt, WMFHANDLES *wht){
     textlabel(40, "BITBLT       ", x1, y1, font, wt, wht);          y1 += 220;
     textlabel(40, "STRETCHBLT   ", x1, y1, font, wt, wht);          y1 += 240;
     textlabel(40, "DIBBITBLT    ", x1, y1, font, wt, wht);          y1 += 220;
-    textlabel(40, "DIBSTRETCHBLT", x1, y1, font, wt, wht);          y1 += 220;
+    textlabel(40, "DIBSTRETCHBLT", x1, y1, font, wt, wht);       // y1 += 220; // clang static analyzer does not like this
     return;
 }
 
@@ -313,7 +313,7 @@ void label_row(int x1, int y1, uint32_t font, WMFTRACK *wt, WMFHANDLES *wht){
     textlabel(30, "-MONO    ", x1, y1, font, wt, wht);          x1 += 220;
     textlabel(30, "+COLOR8 0", x1, y1, font, wt, wht);          x1 += 220;
     textlabel(30, "+COLOR4 0", x1, y1, font, wt, wht);          x1 += 220;
-    textlabel(30, "+MONO   0", x1, y1, font, wt, wht);          x1 += 220;
+    textlabel(30, "+MONO   0", x1, y1, font, wt, wht);        //x1 += 220; // clang static analyzer does not like this
     return;
 }
 
@@ -387,7 +387,7 @@ void image_column(WMFTRACK *wt, int x1, int y1, int w, int h, U_BITMAPINFO *Bmi,
        cbPx, 
        px);
     taf(rec,wt,"U_WMRDIBSTRETCHBLT_set");
-    step += 240;
+  // step += 240; // clang static analyzer does not like this
 }
 
 void not_in_wmf(double scale, int x, int y, int pen, int brush, WMFTRACK *wt, WMFHANDLES *wht){
@@ -702,7 +702,9 @@ int main(int argc, char *argv[]){
     // set up and begin the WMF
  
     status=wmf_start("test_libuemf.wmf",1000000, 250000, &wt);  // space allocation initial and increment 
+    if(status)printf("error in wmf_start\n"); fflush(stdout);
     status=wmf_htable_create(128, 128, &wht);
+    if(status)printf("error in wmf_htable\n"); fflush(stdout);
 
     ps = U_PAIRF_set(11.692913,8.267717);
     rec = U_WMRHEADER_set(ps,1200); // Example: drawing is A4 horizontal,  1200 dpi
@@ -1128,8 +1130,10 @@ int main(int argc, char *argv[]){
     /* Windows XP Preview (GDI?) does not render this properly, colors are offset  */
     colortype = U_BCBM_COLOR32;
     status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  10, 10, 40, colortype, U_CT_NO, U_ROW_ORDER_INVERT);
+    if(status)printf("Error in RGBA->DIB for U_BCBM_COLOR32\n"); fflush(stdout);
        //  Test the inverse operation - this does not affect the WMF contents
     status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 10, 10,     colortype, U_CT_NO, U_ROW_ORDER_INVERT);
+    if(status)printf("Error in DIB->RGBA for U_BCBM_COLOR32\n"); fflush(stdout);
     if(rgba_diff(rgba_px, rgba_px2, 10 * 10 * 4, 0))printf("Error in RGBA->DIB->RGBA for U_BCBM_COLOR32\n"); fflush(stdout);
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(10, 10, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
@@ -1157,8 +1161,10 @@ int main(int argc, char *argv[]){
     /* Windows XP Preview (GDI?) does render this properly  */
     colortype = U_BCBM_COLOR24;
     status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  10, 10, 40, colortype, U_CT_NO, U_ROW_ORDER_INVERT);
+    if(status)printf("Error in RGBA->DIB for U_BCBM_COLOR24\n"); fflush(stdout);
        //  Test the inverse operation - this does not affect the WMF contents
     status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 10, 10,     colortype, U_CT_NO, U_ROW_ORDER_INVERT);
+    if(status)printf("Error in DIB->RGBA for U_BCBM_COLOR24\n"); fflush(stdout);
     if(rgba_diff(rgba_px, rgba_px2, 10 * 10 * 4, 1))printf("Error in RGBA->DIB->RGBA for U_BCBM_COLOR24\n"); fflush(stdout);
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(10, 10, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
@@ -1172,8 +1178,10 @@ int main(int argc, char *argv[]){
     /* Windows XP Preview (GDI?) does not render this properly, colors are offset  */
     colortype = U_BCBM_COLOR16;
     status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  10, 10, 40, colortype, U_CT_NO, U_ROW_ORDER_INVERT);
+    if(status)printf("Error in RGBA->DIB for U_BCBM_COLOR16\n"); fflush(stdout);
        //  Test the inverse operation - this does not affect the WMF contents
     status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 10, 10,     colortype, U_CT_NO, U_ROW_ORDER_INVERT);
+    if(status)printf("Error in DIB->RGBA for U_BCBM_COLOR16\n"); fflush(stdout);
     if(rgba_diff(rgba_px, rgba_px2, 10 * 10 * 4,2))printf("Error in RGBA->DIB->RGBA for U_BCBM_COLOR16\n"); fflush(stdout);
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(10, 10, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
@@ -1194,9 +1202,11 @@ int main(int argc, char *argv[]){
     /* Windows XP Preview (GDI?) does render this properly */
     colortype = U_BCBM_COLOR8;
     status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  10, 10, 40, colortype, U_CT_BGRA, U_ROW_ORDER_SAME);
+    if(status)printf("Error in RGBA->DIB for U_BCBM_COLOR8\n"); fflush(stdout);
        //  Test the inverse operation - this does not affect the WMF contents
     status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 10, 10,     colortype, U_CT_BGRA, U_ROW_ORDER_SAME);
     if(rgba_diff(rgba_px, rgba_px2, 10 * 10 * 4, 0))printf("Error in RGBA->DIB->RGBA for U_BCBM_COLOR8\n"); fflush(stdout);
+    if(status)printf("Error in DIB->RGBA for U_BCBM_COLOR8\n"); fflush(stdout);
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(10, 10, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
     Bmi = bitmapinfo_set(Bmih, ct);
@@ -1222,8 +1232,10 @@ int main(int argc, char *argv[]){
     /* Windows XP Preview (GDI?) does render this properly */
     colortype = U_BCBM_COLOR4;
     status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  4, 4, 16, colortype, U_CT_BGRA, U_ROW_ORDER_SAME);
+    if(status)printf("Error in RGBA->DIB for U_BCBM_COLOR4\n"); fflush(stdout);
        //  Test the inverse operation - this does not affect the WMF contents
     status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 4, 4,     colortype, U_CT_BGRA, U_ROW_ORDER_SAME);
+    if(status)printf("Error in DIB->RGBA for U_BCBM_COLOR4\n"); fflush(stdout);
     if(rgba_diff(rgba_px, rgba_px2, 4 * 4 * 4, 0))printf("Error in RGBA->DIB->RGBA for U_BCBM_COLOR4\n"); fflush(stdout);
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(4, 4, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
@@ -1248,8 +1260,10 @@ int main(int argc, char *argv[]){
     /* Windows XP Preview (GDI?) does render this properly */
     colortype = U_BCBM_MONOCHROME;
     status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  4, 4, 16, colortype, U_CT_BGRA, U_ROW_ORDER_SAME);
+    if(status)printf("Error in RGBA->DIB for U_BCBM_MONOCHROME\n"); fflush(stdout);
        //  Test the inverse operation - this does not affect the WMF contents
     status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 4, 4,     colortype, U_CT_BGRA, U_ROW_ORDER_SAME);
+    if(status)printf("Error in DIB->RGBA for U_BCBM_MONOCHROME\n"); fflush(stdout);
     if(rgba_diff(rgba_px, rgba_px2, 4 * 4 * 4, 0))printf("Error in RGBA->DIB->RGBA for U_BCBM_MONOCHROME\n"); fflush(stdout);
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(4, 4, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
@@ -1521,6 +1535,7 @@ int main(int argc, char *argv[]){
 
     colortype = U_BCBM_COLOR32;
     status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  5, 5, 20, colortype, U_CT_NO, U_ROW_ORDER_INVERT);
+    if(status)printf("Error in RGBA->DIB for U_BCBM_COLOR32\n"); fflush(stdout);
     Bmih = bitmapinfoheader_set(5, 5, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
     Bmi = bitmapinfo_set(Bmih, ct);
 
@@ -1630,6 +1645,7 @@ int main(int argc, char *argv[]){
     memset(rgba_px, 0xAA, 4*4*2);
     colortype = U_BCBM_MONOCHROME;
     status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  4, 4, 16, colortype, U_CT_BGRA, U_ROW_ORDER_SAME);  // Must use color tables!
+    if(status)printf("Error in RGBA->DIB for U_BCBM_MONOCHROME\n"); fflush(stdout);
     Bmih = bitmapinfoheader_set(4, 4, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
     Bmi = bitmapinfo_set(Bmih, ct);
     free(ct);
@@ -1838,7 +1854,6 @@ int main(int argc, char *argv[]){
     }
     else {
        memcpy(string,wt->buf,wt->used);
-       status = 0;
        if(!U_wmf_endian(wt->buf,wt->used,1,1)){
           printf("Error in byte swapping of completed WMF, native -> reverse\n");
        }

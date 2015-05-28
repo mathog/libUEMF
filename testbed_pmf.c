@@ -24,8 +24,8 @@
 /* If Version or Date are changed also edit the text labels for the output.
 
 File:      testbed_pmf.c
-Version:   0.0.5
-Date:      28-APR-2015
+Version:   0.0.6
+Date:      28-MAY-2015
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
 Copyright: 2015 David Mathog and California Institute of Technology (Caltech)
@@ -369,7 +369,7 @@ void label_column(U_PSEUDO_OBJ *sum, int x1, int y1, int ax, int ay, U_PSEUDO_OB
     textlabel(sum, 40, "STRETCHBLT    3", x1, y1, ax, ay, poColor, et);          y1 += 240;
     textlabel(sum, 40, "STRETCHDIBITS 4", x1, y1, ax, ay, poColor, et);          y1 += 220;
     textlabel(sum, 40, "BITBLT        4", x1, y1, ax, ay, poColor, et);          y1 += 220;
-    textlabel(sum, 40, "STRETCHBLT    4", x1, y1, ax, ay, poColor, et);          y1 += 220;
+    textlabel(sum, 40, "STRETCHBLT    4", x1, y1, ax, ay, poColor, et);       // y1 += 220;// clang static analyzer does not like this
     return;
 }
 
@@ -384,7 +384,7 @@ void label_row(U_PSEUDO_OBJ *sum, int x1, int y1, int ax, int ay, U_PSEUDO_OBJ *
     textlabel(sum, 30, "-MONO    ",       x1, y1, ax, ay, poColor, et);          x1 += 220;
     textlabel(sum, 30, "+COLOR8 0",       x1, y1, ax, ay, poColor, et);          x1 += 220;
     textlabel(sum, 30, "+COLOR4 0",       x1, y1, ax, ay, poColor, et);          x1 += 220;
-    textlabel(sum, 30, "+MONO   0",       x1, y1, ax, ay, poColor, et);          x1 += 220;
+    textlabel(sum, 30, "+MONO   0",       x1, y1, ax, ay, poColor, et);       // x1 += 220;// clang static analyzer does not like this
     return;
 }
 
@@ -582,7 +582,7 @@ void image_column2(EMFTRACK *et, int x1, int y1, int w, int h, int IsCompressed,
     paf(et, poac, po, "U_PMR_DRAWIMAGE_set");
         U_PO_free(&poPoints);
         free(points);
-    step += 220;
+    //step += 220; // clang static analyzer does not like this
 
 
     // finally done with this
@@ -644,12 +644,12 @@ void grad_star(EMFTRACK *et, int x, int y, int options, U_PSEUDO_OBJ *poac){
        IfNullPtr(po,__LINE__,"OOPS on U_PMR_OBJECT_PO_set\n");
    paf(et, poac, po, "U_PMR_OBJECT_PO_set");
 
-   if(options == 0){
+   if(!options){
      Flags |= U_BD_Path;
      poBPath = U_PMF_BOUNDARYPATHDATA_set(poPath);
         IfNullPtr(poBPath,__LINE__,"OOPS U_PMF_BOUNDARYPATHDATA_set\n");
    }
-   else if(options == 1){
+   else {
      /* U_BD_Path is not set for points */
      poBPath = U_PMF_BOUNDARYPOINTDATA_set(10,points);
         IfNullPtr(poBPath,__LINE__,"OOPS U_PMF_BOUNDARYPOINTDATA_set\n");
@@ -1377,7 +1377,9 @@ int main(int argc, char *argv[]){
     // set up and begin the EMF+ file, core is EMF
  
     status=emf_start("test_libuemf_p.emf",1000000, 250000, &et);  // space allocation initial and increment 
+    if(status)printf("error in emf_start\n"); fflush(stdout);
     status=emf_htable_create(128, 128, &eht);
+    if(status)printf("error in emf_htable\n"); fflush(stdout);
 
     (void) device_size(216, 279, 47.244094, &szlDev, &szlMm); // Example: device is Letter vertical, 1200 dpi = 47.244 DPmm
     (void) drawing_size(297, 210, 47.244094, &rclBounds, &rclFrame);  // Example: drawing is A4 horizontal,  1200 dpi = 47.244 DPmm
@@ -2587,7 +2589,7 @@ int main(int argc, char *argv[]){
     image_column(et, offset, 5000, 200, 200, CMP_IMG_YES, &Bs, 0, NULL, PNG_ARRAY_SIZE, (char *)pngarray, poac);
     offset += 220;  
     image_column(et, offset, 5000, 200, 200, CMP_IMG_YES, &Bs, 0, NULL, 676, (char *)jpgarray, poac);
-    offset += 220;  
+    // offset += 220; // clang static analyzer does not like this  
 
     // test image effects.  These seem to have no effect when viewed in XP Preview.
     rgba_px = (char *) malloc(100*100*4);
@@ -2784,6 +2786,7 @@ int main(int argc, char *argv[]){
 
     colortype = U_BCBM_COLOR32;
     status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px, 10, 10, 40, colortype, U_CT_NO, U_ROW_ORDER_SAME);
+    if(status)printf("error at RGBA_to_DIB with colortype U_BCBM_COLOR32\n"); fflush(stdout);
     poBmd = U_PMF_BITMAPDATA_set(NULL, cbPx, px); // No palette
        IfNullPtr(poBmd,__LINE__,"OOPS on U_PMF_BITMAPDATA_set\n");
     poBm = U_PMF_BITMAP_set(&Bs, poBmd);
@@ -2892,7 +2895,6 @@ int main(int argc, char *argv[]){
     }
     else {
        memcpy(string,et->buf,et->used);
-       status = 0;
        if(!U_emf_endian(et->buf,et->used,1)){
           printf("Error in byte swapping of completed EMF, native -> reverse\n");
        }

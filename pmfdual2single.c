@@ -14,11 +14,11 @@
 
 /*
 File:      pmfdual2single.c
-Version:   0.0.1
-Date:      19-JUL-2013
+Version:   0.0.2
+Date:      28-MAY-2015
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
-Copyright: 2013 David Mathog and California Institute of Technology (Caltech)
+Copyright: 2015 David Mathog and California Institute of Technology (Caltech)
 */
 
 #include <stdlib.h>
@@ -153,6 +153,10 @@ int main(int argc, char *argv[]){
       exit(EXIT_FAILURE);
    }
    status=htable_create(128, 128, &eht);
+   if(status){
+      printf("pmfdual2single: fatal error: at htable_create\n");
+      exit(EXIT_FAILURE);
+   }
 
    contents = cut_recs(et, contents,&length, ProcMode); /* copy records and free contents */
    
