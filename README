@@ -19,7 +19,7 @@ bit Solaris (BE).
 
 libUEMF is released under the GPL 2 license, read the file 'COPYING' for more information
 
-Version 0.2.3, released May 28, 2015.
+Version 0.2.4, released Jan 26,   2016.
 
 To report bugs or provide feedback send email to David Mathog, mathog@caltech.edu.
 
@@ -377,6 +377,11 @@ History
   (Note, version numbers in files represent the libUEMF release where it was last modified, so not
   all files will show the same version numbers in each release.)
 
+0.2.4 2016-01-26
+  Record EXTSELECTCLIPRGN is supposed to be valid when the RgnDataSize is 0 if the RegionMode
+     is "COPY".  Modified safe and print routines so that they would handle this situation.
+  U_PMR_DrawDriverstring seen for the first time and it crashed reademf.  Reason, there was a spurious
+     "Tension" value in the structure, which offset values in the record.
 0.2.3 2015-05-28
   Fixed an assortment of warnings and a couple of bugs flagged by clang static analysis.
 0.2.2 2015-04-28
