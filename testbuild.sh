@@ -1,5 +1,6 @@
 #!/bin/bash
-# simple build script used for development
+# simple build script used for development.
+# Builds applications directly, no libraries built.
 # (linux)
 COPTS="-Werror=format-security -Wall -Wformat -Wformat-security -W -Wno-pointer-sign -std=c99 -pedantic -Wall -g"
 CLIBS=-lm

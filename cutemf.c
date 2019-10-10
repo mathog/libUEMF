@@ -8,22 +8,25 @@
     cutemf 'rec1,rec2...,recN' src.emf dst.emf
  
  Build with:  gcc -Wall -o cutemf cutemf.c uemf.c uemf_endian.c uemf_utf.c upmf.c -lm
+
+0.0.13  11-OCT-2019.  Encountered EMF files with >10k records.  
+   Changed so that it can operate on up to 10M records and handled more than that better.
 */
 
 /*
 File:      cutemf.c
-Version:   0.0.12
-Date:      28-MAY-2015
+Version:   0.0.13
+Date:      11-OCT-2019
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
-Copyright: 2015 David Mathog and California Institute of Technology (Caltech)
+Copyright: 2019 David Mathog and California Institute of Technology (Caltech)
 */
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include "upmf.h" // includes "uemf.h"
-#define MAXREC 10000
+#define MAXREC 10000000
 
 /*
   cut_recs  Copy only those records NOT in the cuts list.  Returns NULL or exits.
@@ -92,10 +95,6 @@ void get_ints(const char *estring, int *array, int *cutN){
    strcpy(string,estring);
    token = strtok(string," \t:,");
    while(token){
-      if(count >= MAXREC){
-         printf("cutemf: fatal error: too many records were listed\n");
-         exit(EXIT_FAILURE);
-      }
       int slen = strlen(token);
       int dash = strcspn(token,"-");
       int i;
@@ -107,12 +106,20 @@ void get_ints(const char *estring, int *array, int *cutN){
             printf("cutemf: fatal error: range A-B has start:%d and stop:%d\n",start,stop);
             exit(EXIT_FAILURE);
          }
+         if(stop >= MAXREC){
+            printf("cutemf: fatal error: only up to 10M records may be processed.  Modify code.\n");
+            exit(EXIT_FAILURE);
+         }
          for(i=start;i<=stop;i++){
             array[count++]=i;
          }
       }
       else {
-          array[count++]=atoi(token);
+         if(count >= MAXREC){
+            printf("cutemf: fatal error: only up to 10M records may be processed.  Modify code.\n");
+            exit(EXIT_FAILURE);
+         }
+         array[count++]=atoi(token);
       }
       token = strtok(NULL," \t:,");
    }
@@ -127,7 +134,7 @@ int main(int argc, char *argv[]){
     size_t               length;
     int                  status;
     char                *contents=NULL;
-    int                  cutem[MAXREC];
+    int                  *cutem;
     int                  cutN=0;
 
    if(argc != 4){
@@ -147,6 +154,12 @@ int main(int argc, char *argv[]){
       exit(EXIT_FAILURE);
    }
    
+   cutem = calloc(sizeof(int),MAXREC);
+   if(!cutem){
+      printf("cutemf: fatal error: could not allocate memory\n");
+      exit(EXIT_FAILURE);
+   }
+
    status=emf_start(argv[3],length, 4096, &et); // space allocation initial, increment will never be used
    if(status){
       printf("cutemf: fatal error: in emf_start\n");
@@ -158,13 +171,13 @@ int main(int argc, char *argv[]){
       exit(EXIT_FAILURE);
    }
 
-   get_ints(argv[1],&cutem[0],&cutN);
+   get_ints(argv[1],cutem,&cutN);
    if(!cutN || cutem[0] <=1){
       printf("cutemf: fatal error: record list empty, invalid, or includes first record\n");
       exit(EXIT_FAILURE);
    }
 
-   contents = cut_recs(et, eht, contents,&length,&cutem[0],cutN); /* copy records and free contents */
+   contents = cut_recs(et, eht, contents,&length,cutem,cutN); /* copy records and free contents */
    
    status=emf_finish(et, eht);
    if(status){
@@ -174,6 +187,7 @@ int main(int argc, char *argv[]){
 
    emf_free(&et);
    htable_free(&eht);
+   free(cutem);
 
    exit(EXIT_SUCCESS);
 }
