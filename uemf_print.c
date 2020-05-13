@@ -6,11 +6,11 @@
 
 /*
 File:      uemf_print.c
-Version:   0.0.21
-Date:      26-JAN-2016
+Version:   0.0.22
+Date:      12-MAY-2020
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
-Copyright: 2016 David Mathog and California Institute of Technology (Caltech)
+Copyright: 2020 David Mathog and California Institute of Technology (Caltech)
 */
 
 #ifdef __cplusplus
@@ -44,7 +44,7 @@ Code based on example crc32b  here:
    http://www.hackersdelight.org/hdcodetxt/crc.c.txt
 */
 uint32_t lu_crc32(const char *record, uint32_t Size){
-   const unsigned char *message = record;
+   const unsigned char *message = (const unsigned char *)record;
    uint32_t i, j;
    uint32_t crc, mask;
 

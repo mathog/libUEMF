@@ -19,7 +19,7 @@ bit Solaris (BE).
 
 libUEMF is released under the GPL 2 license, read the file 'COPYING' for more information
 
-Version 0.2.7, released Oct 10,   2019.
+Version 0.2.8, released May 13,   2020.
 
 To report bugs or provide feedback send email to David Mathog, mathog@caltech.edu.
 
@@ -355,6 +355,11 @@ History
   (Note, version numbers in files represent the libUEMF release where it was last modified, so not
   all files will show the same version numbers in each release.)
 
+0.2.8 2020-05-13
+  Fixed warnings from newer compilers.
+  Fixed truncation of one string in testbed outputs files,
+    from 32 to 31 bytes (seen on CentOS 8 with gcc 8.3.1 
+    but not CentOS 7 with gcc 4.8.5)
 0.2.7 2019-10-10
   Added CMakeLists.txt for linux.
   Added cmake instructions in README.

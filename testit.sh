@@ -12,11 +12,12 @@
 #    extract & execinput are from http://sourceforge.net/projects/drmtools/
 #    EPATH is the path to the binaries built by this package
 #EPATH=/usr/local/bin
-EPATH=./bin
+EPATH=${PWD}/bin
 #EPATH=.
 USEDIFF=`which diff`
 EXTRACT=/usr/local/bin/extract
 EXECINPUT=/usr/local/bin/execinput
+export LD_LIBRARY_PATH=${PWD}/lib
 
 PROBLEMS=0
 if [ ! -x $EPATH/testbed_emf ]

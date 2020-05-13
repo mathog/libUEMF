@@ -7,8 +7,8 @@ project(libUEMF VERSION 0.2.7 LANGUAGES C)
 # Default installation is to /usr/local
 # Commented out line below installs to current directory
 # Pick one or the other or edit to set target.
-SET(CMAKE_INSTALL_PREFIX          /usr/local                  )
-#SET(CMAKE_INSTALL_PREFIX           ..                          )
+#SET(CMAKE_INSTALL_PREFIX          /usr/local                  )
+SET(CMAKE_INSTALL_PREFIX           ..                          )
 
 SET(FS8 -std=c99 -pedantic -Wall -fPIC -c)
 SET(FS9 -Wall -std=c99 -pedantic -O3)

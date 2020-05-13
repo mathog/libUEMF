@@ -25,11 +25,11 @@
 /* If Version or Date are changed also edit the text labels for the output.
 
 File:      testbed_wmf.c
-Version:   0.0.28
-Date:      28-MAY-2015
+Version:   0.0.29
+Date:      13-MAY-2020
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
-Copyright: 2015 David Mathog and California Institute of Technology (Caltech)
+Copyright: 2020 David Mathog and California Institute of Technology (Caltech)
 */
 
 #include <stdlib.h>
@@ -43,6 +43,12 @@ Copyright: 2015 David Mathog and California Institute of Technology (Caltech)
 #define PREVIEW_BLOCKERS 2
 #define LODRAW_BLOCKERS  4
 #define NO_CLIP_TEST     8
+#define STRALLOC        64
+
+void printf_and_flush(const char *string){
+   printf(string);
+   fflush(stdout);
+}
 
 // noa special conditions:
 // 1 then s2 is expected to have zero in the "a" channel
@@ -174,7 +180,7 @@ void spintext(uint32_t x, uint32_t y, uint32_t textalign, WMFTRACK *wt, WMFHANDL
     
     
     rec = U_WMRSETTEXTALIGN_set(textalign);  taf(rec,wt,"U_WMRSETTEXTALIGN_set");
-    string = (char *) malloc(32);
+    string = (char *) malloc(STRALLOC);
     for(i=0; i<3600; i+=300){
 
        // set escapement and orientation in tenths of a degree counter clockwise rotation
@@ -209,7 +215,7 @@ void textvariants(uint32_t x, uint32_t y, uint32_t textalign, WMFTRACK *wt, WMFH
     
     
     rec = U_WMRSETTEXTALIGN_set(textalign);  taf(rec,wt,"U_WMRSETTEXTALIGN_set");
-    string = (char *) malloc(32);
+    string = (char *) malloc(STRALLOC);
     for(i=0; i<=900; i+=100){
 
        // set escapement and orientation in tenths of a degree counter clockwise rotation
@@ -247,7 +253,10 @@ void textvariants(uint32_t x, uint32_t y, uint32_t textalign, WMFTRACK *wt, WMFH
        free(puf);
        rec = wselectobject_set(font, wht);  taf(rec,wt,"wselectobject_set");
 
-       sprintf(string,"%sItalic %sUnderline %sStrikeout",(i&4 ? "" : "No"),(i&2 ? "" : "No"),(i&1 ? "" : "No"));
+       int snpstat=snprintf(string,STRALLOC,"%sItalic %sUnderline %sStrikeout",(i&4 ? "" : "No"),(i&2 ? "" : "No"),(i&1 ? "" : "No"));
+       if(snpstat <0 || snpstat >STRALLOC){
+          printf_and_flush("Error formatting string in textvariants\n");
+       }
        slen=strlen(string);
        dx = dx16_set(-30,  U_FW_NORMAL, slen);
        rec = U_WMREXTTEXTOUT_set(point16_set(x,y), slen, U_ETO_NONE, string, dx, U_RCL16_DEF);
@@ -702,9 +711,9 @@ int main(int argc, char *argv[]){
     // set up and begin the WMF
  
     status=wmf_start("test_libuemf.wmf",1000000, 250000, &wt);  // space allocation initial and increment 
-    if(status)printf("error in wmf_start\n"); fflush(stdout);
+    if(status)printf_and_flush("error in wmf_start\n");
     status=wmf_htable_create(128, 128, &wht);
-    if(status)printf("error in wmf_htable\n"); fflush(stdout);
+    if(status)printf_and_flush("error in wmf_htable\n");
 
     ps = U_PAIRF_set(11.692913,8.267717);
     rec = U_WMRHEADER_set(ps,1200); // Example: drawing is A4 horizontal,  1200 dpi
@@ -1130,11 +1139,13 @@ int main(int argc, char *argv[]){
     /* Windows XP Preview (GDI?) does not render this properly, colors are offset  */
     colortype = U_BCBM_COLOR32;
     status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  10, 10, 40, colortype, U_CT_NO, U_ROW_ORDER_INVERT);
-    if(status)printf("Error in RGBA->DIB for U_BCBM_COLOR32\n"); fflush(stdout);
+    if(status)printf_and_flush("Error in RGBA->DIB for U_BCBM_COLOR32\n");
        //  Test the inverse operation - this does not affect the WMF contents
     status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 10, 10,     colortype, U_CT_NO, U_ROW_ORDER_INVERT);
-    if(status)printf("Error in DIB->RGBA for U_BCBM_COLOR32\n"); fflush(stdout);
-    if(rgba_diff(rgba_px, rgba_px2, 10 * 10 * 4, 0))printf("Error in RGBA->DIB->RGBA for U_BCBM_COLOR32\n"); fflush(stdout);
+    if(status)printf_and_flush("Error in DIB->RGBA for U_BCBM_COLOR32\n");
+    if(rgba_diff(rgba_px, rgba_px2, 10 * 10 * 4, 0)){
+       printf_and_flush("Error in RGBA->DIB->RGBA for U_BCBM_COLOR32\n");
+    }
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(10, 10, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
     Bmi = bitmapinfo_set(Bmih, ct);
@@ -1161,11 +1172,13 @@ int main(int argc, char *argv[]){
     /* Windows XP Preview (GDI?) does render this properly  */
     colortype = U_BCBM_COLOR24;
     status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  10, 10, 40, colortype, U_CT_NO, U_ROW_ORDER_INVERT);
-    if(status)printf("Error in RGBA->DIB for U_BCBM_COLOR24\n"); fflush(stdout);
+    if(status)printf_and_flush("Error in RGBA->DIB for U_BCBM_COLOR24\n"); 
        //  Test the inverse operation - this does not affect the WMF contents
     status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 10, 10,     colortype, U_CT_NO, U_ROW_ORDER_INVERT);
-    if(status)printf("Error in DIB->RGBA for U_BCBM_COLOR24\n"); fflush(stdout);
-    if(rgba_diff(rgba_px, rgba_px2, 10 * 10 * 4, 1))printf("Error in RGBA->DIB->RGBA for U_BCBM_COLOR24\n"); fflush(stdout);
+    if(status)printf_and_flush("Error in DIB->RGBA for U_BCBM_COLOR24\n");
+    if(rgba_diff(rgba_px, rgba_px2, 10 * 10 * 4, 1)){
+       printf_and_flush("Error in RGBA->DIB->RGBA for U_BCBM_COLOR24\n"); 
+    }
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(10, 10, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
     Bmi = bitmapinfo_set(Bmih, NULL);
@@ -1178,11 +1191,13 @@ int main(int argc, char *argv[]){
     /* Windows XP Preview (GDI?) does not render this properly, colors are offset  */
     colortype = U_BCBM_COLOR16;
     status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  10, 10, 40, colortype, U_CT_NO, U_ROW_ORDER_INVERT);
-    if(status)printf("Error in RGBA->DIB for U_BCBM_COLOR16\n"); fflush(stdout);
+    if(status)printf_and_flush("Error in RGBA->DIB for U_BCBM_COLOR16\n");
        //  Test the inverse operation - this does not affect the WMF contents
     status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 10, 10,     colortype, U_CT_NO, U_ROW_ORDER_INVERT);
-    if(status)printf("Error in DIB->RGBA for U_BCBM_COLOR16\n"); fflush(stdout);
-    if(rgba_diff(rgba_px, rgba_px2, 10 * 10 * 4,2))printf("Error in RGBA->DIB->RGBA for U_BCBM_COLOR16\n"); fflush(stdout);
+    if(status)printf_and_flush("Error in DIB->RGBA for U_BCBM_COLOR16\n");
+    if(rgba_diff(rgba_px, rgba_px2, 10 * 10 * 4,2)){
+       printf_and_flush("Error in RGBA->DIB->RGBA for U_BCBM_COLOR16\n"); 
+    }
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(10, 10, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
     Bmi = bitmapinfo_set(Bmih, ct);
@@ -1202,11 +1217,13 @@ int main(int argc, char *argv[]){
     /* Windows XP Preview (GDI?) does render this properly */
     colortype = U_BCBM_COLOR8;
     status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  10, 10, 40, colortype, U_CT_BGRA, U_ROW_ORDER_SAME);
-    if(status)printf("Error in RGBA->DIB for U_BCBM_COLOR8\n"); fflush(stdout);
+    if(status)printf_and_flush("Error in RGBA->DIB for U_BCBM_COLOR8\n"); 
        //  Test the inverse operation - this does not affect the WMF contents
     status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 10, 10,     colortype, U_CT_BGRA, U_ROW_ORDER_SAME);
-    if(rgba_diff(rgba_px, rgba_px2, 10 * 10 * 4, 0))printf("Error in RGBA->DIB->RGBA for U_BCBM_COLOR8\n"); fflush(stdout);
-    if(status)printf("Error in DIB->RGBA for U_BCBM_COLOR8\n"); fflush(stdout);
+    if(rgba_diff(rgba_px, rgba_px2, 10 * 10 * 4, 0)){
+       printf_and_flush("Error in RGBA->DIB->RGBA for U_BCBM_COLOR8\n");
+    }
+    if(status)printf_and_flush("Error in DIB->RGBA for U_BCBM_COLOR8\n");
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(10, 10, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
     Bmi = bitmapinfo_set(Bmih, ct);
@@ -1232,11 +1249,13 @@ int main(int argc, char *argv[]){
     /* Windows XP Preview (GDI?) does render this properly */
     colortype = U_BCBM_COLOR4;
     status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  4, 4, 16, colortype, U_CT_BGRA, U_ROW_ORDER_SAME);
-    if(status)printf("Error in RGBA->DIB for U_BCBM_COLOR4\n"); fflush(stdout);
+    if(status)printf_and_flush("Error in RGBA->DIB for U_BCBM_COLOR4\n");
        //  Test the inverse operation - this does not affect the WMF contents
     status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 4, 4,     colortype, U_CT_BGRA, U_ROW_ORDER_SAME);
-    if(status)printf("Error in DIB->RGBA for U_BCBM_COLOR4\n"); fflush(stdout);
-    if(rgba_diff(rgba_px, rgba_px2, 4 * 4 * 4, 0))printf("Error in RGBA->DIB->RGBA for U_BCBM_COLOR4\n"); fflush(stdout);
+    if(status)printf_and_flush("Error in DIB->RGBA for U_BCBM_COLOR4\n");
+    if(rgba_diff(rgba_px, rgba_px2, 4 * 4 * 4, 0)){
+       printf_and_flush("Error in RGBA->DIB->RGBA for U_BCBM_COLOR4\n");
+    }
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(4, 4, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
     Bmi = bitmapinfo_set(Bmih, ct);
@@ -1260,11 +1279,13 @@ int main(int argc, char *argv[]){
     /* Windows XP Preview (GDI?) does render this properly */
     colortype = U_BCBM_MONOCHROME;
     status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  4, 4, 16, colortype, U_CT_BGRA, U_ROW_ORDER_SAME);
-    if(status)printf("Error in RGBA->DIB for U_BCBM_MONOCHROME\n"); fflush(stdout);
+    if(status)printf_and_flush("Error in RGBA->DIB for U_BCBM_MONOCHROME\n"); 
        //  Test the inverse operation - this does not affect the WMF contents
     status = DIB_to_RGBA( px,         ct,  numCt, &rgba_px2, 4, 4,     colortype, U_CT_BGRA, U_ROW_ORDER_SAME);
-    if(status)printf("Error in DIB->RGBA for U_BCBM_MONOCHROME\n"); fflush(stdout);
-    if(rgba_diff(rgba_px, rgba_px2, 4 * 4 * 4, 0))printf("Error in RGBA->DIB->RGBA for U_BCBM_MONOCHROME\n"); fflush(stdout);
+    if(status)printf_and_flush("Error in DIB->RGBA for U_BCBM_MONOCHROME\n");
+    if(rgba_diff(rgba_px, rgba_px2, 4 * 4 * 4, 0)){
+       printf_and_flush("Error in RGBA->DIB->RGBA for U_BCBM_MONOCHROME\n"); 
+    }
     free(rgba_px2);
     Bmih = bitmapinfoheader_set(4, 4, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
     Bmi = bitmapinfo_set(Bmih, ct);
@@ -1427,7 +1448,7 @@ int main(int argc, char *argv[]){
     free(dx);
     free(string);
 
-    string = (char *) malloc(32);
+    string = (char *) malloc(STRALLOC);
     for(i=0;i<=0x18; i+=2){
        rec = U_WMRSETTEXTALIGN_set(i);            taf(rec,wt,"U_WMRSETTEXTALIGN_set");
 
@@ -1535,7 +1556,7 @@ int main(int argc, char *argv[]){
 
     colortype = U_BCBM_COLOR32;
     status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  5, 5, 20, colortype, U_CT_NO, U_ROW_ORDER_INVERT);
-    if(status)printf("Error in RGBA->DIB for U_BCBM_COLOR32\n"); fflush(stdout);
+    if(status)printf_and_flush("Error in RGBA->DIB for U_BCBM_COLOR32\n"); 
     Bmih = bitmapinfoheader_set(5, 5, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
     Bmi = bitmapinfo_set(Bmih, ct);
 
@@ -1645,7 +1666,7 @@ int main(int argc, char *argv[]){
     memset(rgba_px, 0xAA, 4*4*2);
     colortype = U_BCBM_MONOCHROME;
     status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px,  4, 4, 16, colortype, U_CT_BGRA, U_ROW_ORDER_SAME);  // Must use color tables!
-    if(status)printf("Error in RGBA->DIB for U_BCBM_MONOCHROME\n"); fflush(stdout);
+    if(status)printf_and_flush("Error in RGBA->DIB for U_BCBM_MONOCHROME\n"); 
     Bmih = bitmapinfoheader_set(4, 4, 1, colortype, U_BI_RGB, 0, 47244, 47244, numCt, 0);
     Bmi = bitmapinfo_set(Bmih, ct);
     free(ct);

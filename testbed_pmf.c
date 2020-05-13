@@ -24,11 +24,11 @@
 /* If Version or Date are changed also edit the text labels for the output.
 
 File:      testbed_pmf.c
-Version:   0.0.6
-Date:      28-MAY-2015
+Version:   0.0.7
+Date:      13-MAY-2020
 Author:    David Mathog, Biology Division, Caltech
 email:     mathog@caltech.edu
-Copyright: 2015 David Mathog and California Institute of Technology (Caltech)
+Copyright: 2020 David Mathog and California Institute of Technology (Caltech)
 */
 
 #include <stdlib.h>
@@ -65,7 +65,12 @@ Copyright: 2015 David Mathog and California Institute of Technology (Caltech)
 #define OBJ_IA             51 /* variable */
 #define OBJ_REGION_1       60 /* variable */
 
-   
+#define STRALLOC        64
+
+void printf_and_flush(const char *string){
+   printf(string);
+   fflush(stdout);
+}
 
 void IfNullPtr(void *po, int LineNo, char *text){
   if(!po){ 
@@ -339,7 +344,7 @@ void spintext(U_PSEUDO_OBJ *sum, U_FLOAT size, U_FLOAT x, U_FLOAT y, int ax, int
     U_FLOAT             Angle;
     U_PSEUDO_OBJ       *po;
     
-    string = malloc(32);
+    string = malloc(STRALLOC);
     for(i=0; i<360; i+=30){
        Angle = i;
        po = U_PMR_ROTATEWORLDTRANSFORM_set(U_XM_PostX, Angle);
@@ -708,7 +713,7 @@ void test_clips(EMFTRACK *et, int x, int y, U_PSEUDO_OBJ *poac){
    int                    i;
    U_DPSEUDO_OBJ         *dpath=NULL;
    U_PMF_TRANSFORMMATRIX  Tm;
-   char                   string[32];
+   char                   string[STRALLOC];
 
    poColor   = U_PMF_ARGB_set(255,0,0,0);
    IfNullPtr(poColor,__LINE__,"OOPS on U_PMF_ARGB_set\n");
@@ -1377,10 +1382,9 @@ int main(int argc, char *argv[]){
     // set up and begin the EMF+ file, core is EMF
  
     status=emf_start("test_libuemf_p.emf",1000000, 250000, &et);  // space allocation initial and increment 
-    if(status)printf("error in emf_start\n"); fflush(stdout);
+    if(status)printf_and_flush("error in emf_start\n");
     status=emf_htable_create(128, 128, &eht);
-    if(status)printf("error in emf_htable\n"); fflush(stdout);
-
+    if(status)printf_and_flush("error in emf_htable\n");
     (void) device_size(216, 279, 47.244094, &szlDev, &szlMm); // Example: device is Letter vertical, 1200 dpi = 47.244 DPmm
     (void) drawing_size(297, 210, 47.244094, &rclBounds, &rclFrame);  // Example: drawing is A4 horizontal,  1200 dpi = 47.244 DPmm
     Description = U_Utf8ToUtf16le("Test EMF+\1produced by libUEMF testbed_pmf program\1",0, NULL); 
@@ -2620,7 +2624,7 @@ int main(int argc, char *argv[]){
     paf(et, poac, po, "set font in Text Alignments");
     U_PO_free(&poFont);
 
-    string = (char *) malloc(32);
+    string = (char *) malloc(STRALLOC);
     poBrushID = U_PMF_ARGB_set(255, 128, 128, 128);
        IfNullPtr(poBrushID,__LINE__,"OOPS on U_PMF_ARGB_set\n");
 
@@ -2786,7 +2790,7 @@ int main(int argc, char *argv[]){
 
     colortype = U_BCBM_COLOR32;
     status = RGBA_to_DIB(&px, &cbPx, &ct, &numCt,  rgba_px, 10, 10, 40, colortype, U_CT_NO, U_ROW_ORDER_SAME);
-    if(status)printf("error at RGBA_to_DIB with colortype U_BCBM_COLOR32\n"); fflush(stdout);
+    if(status)printf_and_flush("error at RGBA_to_DIB with colortype U_BCBM_COLOR32\n"); 
     poBmd = U_PMF_BITMAPDATA_set(NULL, cbPx, px); // No palette
        IfNullPtr(poBmd,__LINE__,"OOPS on U_PMF_BITMAPDATA_set\n");
     poBm = U_PMF_BITMAP_set(&Bs, poBmd);

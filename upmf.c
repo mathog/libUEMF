@@ -651,8 +651,9 @@ U_PSEUDO_OBJ *U_PMF_SERIAL_set(uint32_t Type, const U_SERIAL_DESC *List){
    const U_SERIAL_DESC *lptr;
    if(!List)return(NULL);
    for(lptr=List; lptr->TE != U_XX; lptr++){
-      if(!(lptr->Units * lptr->Reps) && lptr->Ptr)return(po);
-      Total += lptr->Units * lptr->Reps;
+      FSize = lptr->Units * lptr->Reps;
+      if(!FSize && lptr->Ptr)return(po);
+      Total += FSize;
    }
    po = U_PO_create(NULL, Total, Total, Type);
    if(po){
